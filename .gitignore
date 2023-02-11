@@ -1,0 +1,15 @@
+node_modules
+.env
+coverage
+coverage.json
+typechain
+typechain-types
+.idea
+.deps
+
+#Hardhat files
+cache
+artifacts
+contracts/artifacts
+contracts/base/artifacts
+contracts/interfaces/artifacts
