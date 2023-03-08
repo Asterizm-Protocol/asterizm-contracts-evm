@@ -65,34 +65,6 @@ contract GasSender is BaseAsterizmClient {
         maxUsdAmount = _amount;
     }
 
-//    function sendGas(uint64[] memory _chainIds, uint[] memory _amounts, address[] memory _addresses, address[] memory _receivers, IERC20 _token) external {
-//        address tokenAddress = address(_token);
-//        require(stableCoins[tokenAddress].exists, "GasSender: wrong token");
-//        uint8 decimals = _token.decimals();
-//        uint length = _amounts.length;
-//        uint sum = 0;
-//        for (uint i = 0; i < length; i++) {
-//            sum = sum.add(_amounts[i]);
-//        }
-//
-//        require(sum > 0, "GasSender: wrong amounts");
-//        uint sumInUsd = sum.div(10 ** decimals);
-//        require(sumInUsd > 0, "GasSender: wrong amounts in USD");
-//        if (minUsdAmount > 0) {
-//            require(sumInUsd >= minUsdAmount, "GasSender: minimum amount validation error");
-//        }
-//        if (maxUsdAmount > 0) {
-//            require(sumInUsd <= maxUsdAmount, "GasSender: maximum amount validation error");
-//        }
-//
-//        require(_token.transferFrom(msg.sender, address(this), sum), "GasSender: token transfer failed");
-//        stableCoins[tokenAddress].balance = stableCoins[tokenAddress].balance.add(sum);
-//        for (uint i = 0; i < length; i++) {
-//            bytes memory payload = abi.encode(_receivers[i], _amounts[i], tokenAddress, decimals);
-//            _sendDataToInitializer(_chainIds[i], _addresses[i], 0, payload);
-//        }
-//    }
-
     function sendGasEnc(uint64[] memory _chainIds, uint[] memory _amounts, address[] memory _addresses, address[] memory _receivers, IERC20 _token) external {
         address tokenAddress = address(_token);
         require(stableCoins[tokenAddress].exists, "GasSender: wrong token");

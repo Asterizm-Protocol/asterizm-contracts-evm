@@ -67,6 +67,16 @@ const config = {
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 42220
     },
+    boba: {
+      url: process.env.NETWORK_HOST_BOBA,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 288
+    },
+    aurora: {
+      url: process.env.NETWORK_HOST_AURORA,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 1313161554
+    },
     ethereumGoerli: {
       url: process.env.NETWORK_HOST_ETHEREUM_GOERLI,
       accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
