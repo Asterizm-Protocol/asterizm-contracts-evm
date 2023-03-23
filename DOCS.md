@@ -7,18 +7,17 @@ The Translator Contract is designed to facilitate the replication of events on o
 The Translator Contract can be executed in either a strict sequential mode or a parallel mode. In the strict sequential mode, the Nonce Contract is utilized to ensure that a separate nonce is counted for each user who initiates the transaction and for each Asrterism-compatible application. In the parallel execution mode, the client server is responsible for maintaining the order of transactions.
 
 ## Key Variables
-- `endpoint`: The address of the Initializer Contract
-- `relayer`: The address of the relayer responsible for this particular blockchain
-- `owner`: The address of the contract owner
-- `chainsMap`: Available chains map
+- `initializer`: The address of the Initializer Contract
+- `relayers`: List of relayers address responsible for this particular blockchain
+- `chains`: Available chains map
 - `localChainId`: Local chain ID
 
 ## Key Methods
-- `send`: Sends a message to another blockchain (initiate event for Asterizm translator)
-- `translateMessage`: Translates a message from a relay into the Initializer Contract
-- `translateEncodedMessage`: Translates an encrypted message from the relay to the Initializer Contract.
+- `sendMessage`: Sends a message to another blockchain (initiate event for Asterizm translator)
+- `transferMessage`: Translates a message from a relay into the Initializer Contract
+- `transferEncodedMessage`: Translates an encrypted message from the relay to the Initializer Contract.
 
-_Note_: The differences between `translateMessage` and `translateEncodedMessage` is in the `_isEncoded` parameter, which is passed from the client contract.
+_Note_: The differences between `transferMessage` and `transferEncodedMessage` is in the `_isEncoded` parameter, which is passed from the client entity (initializer address).
 
 # Initializer Contract
 
@@ -33,17 +32,17 @@ In parallel mode, the Client Server in the recipient chain is responsible for ma
 
 ## Key Variables
 - `translator`: The address of the Translator Contract
-- `owner`: The address of the contract owner
-- `clients`: Available clients map that can call `send` method. Contact us to add your contract to this list
-- `availableForAll`: Flag for disable clients validation (true - method `send` available for any contracts, test mode)
+- `blockAddresses`: Blocking address list map that can not call `initTransfer`, `receivePayload` and `receiveEncryptedPayload` methods
+- `sendedTransfers`: Sent transfers list map that was transferred through initializer (successIncome - transfer success income, successOutgoing - transfer success outgoing)
 - `isDecSendAvailable`: Flag for available sending decoded messages
 - `isEncSendAvailable`: Flag for available sending encoded messages
 
 ## Key Methods
-- `send`: A method to send messages to the Translator Contract
+- `initTransfer`: A method to send messages to the Translator Contract
 - `receivePayload`: A method to receive and process public data from the Translator Contract
 - `receiveEncodedPayload`: A method to receive and emit encrypted data events from the Translator Contract
-- `retryPayload`: A method to retry failed payload sending (test mode)
+- `validIncomeTarnsferHash`: A method to validate transfers that were income in initializer
+- `validOutgoingTarnsferHash`: A method to validate transfers that were successfully outgoing from initializer
 
 # Client Contract
 ## Purpose:
@@ -54,64 +53,66 @@ In the encrypted data mode, the contract first receives encrypted bytecode. Afte
 
 ## Key Variables:
 - `initializer`: The address of the Initializer Contract
-- `owner`: The address of the contract owner
 - `transactionId`: Internal transaction ID
-- `isEncoded`: Flag for sending encoded messages (use client server for this options)
-- `forceOrdered`: A switch to toggle between serial and parallel execution
 - `adminsMap`: Additional addresses list who can execute some internal functions
 
 ## Base Contract Methods:
-- `asterismReceive`: This virtual method is responsible for receiving data from the Initializer Contract. It emits an event that is read by the client server.
+- `asterismReceive`: This virtual method is responsible for receiving data from the Initializer Contract.
 - `asterismReceiveEncoded`: This virtual method is responsible for receiving encrypted data from the Initializer Contract. It emits an event that is read by the client server.
-- `_sendMessage`: This method is responsible for sending messages to the Initializer Contract.
-- `_generateSendingEvent`: This method generates the event that will be considered by the client server.
-- `_sendDataToInitializer`: This method is responsible for sending unencrypted messages to the Initializer Contract, so that they can be broadcasted to another network.
+- `initAsterizmTransfer`: This method is responsible for sending messages to the Initializer Contract.
+- `_initAsterizmTransferEvent`: This method generates the event that will be considered by the client server.
 
 
 ## Integration
 
 To integrate with the Asterism Protocol, you need to implement a contract that will inherit from the `BaseAsterizmClient`.
 
-The abstract `BaseAsterizmClient` already has all the necessary methods for receiving and sending messages to the initializer contract. To receive messages, the only method you need to implement is the `asterismReceive` method. This method accepts the following parameters:
+The abstract `BaseAsterizmClient` already has all the necessary methods for receiving and sending messages to the initializer contract. To receive messages, the only method you need to implement is the `asterismReceive` method. This method accepts `ClAsterizmReceiveRequestDto` structure with following parameters:
 
-- `_srcChainId`: The ID of the chain from which the message was sent
-- `_srcAddress`: The sender's address from the source chain
-- `_nonce`: The transaction sequence number
-- `_transactionId`: The transaction ID
-- `_payload`: The bytecode that contains the parameters passed when the method was called in the source chain
+- `srcChainId`: The ID of the chain from which the message was sent
+- `srcAddress`: The sender's address from the source chain
+- `dstChainId`: The ID of destination (current) chain
+- `dstAddress`: The address from destination (current) chain
+- `nonce`: The transaction sequence number
+- `txId`: The transaction ID
+- `transferHash`: The transfer hash
+- `payload`: The bytecode that contains the parameters passed when the method was called in the source chain
 
 You can process all or some of these parameters according to your needs.
 
-To send plaintext messages to the initializer contract, you need to call the `_sendDataToInitializer` method and pass the following parameters:
+To allow the client server to read and encrypt data from your contract, you need to call the `_initAsterizmTransferEvent` method and pass `ClInitTransferEventDto` structure with following parameters:
 
-- `destChain`: The destination chain ID
-- `destAddress`: The address in the destination chain
-- `_feeAmount`: The native coins amount that you want to send for coverage translator transactions fees
-- `payload`: The bytecode that contains the parameters to be passed to the contract in the destination chain
+- `dstChainId`: The ID of destination (current) chain
+- `dstAddress`: The address from destination (current) chain
+- `payload`: The bytecode that contains the parameters passed when the method was called in the source chain
 
-To allow the client server to read and encrypt data from your contract, you need to call the `_generateSendingEvent` method and pass the following parameters:
-
-- `dstChainId`: The destination chain ID
-- `destination`: The address in the destination chain
-- `payload`: The bytecode that contains the parameters to be passed to the contract in the destination chain
-
-After the client server encrypts the transaction payload, the `_sendMessage` method will be called, which will pass the payload to the initializer contract.
+After the client server encrypts the transaction payload, the `initAsterizmTransfer` method will be called, which will pass the payload to the initializer contract.
 
 
-Here is an example of sending an unencrypted message:
+Here is an example of initiation transfer message:
 
 ```solidity
-function sendMessage(uint16 destChain, address destAddress, uint amount, address receiver, address tokenAddress) {
-    bytes memory payload = abi.encode(receiver, amount, tokenAddress);
-    _sendDataToInitializer(destChain, destAddress, payload);
+function sendDecryptedMessage(uint16 dstChain, address dstAddress, uint amount, address receiver, address tokenAddress) {
+    ClInitTransferEventDto memory dto = _buildClInitTransferEventDto(dstChain, dstAddress, abi.encode(receiver, amount, _getTxId(), tokenAddress));
+    _initAsterizmTransferInternal(dto);
 }
 ```
 
 And here is an example of sending an encrypted message:
 
 ```solidity
-function proxyMessage(uint16 destChain, address destAddress, uint amount, address receiver, address tokenAddress) {
-    bytes memory payload = abi.encode(receiver, amount, tokenAddress);
-    _generateSendingEvent(destChain, destAddress, payload);
+function sendEncryptedMessage(uint16 dstChain, address dstAddress, uint amount, address receiver, address tokenAddress) {
+    ClInitTransferEventDto memory dto = _buildClInitTransferEventDto(dstChain, dstAddress, abi.encode(receiver, amount, _getTxId(), tokenAddress));
+    _initAsterizmTransferEvent(dto);
+}
+```
+
+Receive message in target network example:
+
+```solidity
+function asterizmReceive(ClAsterizmReceiveRequestDto calldata _dto) {
+    (address payable receiver, uint amount, uint txId , address tokenAddress) = abi.decode(_dto.payload, (address, uint, uint, address));
+    (bool success, ) = receiver.call{value: amount}("");
+    require(success, "GasStation: transfer error");
 }
 ```

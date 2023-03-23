@@ -12,4 +12,6 @@ cache
 artifacts
 contracts/artifacts
 contracts/base/artifacts
+contracts/demo/artifacts
+contracts/projects/artifacts
 contracts/interfaces/artifacts

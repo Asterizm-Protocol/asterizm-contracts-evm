@@ -1,52 +1,74 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/INonce.sol";
 
-contract AsterizmNonce is INonce {
+/// Asterizm nonce contract
+contract AsterizmNonce is INonce, Ownable {
 
-    mapping(uint64 => mapping(bytes => uint)) public nonce;
-    address public manipulator;
-    address public owner;
+    /// Set manipulator event
+    /// @param _address address  Manipulator address
+    event SetManipulatorEvent(address _address);
 
-    constructor() {
-        owner = msg.sender;
+    /// Force set nonce event
+    /// @param _chainId uint64  Chain ID
+    /// @param _pathData bytes  Path data
+    /// @param _nonce uint  Nonce
+    event ForceSetNonceEvent(uint64 _chainId, bytes _pathData, uint _nonce);
+
+    mapping(uint64 => mapping(bytes => uint)) private nonce;
+    address private manipulator;
+
+    constructor(address _manipulatorAddress) {
+        _setManipulator(_manipulatorAddress);
     }
 
-    modifier onlyOwner() {
-        require(owner == msg.sender, "AsterismNonce: only owner");
-        _;
-    }
-
+    /// Only manipulator modifier
     modifier onlyManipulator() {
         require(manipulator == msg.sender, "AsterismNonce: only manipulator");
         _;
     }
 
-    function setManipulator(address _manipulator) public onlyOwner {
+    /// Set manipulator (only owner)
+    function _setManipulator(address _manipulator) internal onlyOwner {
         manipulator = _manipulator;
+        emit SetManipulatorEvent(_manipulator);
     }
 
-    function setOwner(address _owner) public onlyOwner {
-        owner = _owner;
+    /// Increase nonce
+    /// @param _chainId uint64  Chain ID
+    /// @param _pathData bytes  Nonce data
+    function increaseNonce(uint64 _chainId, bytes calldata _pathData) public onlyManipulator returns (uint) {
+        return ++nonce[_chainId][_pathData];
     }
 
-    function increaseNonceWithValidation(uint64 chId, uint _nonce, bytes calldata pathData) public onlyManipulator returns (uint) {
-        uint currentNonce = nonce[chId][pathData];
+    /// Increase nonce with validation
+    /// @param _chainId uint64  Chain ID
+    /// @param _nonce uint  External nonce
+    /// @param _pathData bytes  Path data
+    function increaseNonceWithValidation(uint64 _chainId, bytes calldata _pathData, uint _nonce) public onlyManipulator returns (uint) {
+        uint currentNonce = getNonce(_chainId, _pathData);
         require(_nonce == currentNonce + 1, "AsterismNonce: wrong nonce");
-        return ++nonce[chId][pathData];
+
+        return increaseNonce(_chainId, _pathData);
     }
 
-    function increaseNonce(uint64 chId, bytes calldata pathData) public onlyManipulator returns (uint) {
-        return ++nonce[chId][pathData];
-    }
-    
-    function forceSetNonce(uint64 chId, uint _nonce, bytes calldata pathData) public onlyOwner returns (uint) {
-        nonce[chId][pathData] = _nonce;
-        return nonce[chId][pathData];
+    /// Return nonce
+    /// @param _chainId uint64  Chain ID
+    /// @param _pathData bytes  Path data
+    function getNonce(uint64 _chainId, bytes calldata _pathData) public view returns (uint) {
+        return nonce[_chainId][_pathData];
     }
 
-    function lookUpNonce(uint64 chId, bytes calldata pathData) public view returns (uint) {
-        return nonce[chId][pathData];
+    /// Force set nonce
+    /// @param _chainId uint64  Chain ID
+    /// @param _pathData bytes  Path data
+    /// @param _nonce uint  External nonce
+    function forceSetNonce(uint64 _chainId, bytes calldata _pathData, uint _nonce) external onlyOwner returns (uint) {
+        nonce[_chainId][_pathData] = _nonce;
+        emit ForceSetNonceEvent(_chainId, _pathData, _nonce);
+
+        return getNonce(_chainId, _pathData);
     }
 }

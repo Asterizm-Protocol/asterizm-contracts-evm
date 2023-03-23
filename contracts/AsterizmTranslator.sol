@@ -2,184 +2,228 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IInitializerReceiver.sol";
 import "./interfaces/INonce.sol";
 import "./interfaces/ITranslator.sol";
-import "./base/AddressLib.sol";
+import "./base/BaseAsterizmEnv.sol";
 
-contract AsterizmTranslator is ITranslator {
+contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
 
-    using AddressLib for address;
+    using Address for address;
     using SafeMath for uint;
 
+    /// Set initializer event
+    /// @param _initializerAddress address
+    event SetInitializerEvent(address _initializerAddress);
+
+    /// Add relayer event
+    /// @param _relayerAddress address
+    event AddRelayerEvent(address _relayerAddress);
+
+    /// Remove relayer event
+    /// @param _relayerAddress address
+    event RemoveRelayerEvent(address _relayerAddress);
+
+    /// Add chain event
+    /// @param _chainId uint64
+    event AddChainEvent(uint64 _chainId);
+
+    /// Remove chain event
+    /// @param _chainId uint64
+    event RemoveChainEvent(uint64 _chainId);
+
+    /// Set local chain event
+    /// @param _chainId uint64
+    event SetLocalChainEvent(uint64 _chainId);
+
+    /// Send message event
+    /// @param _payload bytes  Transfer payload
+    event SendMessageEvent(bytes _payload);
+
+    /// Success transfer event
+    event SuccessTransferEvent();
+
+    /// Transfer send event
+    /// @param _srcChainId uint64  Source chain ID
+    /// @param _srcAddress address  Source address
+    /// @param _dstAddress address  Destination address
+    /// @param _nonce uint  Nonce
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _payloadHash  bytes32  Payload hash
+    event TransferSendEvent(uint64 indexed _srcChainId, address indexed _srcAddress, address indexed _dstAddress, uint _nonce, bytes32 _transferHash, bytes32 _payloadHash);
+
     struct Chain {
-        string title;
+        bool exists;
+    }
+    struct Relayer {
         bool exists;
     }
 
-    IInitializerReceiver public endpointContract;
-    address public endpoint;
-    address public relayer;
-    address public owner;
-    bool public isLock;
-    INonce public outboundNonce;
-    INonce public inboundNonce;
-    mapping(uint64 => Chain) public chainsMap;
+    IInitializerReceiver private initializerLib;
+    mapping(address => Relayer) private relayers;
+    mapping(uint64 => Chain) public chains;
     uint64 public localChainId;
 
-    event Packet(bytes payload);
-    event SuccessTransfer();
-    event InvalidDst(uint64 indexed srcChainId, address srcAddress, address indexed dstAddress, uint nonce, bytes32 payloadHash);
-    event PacketReceived(uint64 indexed srcChainId, address appAddress, address indexed dstAddress, uint nonce, uint transactionId, bytes32 payloadHash);
-
-    constructor() {
-        owner = msg.sender;
+    constructor (uint64 _localChainId) {
+        addRelayer(owner());
+        addChain(_localChainId);
+        _setLocalChainId(_localChainId);
     }
 
-    modifier onlyEndpoint() {
-        require(address(endpoint) == msg.sender, "Translator: only endpoint");
+    /// Only initializer modifier
+    modifier onlyInitializer() {
+        require(msg.sender == address(initializerLib), "Translator: only initializer");
         _;
     }
 
-    modifier onlyOwner() {
-        require(owner == msg.sender, "Translator: only owner");
-        _;
-    }
-
+    /// Only relayer modifier
     modifier onlyRelayer() {
-        if (isLock) {
-            require(relayer == msg.sender, "Translator: only relayer");
-        }
+        require(relayers[msg.sender].exists, "Translator: only relayer");
         _;
     }
 
     /** Internal logic */
 
-    function setOwner(address _owner) public onlyOwner {
-        owner = _owner;
+    /// Add relayer
+    /// @param _relayer address  Relayer address
+    function addRelayer(address _relayer) public onlyOwner {
+        relayers[_relayer].exists = true;
+        emit AddRelayerEvent(_relayer);
     }
 
-    function setOutBoundNonce(INonce _nonce) public onlyOwner {
-        outboundNonce = _nonce;
+    /// Remove relayer
+    /// @param _relayer address  Relayer address
+    function removeRelayer(address _relayer) public onlyOwner {
+        delete relayers[_relayer];
+        emit RemoveRelayerEvent(_relayer);
     }
 
-    function setInBoundNonce(INonce _nonce) public onlyOwner {
-        inboundNonce = _nonce;
+    /// Set initializer
+    /// @param _initializerReceiver IInitializerReceiver  Initializer contract
+    function setInitializer(IInitializerReceiver _initializerReceiver) public onlyOwner {
+        initializerLib = _initializerReceiver;
+        emit SetInitializerEvent(address(_initializerReceiver));
     }
 
-    function setRelayer(address _relayer) public onlyOwner {
-        relayer = _relayer;
-        setIsLock(true);
+    /// Add chain
+    /// @param _chainId uint64  Chain ID
+    function addChain(uint64 _chainId) public onlyOwner {
+        chains[_chainId].exists = true;
+        emit AddChainEvent(_chainId);
     }
 
-    function setEndpoint(IInitializerReceiver _initializerReceiver) public onlyOwner {
-        endpoint = address(_initializerReceiver);
-        endpointContract = _initializerReceiver;
-    }
-
-    function setIsLock(bool _isLock) public onlyOwner {
-        isLock = _isLock;
-    }
-
-    function addChain(uint64 _chainId, string memory _title) public onlyOwner {
-        chainsMap[_chainId].title = _title;
-        chainsMap[_chainId].exists = true;
-    }
-
-    function addChains(uint64[] memory _chainIds, string[] memory _titles) external onlyOwner {
+    /// Add chains list
+    /// @param _chainIds uint64[]  Chain IDs
+    function addChains(uint64[] calldata _chainIds) public onlyOwner {
         for (uint i = 0; i < _chainIds.length; i++) {
-            addChain(_chainIds[i], _titles[i]);
+            addChain(_chainIds[i]);
         }
     }
 
-    function removeChainById(uint64 _chainId) external onlyOwner {
-        delete chainsMap[_chainId];
+    /// Remove chain
+    /// @param _chainId uint64  Chain ID
+    function removeChainById(uint64 _chainId) public onlyOwner {
+        require(localChainId != _chainId, "Translator: removing local chain");
+        delete chains[_chainId];
+        emit RemoveChainEvent(_chainId);
     }
 
-    function setLocalChainId(uint64 _chainId) public onlyOwner {
-        require(chainsMap[_chainId].exists, "Translator: chain is not exists");
+    /// Set local chain
+    /// @param _chainId uint64  Chain ID
+    function _setLocalChainId(uint64 _chainId) private onlyOwner {
+        require(chains[_chainId].exists, "Translator: chain is not exists");
         localChainId = _chainId;
+        emit SetLocalChainEvent(_chainId);
     }
 
     /** External logic */
 
-    function send(address _application, uint _nonce, uint64 _dstChainId, address _dstAddress, uint _transactionId, bool _isEncoded, bool _forceOrdered, bool _shouldCheckFee, bytes calldata _payload) external payable onlyEndpoint {
-        require(chainsMap[_dstChainId].exists, "Translator: wrong chain id");
+    /// Send transfer payload
+    /// @param _dto TrSendMessageRequestDto  Method DTO
+    function sendMessage(TrSendMessageRequestDto calldata _dto) external payable onlyInitializer {
+        require(chains[_dto.dstChainId].exists, "Translator: wrong chain id");
         if (msg.value > 0) {
-            (bool success, ) = owner.call{value: msg.value}("");
+            (bool success, ) = owner().call{value: msg.value}("");
             require(success, "Translator: transfer error");
         }
 
-        uint nonce = outboundNonce.increaseNonce(_dstChainId, abi.encodePacked(_dstAddress));
-        bytes memory packet = abi.encode(
-            nonce, localChainId, _application, _dstChainId,
-            _dstAddress, _transactionId, msg.value, _isEncoded,
-            _forceOrdered, _shouldCheckFee, _payload
+        bytes memory payload = abi.encode(
+            _dto.nonce, localChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress,
+            msg.value, _dto.useEncryption, _dto.forceOrder, _dto.txId, _dto.transferHash, _dto.payload
         );
-        if (_dstChainId == localChainId) {
-            if (_isEncoded) {
-                internalTranslateEncodedMessage(gasleft(), packet);
+        if (_dto.dstChainId == localChainId) {
+            TrTransferMessageRequestDto memory dto = _buildTrTarnsferMessageRequestDto(gasleft(), payload);
+            if (_dto.useEncryption) {
+                _internalTransferEncodedMessage(dto);
             } else {
-                internalTranslateMessage(gasleft(), packet);
+                _internalTransferMessage(dto);
             }
 
-            emit SuccessTransfer();
+            emit SuccessTransferEvent();
             return;
         }
 
-        emit Packet(packet);
+        emit SendMessageEvent(payload);
     }
 
-    function internalTranslateMessage(uint _gasLimit, bytes memory _payload) private {
-        baseTranslateMessage(_gasLimit, _payload, false);
+    /// Initernal transfer message (for transfers in one chain)
+    /// @param _dto TrTransferMessageRequestDto  Method DTO
+    function _internalTransferMessage(TrTransferMessageRequestDto memory _dto) private {
+        baseTransferMessage(_dto, false);
     }
 
-    function internalTranslateEncodedMessage(uint _gasLimit, bytes memory _payload) private {
-        baseTranslateMessage(_gasLimit, _payload, true);
+    /// Initernal transfer encrypted message (for transfers in one chain)
+    /// @param _dto TrTransferMessageRequestDto  Method DTO
+    function _internalTransferEncodedMessage(TrTransferMessageRequestDto memory _dto) private {
+        baseTransferMessage(_dto, true);
     }
 
-    function translateMessage(uint _gasLimit, bytes calldata _payload) external onlyRelayer {
-        baseTranslateMessage(_gasLimit, _payload, false);
+    /// Initernal transfer message
+    /// @param _dto TrTransferMessageRequestDto  Method DTO
+    function transferMessage(TrTransferMessageRequestDto calldata _dto) external onlyRelayer {
+        baseTransferMessage(_dto, false);
     }
 
-    function translateEncodedMessage(uint _gasLimit, bytes calldata _payload) external onlyRelayer {
-        baseTranslateMessage(_gasLimit, _payload, true);
+    /// Initernal transfer encrypted message
+    /// @param _dto TrTransferMessageRequestDto  Method DTO
+    function transferEncodedMessage(TrTransferMessageRequestDto calldata _dto) external onlyRelayer {
+        baseTransferMessage(_dto, true);
     }
 
-    function baseTranslateMessage(uint _gasLimit, bytes memory _payload, bool _useEncode) private {
+    /// Base transfer message
+    /// @param _dto TrTransferMessageRequestDto  Method DTO
+    function baseTransferMessage(TrTransferMessageRequestDto memory _dto, bool _useEncode) private {
+        bytes memory pl = _dto.payload;
         (
-            uint nonce, uint64 srcChainId, address appAddress, uint64 dstChainId,
-            address dstAddress, uint transactionId, , bool isEncoded,
-            bool forceOrdered, , bytes memory payload
+            uint nonce, uint64 srcChainId, address srcAddress, uint64 dstChainId,
+            address dstAddress, , bool isEncoded, bool forceOrder, uint txId,
+            bytes32 transferHash, bytes memory payload
         ) = abi.decode(
-            _payload,
-            (uint, uint64, address, uint64, address, uint, uint, bool, bool, bool, bytes)
+            pl,
+            (uint, uint64, address, uint64, address, uint, bool, bool, uint, bytes32, bytes)
         );
 
         if (_useEncode) {
-            require(isEncoded, "Translator: translateMessage required");
+            require(isEncoded, "Translator: transferMessage required");
         } else {
-            require(!isEncoded, "Translator: translateEncodedMessage required");
+            require(!isEncoded, "Translator: transferEncodedMessage required");
         }
 
         require(dstChainId == localChainId, "Translator: wrong chain id");
+        require(dstAddress.isContract(), "Translator: destination address is non-contract");
 
-        if (!dstAddress.isContract()) {
-            emit InvalidDst(srcChainId, appAddress, dstAddress, nonce, keccak256(payload));
-            return;
-        }
-
-        if (forceOrdered) {
-            bytes memory pathData = abi.encodePacked(appAddress, dstAddress);
-            require(inboundNonce.increaseNonceWithValidation(srcChainId, nonce, pathData) == nonce, "Translator: wrong nonce");
-        }
-
-        uint gasLimit = _gasLimit;
-        emit PacketReceived(srcChainId, appAddress, dstAddress, nonce, transactionId, keccak256(payload));
+        uint gasLimit = _dto.gasLimit;
+        IzReceivePayloadRequestDto memory dto = _buildIzReceivePayloadRequestDto(
+            _buildBaseTransferDirectionDto(srcChainId, srcAddress, localChainId, dstAddress), nonce, gasLimit, forceOrder, txId, transferHash, payload
+        );
         if (_useEncode) {
-            endpointContract.receiveEncodedPayload(srcChainId, appAddress, dstAddress, nonce, gasLimit, transactionId, forceOrdered, payload);
+            initializerLib.receiveEncryptedPayload(dto);
         } else {
-            endpointContract.receivePayload(srcChainId, appAddress, dstAddress, nonce, gasLimit, transactionId, forceOrdered, payload);
+            initializerLib.receivePayload(dto);
         }
+
+        emit TransferSendEvent(srcChainId, srcAddress, dstAddress, nonce, transferHash, keccak256(payload));
     }
 }

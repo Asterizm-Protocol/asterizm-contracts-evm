@@ -11,43 +11,23 @@ describe("Crosschain token", function () {
     const Transalor = await ethers.getContractFactory("AsterizmTranslator");
     const Token = await ethers.getContractFactory("MultichainToken");
     const Nonce = await ethers.getContractFactory("AsterizmNonce");
-    const Gas = await ethers.getContractFactory("GasSender");
+    const Gas = await ethers.getContractFactory("GasStation");
     const [owner] = await ethers.getSigners();
     const currentChainIds = [1, 2];
     let chainIds = [];
-    let chainTitles = [];
     for (let i = 0; i < currentChainIds.length; i++) {
       chainIds.push(currentChainIds[i]);
-      chainTitles.push("Test chain " . i + 1);
     }
 
-    const translator1 = await Transalor.deploy();
+    const translator1 = await Transalor.deploy(currentChainIds[0]);
     await translator1.deployed();
-    await translator1.addChains(chainIds, chainTitles);
-    await translator1.setLocalChainId(currentChainIds[0]);
-    // Translator1 Nonce deployment
-    const outboundTranslator1Nonce = await Nonce.deploy();
-    await outboundTranslator1Nonce.deployed();
-    const inboundTranslator1Nonce = await Nonce.deploy();
-    await inboundTranslator1Nonce.deployed();
-    await translator1.setInBoundNonce(inboundTranslator1Nonce.address);
-    await translator1.setOutBoundNonce(outboundTranslator1Nonce.address);
-    await outboundTranslator1Nonce.setManipulator(translator1.address);
-    await inboundTranslator1Nonce.setManipulator(translator1.address);
+    await translator1.addChains(chainIds);
+    await translator1.addRelayer(owner.address);
 
-    const translator2 = await Transalor.deploy();
+    const translator2 = await Transalor.deploy(currentChainIds[1]);
     await translator2.deployed();
-    await translator2.addChains(chainIds, chainTitles);
-    await translator2.setLocalChainId(currentChainIds[1]);
-    // Translator2 Nonce deployment
-    const outboundTranslator2Nonce = await Nonce.deploy();
-    await outboundTranslator2Nonce.deployed();
-    const inboundTranslator2Nonce = await Nonce.deploy();
-    await inboundTranslator2Nonce.deployed();
-    await translator2.setInBoundNonce(inboundTranslator2Nonce.address);
-    await translator2.setOutBoundNonce(outboundTranslator2Nonce.address);
-    await outboundTranslator2Nonce.setManipulator(translator2.address);
-    await inboundTranslator2Nonce.setManipulator(translator2.address);
+    await translator2.addChains(chainIds);
+    await translator2.addRelayer(owner.address);
 
     // Initializer1 deployment
     const initializer1 = await Initializer.deploy(translator1.address);
@@ -55,14 +35,12 @@ describe("Crosschain token", function () {
     await initializer1.setIsDecSendAvailable(true);
     await initializer1.setIsEncSendAvailable(true);
     // Initializer Nonce deployment
-    const outboundInitializer1Nonce = await Nonce.deploy();
+    const outboundInitializer1Nonce = await Nonce.deploy(initializer1.address);
     await outboundInitializer1Nonce.deployed();
-    const inboundInitializer1Nonce = await Nonce.deploy();
+    const inboundInitializer1Nonce = await Nonce.deploy(initializer1.address);
     await inboundInitializer1Nonce.deployed();
     await initializer1.setInBoundNonce(inboundInitializer1Nonce.address);
     await initializer1.setOutBoundNonce(outboundInitializer1Nonce.address);
-    await outboundInitializer1Nonce.setManipulator(initializer1.address);
-    await inboundInitializer1Nonce.setManipulator(initializer1.address);
 
     // Initializer2 deployment
     const initializer2 = await Initializer.deploy(translator2.address);
@@ -70,33 +48,29 @@ describe("Crosschain token", function () {
     await initializer2.setIsDecSendAvailable(true);
     await initializer2.setIsEncSendAvailable(true);
     // Initializer Nonce deployment
-    const outboundInitializer2Nonce = await Nonce.deploy();
+    const outboundInitializer2Nonce = await Nonce.deploy(initializer2.address);
     await outboundInitializer2Nonce.deployed();
-    const inboundInitializer2Nonce = await Nonce.deploy();
+    const inboundInitializer2Nonce = await Nonce.deploy(initializer2.address);
     await inboundInitializer2Nonce.deployed();
     await initializer2.setInBoundNonce(inboundInitializer2Nonce.address);
     await initializer2.setOutBoundNonce(outboundInitializer2Nonce.address);
-    await outboundInitializer2Nonce.setManipulator(initializer2.address);
-    await inboundInitializer2Nonce.setManipulator(initializer2.address);
 
-    await translator1.setEndpoint(initializer1.address);
-    await translator2.setEndpoint(initializer2.address);
+    await translator1.setInitializer(initializer1.address);
+    await translator2.setInitializer(initializer2.address);
 
     const token1 = await Token.deploy(initializer1.address, TOKEN_AMOUNT.toString());
     await token1.deployed();
     const token2 = await Token.deploy(initializer2.address, TOKEN_AMOUNT.toString());
     await token2.deployed();
+    await token1.addTrustedSourceAddresses(currentChainIds, [token1.address, token2.address]);
+    await token2.addTrustedSourceAddresses(currentChainIds, [token1.address, token2.address]);
 
-    const gas_sender1 = await Gas.deploy(initializer1.address);
+    const gas_sender1 = await Gas.deploy(initializer1.address, true, true);
     await gas_sender1.deployed();
-
-    const gas_sender2 = await Gas.deploy(initializer2.address);
+    const gas_sender2 = await Gas.deploy(initializer2.address, true, true);
     await gas_sender2.deployed();
-
-    await initializer1.addClient(token1.address, true);
-    await initializer1.addClient(gas_sender1.address, true);
-    await initializer2.addClient(token2.address, true);
-    await initializer2.addClient(gas_sender2.address, true);
+    await gas_sender1.addTrustedSourceAddresses(currentChainIds, [gas_sender1.address, gas_sender2.address]);
+    await gas_sender2.addTrustedSourceAddresses(currentChainIds, [gas_sender1.address, gas_sender2.address]);
 
     // Fixtures can return anything you consider useful for your tests
     return { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, owner, currentChainIds};
@@ -127,7 +101,7 @@ describe("Crosschain token", function () {
     }
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, owner, currentChainIds } = await loadFixture(deployContractsFixture);
     await expect(token1.crossChainTransfer(currentChainIds[1], owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", 100, token2.address))
-      .to.emit(translator1, 'Packet')
+      .to.emit(translator1, 'SendMessageEvent')
   });
   it("Should burn token", async function () {
     let capturedValue
@@ -138,7 +112,7 @@ describe("Crosschain token", function () {
     let value = 100;
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, owner, currentChainIds } = await loadFixture(deployContractsFixture);
     await expect(token1.crossChainTransfer(currentChainIds[1], owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", value, token2.address))
-      .to.emit(translator1, 'Packet');
+      .to.emit(translator1, 'SendMessageEvent');
     expect(await token1.balanceOf(owner.address)).to.equal(
       (TOKEN_AMOUNT.sub(value))
     );
@@ -156,12 +130,12 @@ describe("Crosschain token", function () {
     let value = 100;
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, owner, currentChainIds } = await loadFixture(deployContractsFixture);
     await expect(token1.crossChainTransfer(currentChainIds[1], owner.address, addressTo, value, token2.address))
-      .to.emit(translator1, 'Packet')
+      .to.emit(translator1, 'SendMessageEvent')
       .withArgs(captureValue);
     expect(await token1.balanceOf(owner.address)).to.equal(
       (TOKEN_AMOUNT.sub(value))
     );
-    await translator2.translateMessage(300000, capturedValue);
+    await translator2.transferMessage([300000, capturedValue]);
     expect(await token1.balanceOf(owner.address)).to.equal(
       (TOKEN_AMOUNT.sub(value))
     );

@@ -1,165 +1,219 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./interfaces/INonce.sol";
 import "./interfaces/ITranslator.sol";
-import "./interfaces/IClientContract.sol";
+import "./interfaces/IClientReceiverContract.sol";
 import "./interfaces/IInitializerSender.sol";
 import "./interfaces/IInitializerReceiver.sol";
+import "./base/BaseAsterizmEnv.sol";
 
-contract AsterizmInitializer is IInitializerSender, IInitializerReceiver {
+contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, IInitializerReceiver, BaseAsterizmEnv {
 
-    struct StoredPayload {
-        uint64 payloadLength;
-        address dstAddress;
-        bytes32 payloadHash;
+    using Address for address;
+
+    /// Set translator event
+    /// @param _translatorAddress address
+    event SetTranslatorEvent(address _translatorAddress);
+
+    /// Set outbound nonce event
+    /// @param _nonceAddress address
+    event SetOutBoundNonceEvent(address _nonceAddress);
+
+    /// Set inbound nonce event
+    /// @param _nonceAddress address
+    event SetInBoundNonceEvent(address _nonceAddress);
+
+    /// Set decryption send availeble event
+    /// @param _flag bool
+    event SetDecriptionSendAvailableEvent(bool _flag);
+
+    /// Set encryption send availeble event
+    /// @param _flag bool
+    event SetEncriptionSendAvailableEvent(bool _flag);
+
+    /// Block address event
+    /// @param _address address
+    event AddBlockAddressEvent(address _address);
+
+    /// Remove block address event
+    /// @param _address address
+    event RemoveBlockAddressEvent(address _address);
+
+    /// Payload error event
+    /// Client can listen it for moniroting error transfers
+    /// @param _srcChainId uint64  Source chain ID
+    /// @param _srcAddress address  Source address
+    /// @param _dstChainId uint64  Destination chain ID
+    /// @param _dstAddress address  Destination address
+    /// @param _nonce uint  Nonce
+    /// @param _transferHash bytes32  Tansfer hash
+    /// @param _payload bytes  Payload
+    /// @param _reason bytes  Error reason
+    event PayloadErrorEvent(uint64 _srcChainId, address _srcAddress, uint64 _dstChainId, address _dstAddress, uint _nonce, bytes32 _transferHash, bytes _payload, bytes _reason);
+
+    /// Sent payload event
+    /// @param _transferHash bytes32  Transfer hash
+    event SentPayloadEvent(bytes32 _transferHash);
+
+    struct SendedTransfer {
+        bool successIncome;
+        bool successOutgoing;
     }
 
-    struct Client {
-        address clientAddress;
-        bool shouldCheckFee;
-        bool exists;
-    }
-
-    INonce public inboundNonce;
-    INonce public outboundNonce;
-    mapping(uint64 => mapping(bytes => StoredPayload)) public storedPayload;
-    mapping(address => Client) public clients;
-    ITranslator public translatorLibrary;
-    address public translator;
-    address public owner;
-    bool public availableForAllClients;
+    INonce private inboundNonce;
+    INonce private outboundNonce;
+    ITranslator private translatorLib;
     bool public isDecSendAvailable;
     bool public isEncSendAvailable;
-
-    event PayloadCleared(uint64 srcChainId, bytes srcAddress, uint nonce, uint transactionId, address dstAddress);
-    event PayloadStored(uint64 srcChainId, bytes srcAddress, address dstAddress, uint nonce, uint transactionId, bytes payload, bytes reason);
+    mapping(address => bool) public blockAddresses;
+    mapping(bytes32 => SendedTransfer) private sendedTransfers;
 
     constructor (ITranslator _translatorLibrary) {
-        owner = msg.sender;
         setTransalor(_translatorLibrary);
     }
 
-    modifier onlyOwner() {
-        require(owner == msg.sender, "AsterizmInitializer: only owner");
-        _;
-    }
-
+    /// Only translator modifier
     modifier onlyTranslator() {
-        require(translator == msg.sender, "AsterizmInitializer: only translator");
-        _;
-    }
-
-    modifier onlyClient() {
-        if (!availableForAllClients) {
-            require(clients[msg.sender].exists, "AsterizmInitializer: only client");
-        }
+        require(msg.sender == address(translatorLib), "AsterizmInitializer: only translator");
         _;
     }
 
     /** Internal logic */
 
-    function setOwner(address _owner) public onlyOwner {
-        owner = _owner;
+    /// Set translator
+    /// @param _translatorLib ITranslator  Translator library
+    function setTransalor(ITranslator _translatorLib) public onlyOwner {
+        translatorLib = _translatorLib;
+        emit SetTranslatorEvent(address(_translatorLib));
     }
 
-    function setTransalor(ITranslator _translatorLibrary) public onlyOwner {
-        translator = address(_translatorLibrary);
-        translatorLibrary = _translatorLibrary;
-    }
-
+    /// Set outbound nonce
+    /// @param _nonce INonce  Set outbound nonce
     function setOutBoundNonce(INonce _nonce) public onlyOwner {
         outboundNonce = _nonce;
+        emit SetOutBoundNonceEvent(address(_nonce));
     }
 
+    /// Set inbound nonce
+    /// @param _nonce INonce  Set inbound nonce
     function setInBoundNonce(INonce _nonce) public onlyOwner {
         inboundNonce = _nonce;
+        emit SetInBoundNonceEvent(address(_nonce));
     }
 
-    function setAvailableForAll(bool _value) public onlyOwner {
-        availableForAllClients = _value;
-    }
-
-    function addClient(address clientAddress, bool shouldCheckFee) public onlyOwner {
-        clients[clientAddress].clientAddress = clientAddress;
-        clients[clientAddress].shouldCheckFee = shouldCheckFee;
-        clients[clientAddress].exists = true;
-    }
-
-    function removeClient(address clientAddress) public onlyOwner {
-        delete clients[clientAddress];
-    }
-
-    function setIsDecSendAvailable(bool _value) public onlyOwner {
+    /// Set decription send available flag
+    /// @param _value bool  Available flag
+    function setIsDecSendAvailable(bool _value) external onlyOwner {
         isDecSendAvailable = _value;
+        emit SetDecriptionSendAvailableEvent(_value);
     }
 
-    function setIsEncSendAvailable(bool _value) public onlyOwner {
+    /// Set encription send available flag
+    /// @param _value bool  Available flag
+    function setIsEncSendAvailable(bool _value) external onlyOwner {
         isEncSendAvailable = _value;
+        emit SetEncriptionSendAvailableEvent(_value);
+    }
+
+    /// Block address
+    /// @param _address address  Available flag
+    function addBlockAddress(address _address) external onlyOwner {
+        blockAddresses[_address] = true;
+        emit AddBlockAddressEvent(_address);
+    }
+
+    /// Unblock address
+    /// @param _address address  Available flag
+    function removeBlockAddress(address _address) external onlyOwner {
+        delete blockAddresses[_address];
+        emit RemoveBlockAddressEvent(_address);
     }
 
     /** External logic */
 
-    function send(uint64 _dstChainId, address _destination, uint _transactionId, bool _isEncoded, bool _forceOrdered, bytes calldata _payload) external payable onlyClient {
-        _isEncoded ? require(isEncSendAvailable, "AsterizmInitializer: encode transfer is unavailable") : require(isDecSendAvailable, "AsterizmInitializer: decode transfer is unavailable");
-        uint nonce = outboundNonce.increaseNonce(_dstChainId, abi.encodePacked(msg.sender));
-        translatorLibrary.send{value: msg.value}(msg.sender, nonce, _dstChainId, _destination, _transactionId, _isEncoded, _forceOrdered, clients[msg.sender].shouldCheckFee, _payload);
+    /// Validate income transfer by hash
+    /// @param _transferHash bytes32
+    function validIncomeTarnsferHash(bytes32 _transferHash) external view returns(bool) {
+        return sendedTransfers[_transferHash].successIncome;
     }
 
-    function receivePayload(uint64 _srcChainId, address _application, address _dstAddress, uint _nonce, uint _gasLimit, uint _transactionId, bool _forceOrdered, bytes calldata _payload) external onlyTranslator {
-        bytes memory _srcPath = abi.encodePacked(_application, _dstAddress);
-        if (_forceOrdered) {
-            require(inboundNonce.increaseNonceWithValidation(_srcChainId, _nonce, _srcPath) == _nonce, "AsterizmInitializer: wrong nonce");
-        }
-
-        StoredPayload storage sp = storedPayload[_srcChainId][_srcPath];
-        require(sp.payloadHash == bytes32(0), "AsterizmInitializer: in message blocking");
-        require(_dstAddress != address(this) && _dstAddress != msg.sender, "AsterizmInitializer: wrong destination address");
-
-        try IClientContract(_dstAddress).asterismReceive{gas: _gasLimit}(_srcChainId, _application, _nonce, _transactionId, _payload) {
-        } catch (bytes memory reason) {
-            storedPayload[_srcChainId][_srcPath] = StoredPayload(uint64(_payload.length), _dstAddress, keccak256(_payload));
-            emit PayloadStored(_srcChainId, _srcPath, _dstAddress, _nonce, _transactionId, _payload, reason);
-        }
+    /// Validate outhoing transfer by hash
+    /// @param _transferHash bytes32
+    function validOutgoingTarnsferHash(bytes32 _transferHash) external view returns(bool) {
+        return sendedTransfers[_transferHash].successOutgoing;
     }
 
-    function receiveEncodedPayload(uint64 _srcChainId, address _application, address _dstAddress, uint _nonce, uint _gasLimit, uint _transactionId, bool _forceOrdered, bytes calldata _payload) external onlyTranslator {
-        bytes memory _srcPath = abi.encodePacked(_application, _dstAddress);
-        if (_forceOrdered) {
-            require(inboundNonce.increaseNonceWithValidation(_srcChainId, _nonce, _srcPath) == _nonce, "AsterizmInitializer: wrong nonce");
-        }
+    /// Initiate asterizm transfer
+    /// Only clients can call this method
+    /// @param _dto IzIninTransferRequestDto  Method DTO
+    function initTransfer(IzIninTransferRequestDto calldata _dto) external payable {
+        require(!blockAddresses[msg.sender], "AsterizmInitializer: sender address is blocked");
+        require(!blockAddresses[_dto.dstAddress], "AsterizmInitializer: target address is blocked");
+        _dto.useEncryption ?
+            require(isEncSendAvailable, "AsterizmInitializer: encode transfer is unavailable") :
+            require(isDecSendAvailable, "AsterizmInitializer: decode transfer is unavailable");
 
-        StoredPayload storage sp = storedPayload[_srcChainId][_srcPath];
-        require(sp.payloadHash == bytes32(0), "AsterizmInitializer: in message blocking");
-        require(_dstAddress != address(this) && _dstAddress != msg.sender, "AsterizmInitializer: wrong destination address");
-
-        try IClientContract(_dstAddress).asterismReceiveEncoded{gas: _gasLimit}(_srcChainId, _application, _nonce, _transactionId, _payload) {
-        } catch (bytes memory reason) {
-            storedPayload[_srcChainId][_srcPath] = StoredPayload(uint64(_payload.length), _dstAddress, keccak256(_payload));
-            emit PayloadStored(_srcChainId, _srcPath, _dstAddress, _nonce, _transactionId, _payload, reason);
-        }
+        TrSendMessageRequestDto memory dto = _buildTrSendMessageRequestDto(
+            msg.sender, _dto.dstChainId, _dto.dstAddress, _dto.useForceOrder ? outboundNonce.increaseNonce(_dto.dstChainId, abi.encodePacked(msg.sender, _dto.dstAddress)) : 0,
+            _dto.useEncryption, _dto.useForceOrder, _dto.txId, _dto.transferHash, _dto.payload
+        );
+        translatorLib.sendMessage{value: msg.value}(dto);
     }
 
-    function retryPayload(uint64 _srcChainId, address _application, address _dstAddress, uint _gasLimit, uint _transactionId, bool _isEncoded, bytes calldata _payload) external {
-        bytes memory _srcPath = abi.encodePacked(_application, _dstAddress);
-        StoredPayload storage sp = storedPayload[_srcChainId][_srcPath];
-        require(sp.payloadHash != bytes32(0), "AsterizmInitializer: no stored payload");
-        require(_payload.length == sp.payloadLength && keccak256(_payload) == sp.payloadHash, "AsterizmInitializer: invalid payload");
+    /// Receive payload from translator
+    /// @param _dto IzReceivePayloadRequestDto  Method DTO
+    function receivePayload(IzReceivePayloadRequestDto calldata _dto) external onlyTranslator {
+        _baseReceivePayload(_dto, false);
+    }
 
-        address dstAddress = sp.dstAddress;
+    /// Receive encrypted payload from translator
+    /// @param _dto IzReceivePayloadRequestDto  Method DTO
+    function receiveEncryptedPayload(IzReceivePayloadRequestDto calldata _dto) external onlyTranslator {
+        _baseReceivePayload(_dto, true);
+    }
 
-        sp.payloadLength = 0;
-        sp.dstAddress = address(0);
-        sp.payloadHash = bytes32(0);
+    /// Base receive payload
+    /// @param _dto IzReceivePayloadRequestDto  Method DTO
+    /// @param _useEncryption bool  Use encryption flag
+    function _baseReceivePayload(IzReceivePayloadRequestDto calldata _dto, bool _useEncryption) private onlyTranslator {
+        require(!blockAddresses[_dto.dstAddress], "AsterizmInitializer: target address is blocked");
+        require(!sendedTransfers[_dto.transferHash].successIncome, "AsterizmInitializer: message sent already");
+        if (_dto.forceOrder) {
+            require(
+                inboundNonce.increaseNonceWithValidation(_dto.srcChainId, abi.encodePacked(_dto.srcAddress, _dto.dstAddress), _dto.nonce) == _dto.nonce,
+                "AsterizmInitializer: wrong nonce"
+            );
+        }
 
-        uint nonce = inboundNonce.lookUpNonce(_srcChainId, _srcPath);
+        require(_dto.dstAddress != address(this) && _dto.dstAddress != msg.sender, "AsterizmInitializer: wrong destination address");
 
-        if (_isEncoded) {
-            IClientContract(dstAddress).asterismReceiveEncoded{gas: _gasLimit}(_srcChainId, _application, nonce, _transactionId, _payload);
+        ClAsterizmReceiveRequestDto memory dto = _buildClAsterizmReceiveRequestDto(
+            _dto.srcChainId, _dto.srcAddress, _dto.dstChainId,
+            _dto.dstAddress, _dto.nonce, _dto.txId, _dto.transferHash, _dto.payload
+        );
+
+        sendedTransfers[_dto.transferHash].successIncome = true;
+        if (_useEncryption) {
+            try IClientReceiverContract(_dto.dstAddress).asterizmReceiveEncoded{gas: _dto.gasLimit}(dto) {
+            } catch Error(string memory _err) {
+                emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.nonce, _dto.transferHash, _dto.payload, abi.encode(_err));
+            } catch (bytes memory reason) {
+                emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.nonce, _dto.transferHash, _dto.payload, reason);
+            }
         } else {
-            IClientContract(dstAddress).asterismReceive{gas: _gasLimit}(_srcChainId, _application, nonce, _transactionId, _payload);
+            try IClientReceiverContract(_dto.dstAddress).asterizmReceive{gas: _dto.gasLimit}(dto) {
+            } catch Error(string memory _err) {
+                emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.nonce, _dto.transferHash, _dto.payload, abi.encode(_err));
+            } catch (bytes memory reason) {
+                emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.nonce, _dto.transferHash, _dto.payload, reason);
+            }
         }
 
-        emit PayloadCleared(_srcChainId, _srcPath, nonce, _transactionId, dstAddress);
+        sendedTransfers[_dto.transferHash].successOutgoing = true;
+        emit SentPayloadEvent(_dto.transferHash);
     }
 }

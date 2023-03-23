@@ -1,7 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-interface IInitializerReceiver {
-    function receivePayload(uint64 _srcChainId, address _srcPath, address _dstAddress, uint _nonce, uint _gasLimit, uint _transactionId, bool _forceOrdered, bytes calldata _payload) external;
-    function receiveEncodedPayload(uint64 _srcChainId, address _srcPath, address _dstAddress, uint _nonce, uint _gasLimit, uint _transactionId, bool _forceOrdered, bytes calldata _payload) external;
+import "./IAsterizmEnv.sol";
+
+/// Initializer receive interface
+interface IInitializerReceiver is IAsterizmEnv {
+
+    /// Receive payload from translator
+    /// @param _dto IzReceivePayloadRequestDto  Method DTO
+    function receivePayload(IzReceivePayloadRequestDto calldata _dto) external;
+
+    /// Receive encrypted payload from translator
+    /// @param _dto IzReceivePayloadRequestDto  Method DTO
+    function receiveEncryptedPayload(IzReceivePayloadRequestDto calldata _dto) external;
 }
