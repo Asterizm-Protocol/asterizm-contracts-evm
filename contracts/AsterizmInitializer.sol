@@ -167,19 +167,6 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
     /// Receive payload from translator
     /// @param _dto IzReceivePayloadRequestDto  Method DTO
     function receivePayload(IzReceivePayloadRequestDto calldata _dto) external onlyTranslator {
-        _baseReceivePayload(_dto, false);
-    }
-
-    /// Receive encrypted payload from translator
-    /// @param _dto IzReceivePayloadRequestDto  Method DTO
-    function receiveEncryptedPayload(IzReceivePayloadRequestDto calldata _dto) external onlyTranslator {
-        _baseReceivePayload(_dto, true);
-    }
-
-    /// Base receive payload
-    /// @param _dto IzReceivePayloadRequestDto  Method DTO
-    /// @param _useEncryption bool  Use encryption flag
-    function _baseReceivePayload(IzReceivePayloadRequestDto calldata _dto, bool _useEncryption) private onlyTranslator {
         require(!blockAddresses[_dto.dstAddress], "AsterizmInitializer: target address is blocked");
         require(!sendedTransfers[_dto.transferHash].successIncome, "AsterizmInitializer: message sent already");
         if (_dto.forceOrder) {
@@ -197,20 +184,11 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
         );
 
         sendedTransfers[_dto.transferHash].successIncome = true;
-        if (_useEncryption) {
-            try IClientReceiverContract(_dto.dstAddress).asterizmReceiveEncoded{gas: _dto.gasLimit}(dto) {
-            } catch Error(string memory _err) {
-                emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.nonce, _dto.transferHash, _dto.payload, abi.encode(_err));
-            } catch (bytes memory reason) {
-                emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.nonce, _dto.transferHash, _dto.payload, reason);
-            }
-        } else {
-            try IClientReceiverContract(_dto.dstAddress).asterizmReceive{gas: _dto.gasLimit}(dto) {
-            } catch Error(string memory _err) {
-                emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.nonce, _dto.transferHash, _dto.payload, abi.encode(_err));
-            } catch (bytes memory reason) {
-                emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.nonce, _dto.transferHash, _dto.payload, reason);
-            }
+        try IClientReceiverContract(_dto.dstAddress).asterizmIzReceive{gas: _dto.gasLimit}(dto) {
+        } catch Error(string memory _err) {
+            emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.nonce, _dto.transferHash, _dto.payload, abi.encode(_err));
+        } catch (bytes memory reason) {
+            emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.nonce, _dto.transferHash, _dto.payload, reason);
         }
 
         sendedTransfers[_dto.transferHash].successOutgoing = true;

@@ -87,7 +87,7 @@ contract MultichainToken is IMultiChainToken, ERC20, BaseAsterizmClient {
 
     /// Receive non-encoded payload
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function asterizmReceive(ClAsterizmReceiveRequestDto calldata _dto) public override {
+    function _asterizmReceive(ClAsterizmReceiveRequestDto calldata _dto) internal override {
         require(
             _validTransferHash(_dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.payload, _dto.transferHash),
             "MultichainToken: transfer hash is invalid"

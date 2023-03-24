@@ -112,9 +112,8 @@ contract GasStation is BaseAsterizmClient {
         (bool success, bytes memory result) = address(_token).call(abi.encodeWithSignature("decimals()"));
         require(success, "GasStation: decimals request failed");
         uint8 decimals = abi.decode(result, (uint8));
-        uint length = _amounts.length;
         uint sum = 0;
-        for (uint i = 0; i < length; i++) {
+        for (uint i = 0; i < _amounts.length; i++) {
             sum = sum.add(_amounts[i]);
         }
 
@@ -130,16 +129,17 @@ contract GasStation is BaseAsterizmClient {
 
         require(_token.transferFrom(msg.sender, address(this), sum), "GasStation: token transfer failed");
         stableCoins[address(_token)].balance = stableCoins[address(_token)].balance.add(sum);
-        for (uint i = 0; i < length; i++) {
-            ClInitTransferEventDto memory dto = _buildClInitTransferEventDto(_chainIds[i], _addresses[i], abi.encode(_receivers[i], _amounts[i], _getTxId(), address(_token), decimals));
+        for (uint i = 0; i < _amounts.length; i++) {
+            uint txId = _getTxId();
+            ClInitTransferEventDto memory dto = _buildClInitTransferEventDto(_chainIds[i], _addresses[i], abi.encode(_receivers[i], _amounts[i], txId, address(_token), decimals));
             _initAsterizmTransferEvent(dto);
-            emit GasSendEvent(_chainIds[i], _addresses[i], _getTxId(), dto.payload);
+            emit GasSendEvent(_chainIds[i], _addresses[i], txId, dto.payload);
         }
     }
 
     /// Receive non-encoded payload
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function asterizmReceive(ClAsterizmReceiveRequestDto calldata _dto) public override {
+    function _asterizmReceive(ClAsterizmReceiveRequestDto calldata _dto) internal override {
         (address payable dstAddress, uint amount, uint txId , address tokenAddress, uint decimals, uint stableRate) = abi.decode(_dto.payload, (address, uint, uint, address, uint, uint));
         require(
             _validTransferHash(_dto.dstChainId, _dto.dstAddress, _dto.txId, abi.encode(dstAddress, amount, txId, tokenAddress, decimals), _dto.transferHash),

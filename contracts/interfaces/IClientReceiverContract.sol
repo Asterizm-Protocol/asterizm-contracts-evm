@@ -5,11 +5,11 @@ import "./IAsterizmEnv.sol";
 
 interface IClientReceiverContract is IAsterizmEnv {
 
-    /// Receive non-encrypted payload
+    /// Receive payload from initializer
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function asterizmReceive(ClAsterizmReceiveRequestDto calldata _dto) external;
+    function asterizmIzReceive(ClAsterizmReceiveRequestDto calldata _dto) external;
 
-    /// Receive encrypted payload
+    /// Receive payload from client server
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function asterizmReceiveEncoded(ClAsterizmReceiveRequestDto calldata _dto) external;
+    function asterizmClReceive(ClAsterizmReceiveRequestDto calldata _dto) external;
 }

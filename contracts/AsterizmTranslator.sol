@@ -155,12 +155,7 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
         );
         if (_dto.dstChainId == localChainId) {
             TrTransferMessageRequestDto memory dto = _buildTrTarnsferMessageRequestDto(gasleft(), payload);
-            if (_dto.useEncryption) {
-                _internalTransferEncodedMessage(dto);
-            } else {
-                _internalTransferMessage(dto);
-            }
-
+            _internalTransferMessage(dto);
             emit SuccessTransferEvent();
             return;
         }
@@ -171,45 +166,27 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
     /// Initernal transfer message (for transfers in one chain)
     /// @param _dto TrTransferMessageRequestDto  Method DTO
     function _internalTransferMessage(TrTransferMessageRequestDto memory _dto) private {
-        baseTransferMessage(_dto, false);
-    }
-
-    /// Initernal transfer encrypted message (for transfers in one chain)
-    /// @param _dto TrTransferMessageRequestDto  Method DTO
-    function _internalTransferEncodedMessage(TrTransferMessageRequestDto memory _dto) private {
-        baseTransferMessage(_dto, true);
+        baseTransferMessage(_dto);
     }
 
     /// Initernal transfer message
     /// @param _dto TrTransferMessageRequestDto  Method DTO
     function transferMessage(TrTransferMessageRequestDto calldata _dto) external onlyRelayer {
-        baseTransferMessage(_dto, false);
-    }
-
-    /// Initernal transfer encrypted message
-    /// @param _dto TrTransferMessageRequestDto  Method DTO
-    function transferEncodedMessage(TrTransferMessageRequestDto calldata _dto) external onlyRelayer {
-        baseTransferMessage(_dto, true);
+        baseTransferMessage(_dto);
     }
 
     /// Base transfer message
     /// @param _dto TrTransferMessageRequestDto  Method DTO
-    function baseTransferMessage(TrTransferMessageRequestDto memory _dto, bool _useEncode) private {
+    function baseTransferMessage(TrTransferMessageRequestDto memory _dto) private {
         bytes memory pl = _dto.payload;
         (
             uint nonce, uint64 srcChainId, address srcAddress, uint64 dstChainId,
-            address dstAddress, , bool isEncoded, bool forceOrder, uint txId,
+            address dstAddress, , , bool forceOrder, uint txId,
             bytes32 transferHash, bytes memory payload
         ) = abi.decode(
             pl,
             (uint, uint64, address, uint64, address, uint, bool, bool, uint, bytes32, bytes)
         );
-
-        if (_useEncode) {
-            require(isEncoded, "Translator: transferMessage required");
-        } else {
-            require(!isEncoded, "Translator: transferEncodedMessage required");
-        }
 
         require(dstChainId == localChainId, "Translator: wrong chain id");
         require(dstAddress.isContract(), "Translator: destination address is non-contract");
@@ -218,11 +195,7 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
         IzReceivePayloadRequestDto memory dto = _buildIzReceivePayloadRequestDto(
             _buildBaseTransferDirectionDto(srcChainId, srcAddress, localChainId, dstAddress), nonce, gasLimit, forceOrder, txId, transferHash, payload
         );
-        if (_useEncode) {
-            initializerLib.receiveEncryptedPayload(dto);
-        } else {
-            initializerLib.receivePayload(dto);
-        }
+        initializerLib.receivePayload(dto);
 
         emit TransferSendEvent(srcChainId, srcAddress, dstAddress, nonce, transferHash, keccak256(payload));
     }

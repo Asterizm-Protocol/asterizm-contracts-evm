@@ -55,9 +55,15 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// @param _flag bool  Use force order flag
     event SetUseForceOrderEvent(bool _flag);
 
+    struct AsterizmTransfer {
+        bool successReceive;
+        bool successExecute;
+    }
+
     IInitializerSender private initializerLib;
-    mapping(address => bool) private adminsMap;
+    mapping(address => bool) private admins;
     mapping(uint64 => address) private trustedSrcAddresses;
+    mapping(bytes32 => AsterizmTransfer) private transfers;
     uint private trustedAddressCount;
     bool private useEncryption;
     bool private useForceOrder;
@@ -71,13 +77,19 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
 
     /// Only admin modifier
     modifier onlyAdmin {
-        require(adminsMap[msg.sender], "BaseAsterizmClient: only admin");
+        require(admins[msg.sender], "BaseAsterizmClient: only admin");
         _;
     }
 
     /// Only owner or admin modifier
     modifier onlyOwnerOrAdmin {
-        require(msg.sender == owner() || adminsMap[msg.sender], "BaseAsterizmClient: only owner or admin");
+        require(msg.sender == owner() || admins[msg.sender], "BaseAsterizmClient: only owner or admin");
+        _;
+    }
+
+    /// Only initializer modifier
+    modifier onlyInitializer {
+        require(msg.sender == address(initializerLib), "BaseAsterizmClient: only initializer");
         _;
     }
 
@@ -99,8 +111,46 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// Only trusted trarnsfer modifier
     /// Validate transfer hash on initializer
     /// Use this modifier for validate transfer by hash
+    /// @param _transferHash bytes32  Transfer hash
     modifier onlyTrusterTransfer(bytes32 _transferHash) {
         require(initializerLib.validIncomeTarnsferHash(_transferHash), "BaseAsterizmClient: transfer hash is invalid");
+        _;
+    }
+
+    /// Only encryption logic modifier
+    modifier onlyEncryption() {
+        require(useEncryption, "BaseAsterizmClient: only encryption logic");
+        _;
+    }
+
+    /// Set receive transfer modifier
+    /// @param _transferHash bytes32  Transfer hash
+    modifier setReceiveTransfer(bytes32 _transferHash) {
+        _;
+        transfers[_transferHash].successReceive = true;
+    }
+
+    /// Set execute transfer modifier
+    /// @param _transferHash bytes32  Transfer hash
+    modifier setExecuteTransfer(bytes32 _transferHash) {
+        _;
+        transfers[_transferHash].successReceive = true;
+        transfers[_transferHash].successExecute = true;
+    }
+
+    /// Only received transfer modifier
+    /// @param _transferHash bytes32  Transfer hash
+    modifier onlyReceivedTransfer(bytes32 _transferHash) {
+        if (useEncryption) {
+            require(transfers[_transferHash].successReceive, "BaseAsterizmClient: transfer not received");
+        }
+        _;
+    }
+
+    /// Only non-executed transfer modifier
+    /// @param _transferHash bytes32  Transfer hash
+    modifier onlyNonExecuted(bytes32 _transferHash) {
+        require(!transfers[_transferHash].successExecute, "BaseAsterizmClient: transfer executed already");
         _;
     }
 
@@ -109,14 +159,14 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// Add admin (only for owner)
     /// @param _adminAddress address  Admin address
     function addAdmin(address _adminAddress) external onlyOwner {
-        adminsMap[_adminAddress] = true;
+        admins[_adminAddress] = true;
         emit AddAdminEvent(_adminAddress);
     }
 
     /// Remove admin (only for owner)
     /// @param _adminAddress address  Admin address
     function removeAdmin(address _adminAddress) external onlyOwner {
-        delete adminsMap[_adminAddress];
+        delete admins[_adminAddress];
         emit RemoveAdminEvent(_adminAddress);
     }
 
@@ -199,10 +249,12 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
 
     /** External logic */
 
+    /** Sending logic */
+
     /// External initiation transfer
     /// This function needs for external initiating non-encoded payload transfer
     /// @param _dto ClInitTransferRequestDto  Init transfer DTO
-    function initAsterizmTransfer(ClInitTransferRequestDto memory _dto) external payable nonReentrant onlyOwnerOrInitializer {
+    function initAsterizmTransfer(ClInitTransferRequestDto memory _dto) external payable onlyOwner nonReentrant {
         _dto.feeAmount = msg.value;
         _initAsterizmTransferInternal(_dto);
     }
@@ -224,20 +276,47 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
         emit InitiateTransferEvent(_dto.dstChainId, _dto.dstAddress, id, _buildTransferHash(_dto.dstChainId, _dto.dstAddress, id, _dto.payload), _dto.payload);
     }
 
+    /** Receiving logic */
+
+    /// Receive payload from initializer
+    /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
+    function asterizmIzReceive(ClAsterizmReceiveRequestDto calldata _dto) external onlyInitializer nonReentrant {
+        useEncryption ? _asterizmReceiveEncoded(_dto) : _asterizmReceive(_dto);
+    }
+
+    /// Receive payload from client server
+    /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
+    function asterizmClReceive(ClAsterizmReceiveRequestDto calldata _dto) external onlyOwner onlyEncryption nonReentrant {
+        _asterizmReceive(_dto);
+    }
+
     /// Receive non-encoded payload
     /// You must realize this function if you want to transfer non-encoded payload
     /// You must use onlyTrusterSrcAddress modifier!
     /// Validate transferHash with validTransferHash() for more security
     /// For validate transfer you can use onlyTrusterTransfer modifier
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function asterizmReceive(ClAsterizmReceiveRequestDto calldata _dto) public virtual nonReentrant onlyOwnerOrInitializer onlyTrusterSrcAddress(_dto.srcChainId, _dto.srcAddress) onlyTrusterTransfer(_dto.transferHash) {}
+    function _asterizmReceive(ClAsterizmReceiveRequestDto calldata _dto) internal virtual
+        onlyOwnerOrInitializer
+        onlyNonExecuted(_dto.transferHash)
+        onlyReceivedTransfer(_dto.transferHash)
+        onlyTrusterSrcAddress(_dto.srcChainId, _dto.srcAddress)
+        onlyTrusterTransfer(_dto.transferHash)
+        setExecuteTransfer(_dto.transferHash) {}
 
     /// Receive encoded payload
     /// This methos needs for transfer encoded data
     /// You must use onlyTrusterSrcAddress modifier!
     /// For validate transfer you can use onlyTrusterTransfer modifier
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function asterizmReceiveEncoded(ClAsterizmReceiveRequestDto calldata _dto) public nonReentrant onlyOwnerOrInitializer onlyTrusterSrcAddress(_dto.srcChainId, _dto.srcAddress) onlyTrusterTransfer(_dto.transferHash) {
+    function _asterizmReceiveEncoded(ClAsterizmReceiveRequestDto calldata _dto) internal
+        onlyOwnerOrInitializer
+        onlyEncryption
+        onlyNonExecuted(_dto.transferHash)
+        onlyTrusterSrcAddress(_dto.srcChainId, _dto.srcAddress)
+        onlyTrusterTransfer(_dto.transferHash)
+        setReceiveTransfer(_dto.transferHash)
+    {
         require(useEncryption, "BaseAsterizmClient: wrong encryption param");
         emit EncodedPayloadReceivedEvent(_dto.srcChainId, _dto.srcAddress, _dto.nonce, _dto.transferHash, _dto.payload);
     }

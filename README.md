@@ -1,4 +1,4 @@
-# Asterism Protocol contracts
+# Asterism Layer contracts
 
 Run tests:
 ```shell
