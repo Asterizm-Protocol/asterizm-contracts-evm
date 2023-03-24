@@ -256,7 +256,7 @@ describe("Gas sender test", function () {
     await expect(gas_sender1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
         .to.emit(translator1, 'SendMessageEvent')
         .withArgs((value) => {capturedValue = value; return true;});
-    await expect(translator2.transferMessage([300000, capturedValue]))
+    await expect(translator2.transferMessage(300000, capturedValue))
         .to.emit(gas_sender2, 'EncodedPayloadReceivedEvent');
   });
   it("Should not transfer same message second time", async function () {
@@ -336,7 +336,7 @@ describe("Gas sender test", function () {
     expect(decodedValue[8]).to.equal(0); // txId
     expect(decodedValue[9]).to.not.null; // transferHash
     // decodedValue[10] - payload
-    await expect(translator2.transferMessage([300000, capturedValue]))
+    await expect(translator2.transferMessage(300000, capturedValue))
         .to.emit(gas_sender2, 'EncodedPayloadReceivedEvent');
     let payloadValue = ethers.utils.defaultAbiCoder.decode(['address', 'uint', 'uint', 'address', 'uint'], decodedValue[10].toString());
     expect(payloadValue[0]).to.equal(address);
@@ -440,7 +440,7 @@ describe("Gas sender test", function () {
     expect(decodedValue[8]).to.equal(0); // txId
     expect(decodedValue[9]).to.not.null; // transferHash
     // decodedValue[10] - payload
-    await expect(translator2.transferMessage([300000, PacketValue]))
+    await expect(translator2.transferMessage(300000, PacketValue))
         .to.emit(gas_sender2, 'EncodedPayloadReceivedEvent');
     let payloadValue = ethers.utils.defaultAbiCoder.decode(['address', 'uint', 'uint', 'address', 'uint'], decodedValue[10].toString());
     expect(payloadValue[0]).to.equal(address);
@@ -511,7 +511,7 @@ describe("Gas sender test", function () {
     expect(decodedValue[8]).to.equal(1); // txId
     expect(decodedValue[9]).to.not.null; // transferHash
     // decodedValue[10] - payload
-    await expect(translator2.transferMessage([300000, PacketValue]))
+    await expect(translator2.transferMessage(300000, PacketValue))
         .to.emit(gas_sender2, 'EncodedPayloadReceivedEvent');
     payloadValue = ethers.utils.defaultAbiCoder.decode(['address', 'uint', 'uint', 'address', 'uint'], decodedValue[10].toString());
     expect(payloadValue[0]).to.equal(address);
@@ -601,7 +601,7 @@ describe("Gas sender test", function () {
     expect(decodedValue[9]).to.not.null; // transferHash
     // decodedValue[10] - payload
     let psSrcChainId, psSrcAddress, psDstChainId, psDstAddress, psNonce, psTransferHash, psPayload, psReason;
-    await expect(translator2.transferMessage([300000, PacketValue]))
+    await expect(translator2.transferMessage(300000, PacketValue))
         .to.emit(initializer2, 'PayloadErrorEvent')
         .withArgs(
             (value) => {psSrcChainId = value; return true;},

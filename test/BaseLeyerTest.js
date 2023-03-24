@@ -97,7 +97,7 @@ describe("Base layer test", function () {
     await expect(demo1.sendMessage(currentChainIds[1], demo1.address, "New message"))
         .to.emit(translator1, 'SendMessageEvent')
         .withArgs(captureValue)
-    await translator2.transferMessage([300000, capturedValue]);
+    await translator2.transferMessage(300000, capturedValue);
   });
 
   it("Should get exception for decode method not available on initializer", async function () {
@@ -123,7 +123,7 @@ describe("Base layer test", function () {
         .to.emit(translator1, 'SendMessageEvent')
         .withArgs(captureValue);
     const messageBefore = await demo1.externalChainMessage();
-    await translator2.transferMessage([300000, capturedValue]);
+    await translator2.transferMessage(300000, capturedValue);
     expect(await demo1.externalChainMessage()).to.equal(messageBefore);
   });
 
@@ -152,7 +152,7 @@ describe("Base layer test", function () {
         .to.emit(translator1, 'SendMessageEvent')
         .withArgs(captureValue);
     const messageBefore = await demo1.externalChainMessage();
-    await translator2.transferMessage([300000, capturedValue]);
+    await translator2.transferMessage(300000, capturedValue);
     expect(await demo1.externalChainMessage()).to.equal(messageBefore);
   });
 
@@ -167,14 +167,14 @@ describe("Base layer test", function () {
     await expect(demo1.sendMessage(currentChainIds[1], demo2.address, message2))
         .to.emit(translator1, 'SendMessageEvent')
         .withArgs((value) => {capturedValue2 = value; return true;});
-    await expect(translator2.transferMessage([300000, capturedValue2]))
+    await expect(translator2.transferMessage(300000, capturedValue2))
         .to.be.revertedWith("AsterismNonce: wrong nonce");
-    await expect(translator2.transferMessage([300000, capturedValue1]))
+    await expect(translator2.transferMessage(300000, capturedValue1))
         .to.emit(demo2, 'SetExternalChainMessageEvent');
     expect(await demo2.externalChainMessage()).to.equal(message1);
-    await expect(translator2.transferMessage([300000, capturedValue1]))
+    await expect(translator2.transferMessage(300000, capturedValue1))
         .to.be.revertedWith("AsterizmInitializer: message sent already");
-    await expect(translator2.transferMessage([300000, capturedValue2]))
+    await expect(translator2.transferMessage(300000, capturedValue2))
         .to.emit(demo2, 'SetExternalChainMessageEvent');
     expect(await demo2.externalChainMessage()).to.equal(message2);
   });

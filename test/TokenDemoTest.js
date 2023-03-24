@@ -93,7 +93,7 @@ describe("Token contract test", function () {
     expect(await token1.balanceOf(owner.address)).to.equal(
       (TOKEN_AMOUNT.sub(value))
     );
-    const tx = await translator2.transferMessage([300000, capturedValue]);
+    const tx = await translator2.transferMessage(300000, capturedValue);
     expect(await token1.balanceOf(owner.address)).to.equal(
       (TOKEN_AMOUNT.sub(value))
     );
@@ -125,7 +125,7 @@ describe("Token contract test", function () {
     expect(await token1.balanceOf(owner.address)).to.equal(
       (TOKEN_AMOUNT.sub(value))
     );
-    await translator2.transferMessage([300000, capturedValue]);
+    await translator2.transferMessage(300000, capturedValue);
     expect(await token2.balanceOf(owner.address)).to.equal(
       (TOKEN_AMOUNT)
     );
@@ -139,7 +139,7 @@ describe("Token contract test", function () {
     await expect(await claimer1.claim([currentChainIds[1]], amounts, [token1.address]))
       .to.emit(translator1, 'SendMessageEvent')
       .withArgs(captureValue);
-    await translator2.transferMessage([300000, capturedValue]);
+    await translator2.transferMessage(300000, capturedValue);
     expect(await token2.totalSupply()).to.equal(TOKEN_AMOUNT.add(value));
     expect(await token2.balanceOf(owner.address)).to.equal(TOKEN_AMOUNT);
   });
@@ -159,7 +159,7 @@ describe("Token contract test", function () {
     expect(await token1.balanceOf(owner.address)).to.equal(
         (TOKEN_AMOUNT.sub(value))
     );
-    await translator2.transferMessage([300000, capturedValue]);
+    await translator2.transferMessage(300000, capturedValue);
     expect(await token2.balanceOf(owner.address)).to.equal(
         (TOKEN_AMOUNT)
     );

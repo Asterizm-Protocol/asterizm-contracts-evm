@@ -169,10 +169,11 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
         baseTransferMessage(_dto);
     }
 
-    /// Initernal transfer message
-    /// @param _dto TrTransferMessageRequestDto  Method DTO
-    function transferMessage(TrTransferMessageRequestDto calldata _dto) external onlyRelayer {
-        baseTransferMessage(_dto);
+    /// External transfer message
+    /// @param _gasLimit uint  Gas limit
+    /// @param _payload bytes  Payload
+    function transferMessage(uint _gasLimit, bytes calldata _payload) external onlyRelayer {
+        baseTransferMessage(_buildTrTarnsferMessageRequestDto(_gasLimit, _payload));
     }
 
     /// Base transfer message

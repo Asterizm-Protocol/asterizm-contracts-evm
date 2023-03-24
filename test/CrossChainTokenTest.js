@@ -135,7 +135,7 @@ describe("Crosschain token", function () {
     expect(await token1.balanceOf(owner.address)).to.equal(
       (TOKEN_AMOUNT.sub(value))
     );
-    await translator2.transferMessage([300000, capturedValue]);
+    await translator2.transferMessage(300000, capturedValue);
     expect(await token1.balanceOf(owner.address)).to.equal(
       (TOKEN_AMOUNT.sub(value))
     );
