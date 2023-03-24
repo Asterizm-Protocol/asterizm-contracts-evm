@@ -253,7 +253,7 @@ describe("Gas sender test", function () {
     expect(await token1.balanceOf(gas_sender1.address)).to.equal(value);
     expect(await token1.balanceOf(owner.address)).not.to.equal(initial_token_balance);
     let capturedValue;
-    await expect(gas_sender1.initAsterizmTransfer([dstChainId, dstAddress, 0, txId, transferHash, payload]))
+    await expect(gas_sender1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
         .to.emit(translator1, 'SendMessageEvent')
         .withArgs((value) => {capturedValue = value; return true;});
     await expect(translator2.transferMessage([300000, capturedValue]))
@@ -321,7 +321,7 @@ describe("Gas sender test", function () {
     expect(await token1.balanceOf(gas_sender1.address)).to.equal(value);
     expect(await token1.balanceOf(owner.address)).not.to.equal(initial_token_balance);
     let capturedValue;
-    await expect(gas_sender1.initAsterizmTransfer([dstChainId, dstAddress, 0, txId, transferHash, payload]))
+    await expect(gas_sender1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
         .to.emit(translator1, 'SendMessageEvent')
         .withArgs((value) => {capturedValue = value; return true;});
     let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'uint', 'bool', 'bool', 'uint', 'bytes32', 'bytes'], capturedValue);
@@ -345,7 +345,7 @@ describe("Gas sender test", function () {
     expect(payloadValue[3]).to.equal(token1.address);
     expect(payloadValue[4]).to.equal(decimals);
     let finalPayload = decodedValue[10].toString() + hexRate;
-    await gas_sender2.asterizmClReceive([currentChainIds[0], gas_sender1.address, currentChainIds[1], gas_sender2.address, decodedValue[0], decodedValue[8], decodedValue[9], finalPayload]);
+    await gas_sender2.asterizmClReceive(currentChainIds[0], gas_sender1.address, currentChainIds[1], gas_sender2.address, decodedValue[0], decodedValue[8], decodedValue[9], finalPayload);
     expect(await(provider.getBalance(gas_sender2.address))).to.equal(beforeTxGasBalance.sub(valueInUsd * rate));
     expect(await(provider.getBalance(address))).to.equal(beforeTxUserBalance.add(valueInUsd * rate));
     let wrongValue = BigNumber.from(200).mul(pow);
@@ -357,7 +357,7 @@ describe("Gas sender test", function () {
     await gas_sender1.withdrawTokens(token1.address, user1.address, value);
     expect((await gas_sender1.stableCoins(token1.address)).balance).to.equal(0);
     expect(await token1.balanceOf(user1.address)).to.equal(value);
-    await expect(gas_sender2.asterizmClReceive([currentChainIds[0], gas_sender1.address, currentChainIds[1], gas_sender2.address, decodedValue[0], decodedValue[8], decodedValue[9], finalPayload]))
+    await expect(gas_sender2.asterizmClReceive(currentChainIds[0], gas_sender1.address, currentChainIds[1], gas_sender2.address, decodedValue[0], decodedValue[8], decodedValue[9], finalPayload))
         .to.be.revertedWith("BaseAsterizmClient: transfer executed already");
   });
   it("Should send money, receive tokens and withdraw tokens two times", async function () {
@@ -424,7 +424,7 @@ describe("Gas sender test", function () {
     expect(await token1.balanceOf(gas_sender1.address)).to.equal(value);
     expect(await token1.balanceOf(owner.address)).not.to.equal(initial_token_balance);
     let PacketValue;
-    await expect(gas_sender1.initAsterizmTransfer([dstChainId, dstAddress, 0, txId, transferHash, payload]))
+    await expect(gas_sender1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
         .to.emit(translator1, 'SendMessageEvent')
         .withArgs((value) => {PacketValue = value; return true;});
     // Check decoded Packet data
@@ -449,7 +449,7 @@ describe("Gas sender test", function () {
     expect(payloadValue[3]).to.equal(token1.address);
     expect(payloadValue[4]).to.equal(decimals);
     let finalPayload = decodedValue[10].toString() + hexRate;
-    await gas_sender2.asterizmClReceive([currentChainIds[0], gas_sender1.address, currentChainIds[1], gas_sender2.address, decodedValue[0], decodedValue[8], decodedValue[9], finalPayload]);
+    await gas_sender2.asterizmClReceive(currentChainIds[0], gas_sender1.address, currentChainIds[1], gas_sender2.address, decodedValue[0], decodedValue[8], decodedValue[9], finalPayload);
     expect(await(provider.getBalance(gas_sender2.address))).to.equal(beforeTxGasBalance.sub(valueInUsd * rate));
     expect(await(provider.getBalance(address))).to.equal(beforeTxUserBalance.add(valueInUsd * rate));
     let wrongValue = BigNumber.from(200).mul(pow);
@@ -495,7 +495,7 @@ describe("Gas sender test", function () {
     expect(payload).to.equal(gasPayload);
     expect(await token1.balanceOf(gas_sender1.address)).to.equal(value);
     expect(await token1.balanceOf(owner.address)).not.to.equal(initial_token_balance);
-    await expect(gas_sender1.initAsterizmTransfer([dstChainId, dstAddress, 0, txId, transferHash, payload]))
+    await expect(gas_sender1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
         .to.emit(translator1, 'SendMessageEvent')
         .withArgs((value) => {PacketValue = value; return true;});
     // Check decoded Packet data
@@ -520,7 +520,7 @@ describe("Gas sender test", function () {
     expect(payloadValue[3]).to.equal(token1.address);
     expect(payloadValue[4]).to.equal(decimals);
     finalPayload = decodedValue[10].toString() + hexRate;
-    await gas_sender2.asterizmClReceive([currentChainIds[0], gas_sender1.address, currentChainIds[1], gas_sender2.address, decodedValue[0], decodedValue[8], decodedValue[9], finalPayload]);
+    await gas_sender2.asterizmClReceive(currentChainIds[0], gas_sender1.address, currentChainIds[1], gas_sender2.address, decodedValue[0], decodedValue[8], decodedValue[9], finalPayload);
     expect(await(provider.getBalance(gas_sender2.address))).to.equal(beforeTxGasBalance.sub(valueInUsd * rate));
     expect(await(provider.getBalance(address))).to.equal(beforeTxUserBalance.add(valueInUsd * rate));
 
@@ -584,7 +584,7 @@ describe("Gas sender test", function () {
     expect(await token1.balanceOf(gas_sender3.address)).to.equal(value);
     expect(await token1.balanceOf(owner.address)).not.to.equal(initial_token_balance);
     let PacketValue;
-    await expect(gas_sender3.initAsterizmTransfer([dstChainId, dstAddress, 0, txId, transferHash, payload]))
+    await expect(gas_sender3.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
         .to.emit(translator1, 'SendMessageEvent')
         .withArgs((value) => {PacketValue = value; return true;});
     // Check decoded Packet data

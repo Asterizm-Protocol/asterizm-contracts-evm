@@ -253,10 +253,14 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
 
     /// External initiation transfer
     /// This function needs for external initiating non-encoded payload transfer
-    /// @param _dto ClInitTransferRequestDto  Init transfer DTO
-    function initAsterizmTransfer(ClInitTransferRequestDto memory _dto) external payable onlyOwner nonReentrant {
-        _dto.feeAmount = msg.value;
-        _initAsterizmTransferInternal(_dto);
+    /// @param _dstChainId uint64  Destination chain ID
+    /// @param _dstAddress address  Destination address
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _txId uint  Transaction ID
+    /// @param _payload bytes  Payload
+    function initAsterizmTransfer(uint64 _dstChainId, address _dstAddress, uint _txId, bytes32 _transferHash, bytes calldata _payload) external payable onlyOwner nonReentrant {
+        ClInitTransferRequestDto memory dto = _buildClInitTransferRequestDto(_dstChainId, _dstAddress, _txId, _transferHash, msg.value, _payload);
+        _initAsterizmTransferInternal(dto);
     }
 
     /// Internal initiation transfer
@@ -285,14 +289,22 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     }
 
     /// Receive payload from client server
-    /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function asterizmClReceive(ClAsterizmReceiveRequestDto calldata _dto) external onlyOwner onlyEncryption nonReentrant {
-        _asterizmReceiveInternal(_dto);
+    /// @param _srcChainId uint64  Source chain ID
+    /// @param _srcAddress address  Source address
+    /// @param _dstChainId uint64  Destination chain ID
+    /// @param _dstAddress address  Destination address
+    /// @param _nonce uint  Nonce
+    /// @param _txId uint  Transaction ID
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _payload bytes  Payload
+    function asterizmClReceive(uint64 _srcChainId, address _srcAddress, uint64 _dstChainId, address _dstAddress, uint _nonce, uint _txId, bytes32 _transferHash, bytes calldata _payload) external onlyOwner onlyEncryption nonReentrant {
+        ClAsterizmReceiveRequestDto memory dto = _buildClAsterizmReceiveRequestDto(_srcChainId, _srcAddress, _dstChainId, _dstAddress, _nonce, _txId, _transferHash, _payload);
+        _asterizmReceiveInternal(dto);
     }
 
     /// Receive non-encoded payload for internal usage
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function _asterizmReceiveInternal(ClAsterizmReceiveRequestDto calldata _dto) private
+    function _asterizmReceiveInternal(ClAsterizmReceiveRequestDto memory _dto) private
         onlyOwnerOrInitializer
         onlyReceivedTransfer(_dto.transferHash)
         onlyTrusterSrcAddress(_dto.srcChainId, _dto.srcAddress)
@@ -325,5 +337,5 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// Validate transferHash with validTransferHash() for more security
     /// For validate transfer you can use onlyTrusterTransfer modifier
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function _asterizmReceive(ClAsterizmReceiveRequestDto calldata _dto) internal virtual {}
+    function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal virtual {}
 }

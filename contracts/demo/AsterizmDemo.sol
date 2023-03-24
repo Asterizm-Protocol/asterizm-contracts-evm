@@ -40,7 +40,7 @@ contract AsterizmDemo is BaseAsterizmClient {
 
     /// Receive non-encoded payload
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function _asterizmReceive(ClAsterizmReceiveRequestDto calldata _dto) internal override {
+    function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal override {
         require(
             _validTransferHash(_dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.payload, _dto.transferHash),
             "AsterizmDemo: transfer hash is invalid"
