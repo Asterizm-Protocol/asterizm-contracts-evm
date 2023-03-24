@@ -33,9 +33,10 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// @param _srcChainId uint64  Source chain ID
     /// @param _srcAddress address  Source address
     /// @param _nonce uint  Transaction nonce
+    /// @param _txId uint  Transfer ID
     /// @param _transferHash bytes32  Transaction hash
     /// @param _payload bytes  Payload
-    event EncodedPayloadReceivedEvent(uint64 _srcChainId, address _srcAddress, uint _nonce, bytes32 _transferHash, bytes _payload);
+    event EncodedPayloadReceivedEvent(uint64 _srcChainId, address _srcAddress, uint _nonce, uint _txId, bytes32 _transferHash, bytes _payload);
 
     /// Add trusted address event
     /// @param _chainId uint64  Chain ID
@@ -101,7 +102,7 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
 
     /// Only trusted source address modifier
     /// You must add trusted source addresses in production networks!
-    modifier onlyTrusterSrcAddress(uint64 _chainId, address _address) {
+    modifier onlyTrustedSrcAddress(uint64 _chainId, address _address) {
         if (trustedAddressCount > 0) {
             require(trustedSrcAddresses[_chainId] == _address, "BaseAsterizmClient: wrong source address");
         }
@@ -112,7 +113,7 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// Validate transfer hash on initializer
     /// Use this modifier for validate transfer by hash
     /// @param _transferHash bytes32  Transfer hash
-    modifier onlyTrusterTransfer(bytes32 _transferHash) {
+    modifier onlyTrustedTransfer(bytes32 _transferHash) {
         require(initializerLib.validIncomeTarnsferHash(_transferHash), "BaseAsterizmClient: transfer hash is invalid");
         _;
     }
@@ -307,8 +308,8 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     function _asterizmReceiveInternal(ClAsterizmReceiveRequestDto memory _dto) private
         onlyOwnerOrInitializer
         onlyReceivedTransfer(_dto.transferHash)
-        onlyTrusterSrcAddress(_dto.srcChainId, _dto.srcAddress)
-        onlyTrusterTransfer(_dto.transferHash)
+        onlyTrustedSrcAddress(_dto.srcChainId, _dto.srcAddress)
+        onlyTrustedTransfer(_dto.transferHash)
         onlyNonExecuted(_dto.transferHash)
         setExecuteTransfer(_dto.transferHash) {
         _asterizmReceive(_dto);
@@ -316,26 +317,26 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
 
     /// Receive encoded payload
     /// This methos needs for transfer encoded data
-    /// You must use onlyTrusterSrcAddress modifier!
-    /// For validate transfer you can use onlyTrusterTransfer modifier
+    /// You must use onlyTrustedSrcAddress modifier!
+    /// For validate transfer you can use onlyTrustedTransfer modifier
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function _asterizmReceiveEncoded(ClAsterizmReceiveRequestDto calldata _dto) internal
         onlyOwnerOrInitializer
         onlyEncryption
-        onlyTrusterSrcAddress(_dto.srcChainId, _dto.srcAddress)
-        onlyTrusterTransfer(_dto.transferHash)
+        onlyTrustedSrcAddress(_dto.srcChainId, _dto.srcAddress)
+        onlyTrustedTransfer(_dto.transferHash)
         onlyNonExecuted(_dto.transferHash)
         setReceiveTransfer(_dto.transferHash)
     {
         require(useEncryption, "BaseAsterizmClient: wrong encryption param");
-        emit EncodedPayloadReceivedEvent(_dto.srcChainId, _dto.srcAddress, _dto.nonce, _dto.transferHash, _dto.payload);
+        emit EncodedPayloadReceivedEvent(_dto.srcChainId, _dto.srcAddress, _dto.nonce, _dto.txId, _dto.transferHash, _dto.payload);
     }
 
     /// Receive non-encoded payload
     /// You must realize this function if you want to transfer non-encoded payload
-    /// You must use onlyTrusterSrcAddress modifier!
+    /// You must use onlyTrustedSrcAddress modifier!
     /// Validate transferHash with validTransferHash() for more security
-    /// For validate transfer you can use onlyTrusterTransfer modifier
+    /// For validate transfer you can use onlyTrustedTransfer modifier
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal virtual {}
 }

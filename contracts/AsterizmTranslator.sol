@@ -166,19 +166,19 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
     /// Initernal transfer message (for transfers in one chain)
     /// @param _dto TrTransferMessageRequestDto  Method DTO
     function _internalTransferMessage(TrTransferMessageRequestDto memory _dto) private {
-        baseTransferMessage(_dto);
+        _baseTransferMessage(_dto);
     }
 
     /// External transfer message
     /// @param _gasLimit uint  Gas limit
     /// @param _payload bytes  Payload
     function transferMessage(uint _gasLimit, bytes calldata _payload) external onlyRelayer {
-        baseTransferMessage(_buildTrTarnsferMessageRequestDto(_gasLimit, _payload));
+        _baseTransferMessage(_buildTrTarnsferMessageRequestDto(_gasLimit, _payload));
     }
 
     /// Base transfer message
     /// @param _dto TrTransferMessageRequestDto  Method DTO
-    function baseTransferMessage(TrTransferMessageRequestDto memory _dto) private {
+    function _baseTransferMessage(TrTransferMessageRequestDto memory _dto) private {
         bytes memory pl = _dto.payload;
         (
             uint nonce, uint64 srcChainId, address srcAddress, uint64 dstChainId,
