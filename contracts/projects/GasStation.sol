@@ -142,7 +142,7 @@ contract GasStation is BaseAsterizmClient {
     function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal override {
         (address payable dstAddress, uint amount, uint txId , address tokenAddress, uint decimals, uint stableRate) = abi.decode(_dto.payload, (address, uint, uint, address, uint, uint));
         require(
-            _validTransferHash(_dto.dstChainId, _dto.dstAddress, _dto.txId, abi.encode(dstAddress, amount, txId, tokenAddress, decimals), _dto.transferHash),
+            _validTransferHash(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.txId, abi.encode(dstAddress, amount, txId, tokenAddress, decimals), _dto.transferHash),
             "GasStation: transfer hash is invalid"
         );
         uint amountToSend = amount.mul(stableRate).div(10 ** decimals);

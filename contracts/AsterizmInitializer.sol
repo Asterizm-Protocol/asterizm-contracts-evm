@@ -147,6 +147,12 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
         return sendedTransfers[_transferHash].successOutgoing;
     }
 
+    /// Return local chain id
+    /// @return uint64
+    function getLocalChainId() external view returns(uint64) {
+        return translatorLib.getLocalChainId();
+    }
+
     /// Initiate asterizm transfer
     /// Only clients can call this method
     /// @param _dto IzIninTransferRequestDto  Method DTO

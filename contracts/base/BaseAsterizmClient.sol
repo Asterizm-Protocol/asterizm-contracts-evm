@@ -21,6 +21,10 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// @param _initializerAddress address  Initializer address
     event SetInitializerEvent(address _initializerAddress);
 
+    /// Set local chain id event
+    /// @param _localChainId uint64
+    event SetLocalChainIdEvent(uint64 _localChainId);
+
     /// Initiate transfer event (for client server logic)
     /// @param _dstChainId uint64  Destination chein ID
     /// @param _dstAddress address  Destination address
@@ -69,9 +73,11 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     bool private useEncryption;
     bool private useForceOrder;
     uint private txId;
+    uint64 private localChainId;
 
     constructor(IInitializerSender _initializerLib, bool _useEncryption, bool _useForceOrder) {
         _setInitializer(_initializerLib);
+        _setLocalChainId(initializerLib.getLocalChainId());
         _setUseEncryption(_useEncryption);
         _setUseForceOrder(_useForceOrder);
     }
@@ -178,6 +184,13 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
         emit SetInitializerEvent(address(_initializerLib));
     }
 
+    /// Set local chain id library
+    /// _localChainId uint64
+    function _setLocalChainId(uint64 _localChainId) private onlyOwner {
+        localChainId = _localChainId;
+        emit SetLocalChainIdEvent(_localChainId);
+    }
+
     /// Set use encryption flag
     /// _flag bool  Use encryption flag
     function _setUseEncryption(bool _flag) private onlyOwner {
@@ -224,28 +237,38 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     }
 
     /// Build transfer hash
-    /// @param _chainId uint64  Chain ID
-    /// @param _address address  Address
+    /// @param _srcChainId uint64  Chain ID
+    /// @param _srcAddress address  Address
+    /// @param _dstChainId uint64  Chain ID
+    /// @param _dstAddress address  Address
     /// @param _txId uint  Transaction ID
     /// @param _payload bytes  Payload
-    function _buildTransferHash(uint64 _chainId, address _address, uint _txId, bytes memory _payload) internal pure returns(bytes32) {
-        return keccak256(abi.encode(_chainId, _address, _txId, _payload));
+    function _buildTransferHash(uint64 _srcChainId, address _srcAddress, uint64 _dstChainId, address _dstAddress, uint _txId, bytes memory _payload) internal pure returns(bytes32) {
+        return keccak256(abi.encode(_srcChainId, _srcAddress, _dstChainId, _dstAddress, _txId, _payload));
     }
 
     /// Check is transfer hash valid
-    /// @param _chainId uint64  Chain ID
-    /// @param _address address  Address
+    /// @param _srcChainId uint64  Chain ID
+    /// @param _srcAddress address  Address
+    /// @param _dstChainId uint64  Chain ID
+    /// @param _dstAddress address  Address
     /// @param _txId uint  Transaction ID
     /// @param _payload bytes  Payload
     /// @param _transferHash bytes32  Transfer hash
-    function _validTransferHash(uint64 _chainId, address _address, uint _txId, bytes memory _payload, bytes32 _transferHash) internal pure returns(bool) {
-        return _buildTransferHash(_chainId, _address, _txId, _payload) == _transferHash;
+    function _validTransferHash(uint64 _srcChainId, address _srcAddress, uint64 _dstChainId, address _dstAddress, uint _txId, bytes memory _payload, bytes32 _transferHash) internal pure returns(bool) {
+        return _buildTransferHash(_srcChainId, _srcAddress, _dstChainId, _dstAddress, _txId, _payload) == _transferHash;
     }
 
     /// Return txId
     /// @return uint
     function _getTxId() internal view returns(uint) {
         return txId;
+    }
+
+    /// Return local chain id
+    /// @return uint64
+    function _getLocalChainId() internal view returns(uint64) {
+        return localChainId;
     }
 
     /** External logic */
@@ -278,7 +301,13 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// @param _dto ClInitTransferEventDto  Init transfer DTO
     function _initAsterizmTransferEvent(ClInitTransferEventDto memory _dto) internal {
         uint id = txId++;
-        emit InitiateTransferEvent(_dto.dstChainId, _dto.dstAddress, id, _buildTransferHash(_dto.dstChainId, _dto.dstAddress, id, _dto.payload), _dto.payload);
+        emit InitiateTransferEvent(
+            _dto.dstChainId,
+            _dto.dstAddress,
+            id,
+            _buildTransferHash(_getLocalChainId(), address(this), _dto.dstChainId, _dto.dstAddress, id, _dto.payload),
+            _dto.payload
+        );
     }
 
     /** Receiving logic */

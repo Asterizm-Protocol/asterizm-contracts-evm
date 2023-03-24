@@ -140,6 +140,12 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
 
     /** External logic */
 
+    /// Return local chain id
+    /// @return uint64
+    function getLocalChainId() external view returns(uint64) {
+        return localChainId;
+    }
+
     /// Send transfer payload
     /// @param _dto TrSendMessageRequestDto  Method DTO
     function sendMessage(TrSendMessageRequestDto calldata _dto) external payable onlyInitializer {

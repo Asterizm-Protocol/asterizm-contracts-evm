@@ -43,7 +43,7 @@ contract MultichainToken is IMultiChainToken, ERC20, BaseAsterizmClient {
             _dstChainId,
             _target,
             _getTxId(),
-            _buildTransferHash(_dstChainId, _target, _getTxId(), payload),
+            _buildTransferHash(_getLocalChainId(), address(this), _dstChainId, _target, _getTxId(), payload),
             msg.value,
             payload
         ));
@@ -77,7 +77,7 @@ contract MultichainToken is IMultiChainToken, ERC20, BaseAsterizmClient {
             crosschainTransfers[_id].destChain,
             crosschainTransfers[_id].target,
             _getTxId(),
-            _buildTransferHash(crosschainTransfers[_id].destChain, crosschainTransfers[_id].target, _getTxId(), _payload),
+            _buildTransferHash(_getLocalChainId(), address(this), crosschainTransfers[_id].destChain, crosschainTransfers[_id].target, _getTxId(), _payload),
             msg.value,
             _payload
         ));
@@ -89,7 +89,7 @@ contract MultichainToken is IMultiChainToken, ERC20, BaseAsterizmClient {
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal override {
         require(
-            _validTransferHash(_dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.payload, _dto.transferHash),
+            _validTransferHash(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.payload, _dto.transferHash),
             "MultichainToken: transfer hash is invalid"
         );
         (address dstAddress, uint amount, ) = abi.decode(_dto.payload, (address, uint, uint));

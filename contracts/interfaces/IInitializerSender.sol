@@ -17,4 +17,8 @@ interface IInitializerSender is IAsterizmEnv {
     /// Validate outhoing transfer by hash
     /// @param _transferHash bytes32
     function validOutgoingTarnsferHash(bytes32 _transferHash) external view returns(bool);
+
+    /// Return local chain id
+    /// @return uint64
+    function getLocalChainId() external view returns(uint64);
 }
