@@ -21,7 +21,7 @@ contract MultichainToken is IMultiChainToken, ERC20, BaseAsterizmClient {
         address target;
     }
 
-    mapping (uint => CrossChainTransfer) public transfers;
+    mapping (uint => CrossChainTransfer) public crosschainTransfers;
 
     constructor(IInitializerSender _initializerLib, uint _initialSupply)
     ERC20("CrossToken", "CTN")
@@ -56,13 +56,13 @@ contract MultichainToken is IMultiChainToken, ERC20, BaseAsterizmClient {
     /// @param _target address  Target address
     function crossChainEncodedTransferFirstStep(uint64 _dstChainId, address _from, address _to, uint _amount, address _target) public {
         uint transferId = _getTxId();
-        require(!transfers[transferId].exists, "MultichainToken: transaction already exists");
-        transfers[transferId].exists = true;
-        transfers[transferId].destChain = _dstChainId;
-        transfers[transferId].from = _from;
-        transfers[transferId].to = _to;
-        transfers[transferId].amount = _amount;
-        transfers[transferId].target = _target;
+        require(!crosschainTransfers[transferId].exists, "MultichainToken: transaction already exists");
+        crosschainTransfers[transferId].exists = true;
+        crosschainTransfers[transferId].destChain = _dstChainId;
+        crosschainTransfers[transferId].from = _from;
+        crosschainTransfers[transferId].to = _to;
+        crosschainTransfers[transferId].amount = _amount;
+        crosschainTransfers[transferId].target = _target;
         emit CrossChainTransferReceived(transferId, _dstChainId, _from, _to, _amount, transferId, _target);
     }
 
@@ -70,18 +70,18 @@ contract MultichainToken is IMultiChainToken, ERC20, BaseAsterizmClient {
     /// @param _id uint  Transfer ID
     /// @param _payload bytes  Payload
     function crossChainEncodedTransferSecondStep(uint _id, bytes calldata _payload) public payable onlyOwner {
-        require(transfers[_id].exists, "MultichainToken: wrong transfer ID");
-        uint amount = _debitFrom(transfers[_id].from, transfers[_id].amount); // amount returned should not have dust
+        require(crosschainTransfers[_id].exists, "MultichainToken: wrong transfer ID");
+        uint amount = _debitFrom(crosschainTransfers[_id].from, crosschainTransfers[_id].amount); // amount returned should not have dust
         require(amount > 0, "MultichainToken: amount too small");
         _initAsterizmTransferInternal(_buildClInitTransferRequestDto(
-            transfers[_id].destChain,
-            transfers[_id].target,
+            crosschainTransfers[_id].destChain,
+            crosschainTransfers[_id].target,
             _getTxId(),
-            _buildTransferHash(transfers[_id].destChain, transfers[_id].target, _getTxId(), _payload),
+            _buildTransferHash(crosschainTransfers[_id].destChain, crosschainTransfers[_id].target, _getTxId(), _payload),
             msg.value,
             _payload
         ));
-        delete transfers[_id];
+        delete crosschainTransfers[_id];
         emit CrossChainTransferCompleted(_id);
     }
 

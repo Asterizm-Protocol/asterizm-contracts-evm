@@ -281,28 +281,26 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// Receive payload from initializer
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function asterizmIzReceive(ClAsterizmReceiveRequestDto calldata _dto) external onlyInitializer nonReentrant {
-        useEncryption ? _asterizmReceiveEncoded(_dto) : _asterizmReceive(_dto);
+        useEncryption ? _asterizmReceiveEncoded(_dto) : _asterizmReceiveInternal(_dto);
     }
 
     /// Receive payload from client server
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function asterizmClReceive(ClAsterizmReceiveRequestDto calldata _dto) external onlyOwner onlyEncryption nonReentrant {
-        _asterizmReceive(_dto);
+        _asterizmReceiveInternal(_dto);
     }
 
-    /// Receive non-encoded payload
-    /// You must realize this function if you want to transfer non-encoded payload
-    /// You must use onlyTrusterSrcAddress modifier!
-    /// Validate transferHash with validTransferHash() for more security
-    /// For validate transfer you can use onlyTrusterTransfer modifier
+    /// Receive non-encoded payload for internal usage
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function _asterizmReceive(ClAsterizmReceiveRequestDto calldata _dto) internal virtual
+    function _asterizmReceiveInternal(ClAsterizmReceiveRequestDto calldata _dto) private
         onlyOwnerOrInitializer
-        onlyNonExecuted(_dto.transferHash)
         onlyReceivedTransfer(_dto.transferHash)
         onlyTrusterSrcAddress(_dto.srcChainId, _dto.srcAddress)
         onlyTrusterTransfer(_dto.transferHash)
-        setExecuteTransfer(_dto.transferHash) {}
+        onlyNonExecuted(_dto.transferHash)
+        setExecuteTransfer(_dto.transferHash) {
+        _asterizmReceive(_dto);
+    }
 
     /// Receive encoded payload
     /// This methos needs for transfer encoded data
@@ -312,12 +310,20 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     function _asterizmReceiveEncoded(ClAsterizmReceiveRequestDto calldata _dto) internal
         onlyOwnerOrInitializer
         onlyEncryption
-        onlyNonExecuted(_dto.transferHash)
         onlyTrusterSrcAddress(_dto.srcChainId, _dto.srcAddress)
         onlyTrusterTransfer(_dto.transferHash)
+        onlyNonExecuted(_dto.transferHash)
         setReceiveTransfer(_dto.transferHash)
     {
         require(useEncryption, "BaseAsterizmClient: wrong encryption param");
         emit EncodedPayloadReceivedEvent(_dto.srcChainId, _dto.srcAddress, _dto.nonce, _dto.transferHash, _dto.payload);
     }
+
+    /// Receive non-encoded payload
+    /// You must realize this function if you want to transfer non-encoded payload
+    /// You must use onlyTrusterSrcAddress modifier!
+    /// Validate transferHash with validTransferHash() for more security
+    /// For validate transfer you can use onlyTrusterTransfer modifier
+    /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
+    function _asterizmReceive(ClAsterizmReceiveRequestDto calldata _dto) internal virtual {}
 }
