@@ -12,11 +12,11 @@ interface IInitializerSender is IAsterizmEnv {
 
     /// Validate income transfer by hash
     /// @param _transferHash bytes32
-    function validIncomeTarnsferHash(bytes32 _transferHash) external view returns(bool);
+    function validIncomeTransferHash(bytes32 _transferHash) external view returns(bool);
 
     /// Validate outhoing transfer by hash
     /// @param _transferHash bytes32
-    function validOutgoingTarnsferHash(bytes32 _transferHash) external view returns(bool);
+    function validOutgoingTransferHash(bytes32 _transferHash) external view returns(bool);
 
     /// Return local chain id
     /// @return uint64

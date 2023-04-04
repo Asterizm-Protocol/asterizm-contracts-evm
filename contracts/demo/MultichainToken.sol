@@ -25,7 +25,7 @@ contract MultichainToken is IMultiChainToken, ERC20, BaseAsterizmClient {
 
     constructor(IInitializerSender _initializerLib, uint _initialSupply)
     ERC20("CrossToken", "CTN")
-    BaseAsterizmClient(_initializerLib, false, true)
+    BaseAsterizmClient(_initializerLib, true)
     {
         _mint(_msgSender(), _initialSupply);
     }
@@ -39,11 +39,9 @@ contract MultichainToken is IMultiChainToken, ERC20, BaseAsterizmClient {
         uint amount = _debitFrom(_from, _amount); // amount returned should not have dust
         require(amount > 0, "MultichainToken: amount too small");
         bytes memory payload = abi.encode(_to, amount, _getTxId());
-        _initAsterizmTransferInternal(_buildClInitTransferRequestDto(
+        _initAsterizmTransferClient(_buildInternalClInitTransferRequestDto(
             _dstChainId,
             _target,
-            _getTxId(),
-            _buildTransferHash(_getLocalChainId(), address(this), _dstChainId, _target, _getTxId(), payload),
             msg.value,
             payload
         ));
@@ -73,11 +71,9 @@ contract MultichainToken is IMultiChainToken, ERC20, BaseAsterizmClient {
         require(crosschainTransfers[_id].exists, "MultichainToken: wrong transfer ID");
         uint amount = _debitFrom(crosschainTransfers[_id].from, crosschainTransfers[_id].amount); // amount returned should not have dust
         require(amount > 0, "MultichainToken: amount too small");
-        _initAsterizmTransferInternal(_buildClInitTransferRequestDto(
+        _initAsterizmTransferClient(_buildInternalClInitTransferRequestDto(
             crosschainTransfers[_id].destChain,
             crosschainTransfers[_id].target,
-            _getTxId(),
-            _buildTransferHash(_getLocalChainId(), address(this), crosschainTransfers[_id].destChain, crosschainTransfers[_id].target, _getTxId(), _payload),
             msg.value,
             _payload
         ));
@@ -87,7 +83,7 @@ contract MultichainToken is IMultiChainToken, ERC20, BaseAsterizmClient {
 
     /// Receive non-encoded payload
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal override {
+    function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal override onlyValidTransferHash(_dto) {
         require(
             _validTransferHash(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.payload, _dto.transferHash),
             "MultichainToken: transfer hash is invalid"

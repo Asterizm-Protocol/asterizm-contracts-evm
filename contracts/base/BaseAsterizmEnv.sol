@@ -44,6 +44,22 @@ abstract contract BaseAsterizmEnv is IAsterizmEnv {
         return dto;
     }
 
+    /// Build iuntrnal client initiation transfer request DTO
+    /// @param _dstChainId uint64  Destination chain ID
+    /// @param _dstAddress address  Destination address
+    /// @param _feeAmount uint  Fee amount
+    /// @param _payload bytes  Payload
+    /// @return InternalClInitTransferRequestDto
+    function _buildInternalClInitTransferRequestDto(uint64 _dstChainId, address _dstAddress, uint _feeAmount, bytes memory _payload) internal pure returns(InternalClInitTransferRequestDto memory) {
+        InternalClInitTransferRequestDto memory dto;
+        dto.dstChainId = _dstChainId;
+        dto.dstAddress = _dstAddress;
+        dto.feeAmount = _feeAmount;
+        dto.payload = _payload;
+
+        return dto;
+    }
+
     /// Build client initiation transfer event DTO
     /// @param _dstChainId uint64  Destination chain ID
     /// @param _dstAddress address  Destination address
@@ -63,14 +79,13 @@ abstract contract BaseAsterizmEnv is IAsterizmEnv {
     /// @param _dstChainId uint64  Destination chain ID
     /// @param _dstAddress address  Destination address
     /// @param _nonce uint  Nonce
-    /// @param _useEncryption bool  Use encryption flag
     /// @param _forceOrder bool  Force order flag
     /// @param _txId uint  Transaction ID
     /// @param _transferHash bytes32  Transfer hash
     /// @param _payload bytes  Payload
     /// @return TrSendMessageRequestDto
     function _buildTrSendMessageRequestDto(
-        address _srcAddress, uint64 _dstChainId, address _dstAddress, uint _nonce, bool _useEncryption,
+        address _srcAddress, uint64 _dstChainId, address _dstAddress, uint _nonce,
         bool _forceOrder, uint _txId, bytes32 _transferHash, bytes calldata _payload
     ) internal pure returns(TrSendMessageRequestDto memory) {
         TrSendMessageRequestDto memory dto;
@@ -78,7 +93,6 @@ abstract contract BaseAsterizmEnv is IAsterizmEnv {
         dto.dstChainId = _dstChainId;
         dto.dstAddress = _dstAddress;
         dto.nonce = _nonce;
-        dto.useEncryption = _useEncryption;
         dto.forceOrder = _forceOrder;
         dto.txId = _txId;
         dto.transferHash = _transferHash;
@@ -104,17 +118,15 @@ abstract contract BaseAsterizmEnv is IAsterizmEnv {
     /// @param _dstAddress address  Destination address
     /// @param _txId uint  Transaction ID
     /// @param _transferHash bytes32  Transfer hash
-    /// @param _useEncryption bool  Use encrypttion flag
     /// @param _useForceOrder bool  Use force order flag
     /// @param _payload bytes  Payload
     /// @return IzIninTransferRequestDto
-    function _buildIzIninTransferRequestDto(uint64 _dstChainId, address _dstAddress, uint _txId, bytes32 _transferHash, bool _useEncryption, bool _useForceOrder, bytes memory _payload) internal pure returns(IzIninTransferRequestDto memory) {
+    function _buildIzIninTransferRequestDto(uint64 _dstChainId, address _dstAddress, uint _txId, bytes32 _transferHash, bool _useForceOrder, bytes memory _payload) internal pure returns(IzIninTransferRequestDto memory) {
         IzIninTransferRequestDto memory dto;
         dto.dstChainId = _dstChainId;
         dto.dstAddress = _dstAddress;
         dto.txId = _txId;
         dto.transferHash = _transferHash;
-        dto.useEncryption = _useEncryption;
         dto.useForceOrder = _useForceOrder;
         dto.payload = _payload;
 

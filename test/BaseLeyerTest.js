@@ -27,8 +27,6 @@ describe("Base layer test", function () {
     // Initializer1 deployment
     const initializer1 = await Initializer.deploy(translator1.address);
     await initializer1.deployed();
-    await initializer1.setIsDecSendAvailable(true);
-    await initializer1.setIsEncSendAvailable(true);
     // Initializer Nonce deployment
     const outboundInitializer1Nonce = await Nonce.deploy(initializer1.address);
     await outboundInitializer1Nonce.deployed();
@@ -40,8 +38,6 @@ describe("Base layer test", function () {
     // Initializer2 deployment
     const initializer2 = await Initializer.deploy(translator2.address);
     await initializer2.deployed();
-    await initializer2.setIsDecSendAvailable(true);
-    await initializer2.setIsEncSendAvailable(true);
     // Initializer Nonce deployment
     const outboundInitializer2Nonce = await Nonce.deploy(initializer2.address);
     await outboundInitializer2Nonce.deployed();
@@ -100,16 +96,6 @@ describe("Base layer test", function () {
     await translator2.transferMessage(300000, capturedValue);
   });
 
-  it("Should get exception for decode method not available on initializer", async function () {
-    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Demo, demo1, demo2, owner1, owner2, currentChainIds } = await loadFixture(deployContractsFixture);
-    await initializer1.setIsDecSendAvailable(false);
-    expect(await initializer1.isDecSendAvailable()).to.equal(false);
-    await expect(demo1.sendMessage(currentChainIds[1], demo1.address, "New message"))
-        .to.be.revertedWith("AsterizmInitializer: decode transfer is unavailable");
-    await initializer1.setIsDecSendAvailable(true);
-    expect(await initializer1.isDecSendAvailable()).to.equal(true);
-  });
-
   it("Should send message from packet to Initializer", async function () {
     let capturedValue
     const captureValue = (value) => {
@@ -156,29 +142,6 @@ describe("Base layer test", function () {
     expect(await demo1.externalChainMessage()).to.equal(messageBefore);
   });
 
-  it("Should nonce and duplicate transfers validation is working", async function () {
-    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Demo, demo1, demo2, owner1, owner2, currentChainIds } = await loadFixture(deployContractsFixture);
-    let capturedValue1, capturedValue2;
-    const message1 = 'New message 1';
-    const message2 = 'New message 2';
-    await expect(demo1.sendMessage(currentChainIds[1], demo2.address, message1))
-        .to.emit(translator1, 'SendMessageEvent')
-        .withArgs((value) => {capturedValue1 = value; return true;});
-    await expect(demo1.sendMessage(currentChainIds[1], demo2.address, message2))
-        .to.emit(translator1, 'SendMessageEvent')
-        .withArgs((value) => {capturedValue2 = value; return true;});
-    await expect(translator2.transferMessage(300000, capturedValue2))
-        .to.be.revertedWith("AsterismNonce: wrong nonce");
-    await expect(translator2.transferMessage(300000, capturedValue1))
-        .to.emit(demo2, 'SetExternalChainMessageEvent');
-    expect(await demo2.externalChainMessage()).to.equal(message1);
-    await expect(translator2.transferMessage(300000, capturedValue1))
-        .to.be.revertedWith("AsterizmInitializer: message sent already");
-    await expect(translator2.transferMessage(300000, capturedValue2))
-        .to.emit(demo2, 'SetExternalChainMessageEvent');
-    expect(await demo2.externalChainMessage()).to.equal(message2);
-  });
-
   it("Should send message with fee", async function () {
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Demo, demo1, demo2, owner1, owner2, currentChainIds } = await loadFixture(deployContractsFixture);
     const provider = ethers.provider;
@@ -191,18 +154,17 @@ describe("Base layer test", function () {
     await expect(demo1.sendMessage(currentChainIds[1], demo2.address, "New message", {value: feeAmount}))
         .to.emit(translator1, 'SendMessageEvent')
         .withArgs((value) => {capturedValue = value; return true;});
-    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'uint', 'bool', 'bool', 'uint', 'bytes32', 'bytes'], capturedValue);
+    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], capturedValue);
     // decodedValue[0] - nonce
     expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
     expect(decodedValue[2]).to.equal(demo1.address); // srcAddress
     expect(decodedValue[3]).to.equal(currentChainIds[1]); // dstChainId
     expect(decodedValue[4]).to.equal(demo2.address); // dstAddress
     expect(decodedValue[5]).to.equal(feeAmount); // feeValue
-    expect(decodedValue[6]).to.equal(false); // useEncryption
-    expect(decodedValue[7]).to.equal(true); // useForceOrder
-    expect(decodedValue[8]).to.equal(0); // txId
-    expect(decodedValue[9]).to.not.null; // transferHash
-    // decodedValue[10] - payload
+    expect(decodedValue[6]).to.equal(true); // useForceOrder
+    expect(decodedValue[7]).to.equal(0); // txId
+    expect(decodedValue[8]).to.not.null; // transferHash
+    // decodedValue[9] - payload
     expect(await provider.getBalance(demo1.address)).to.equal(0);
     expect(await provider.getBalance(translator1.address)).to.equal(0);
     expect(await provider.getBalance(owner2.address)).to.equal(owner2BalanceBefore.add(feeAmount));

@@ -67,8 +67,6 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
     INonce private inboundNonce;
     INonce private outboundNonce;
     ITranslator private translatorLib;
-    bool public isDecSendAvailable;
-    bool public isEncSendAvailable;
     mapping(address => bool) public blockAddresses;
     mapping(bytes32 => SendedTransfer) private sendedTransfers;
 
@@ -105,20 +103,6 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
         emit SetInBoundNonceEvent(address(_nonce));
     }
 
-    /// Set decription send available flag
-    /// @param _value bool  Available flag
-    function setIsDecSendAvailable(bool _value) external onlyOwner {
-        isDecSendAvailable = _value;
-        emit SetDecriptionSendAvailableEvent(_value);
-    }
-
-    /// Set encription send available flag
-    /// @param _value bool  Available flag
-    function setIsEncSendAvailable(bool _value) external onlyOwner {
-        isEncSendAvailable = _value;
-        emit SetEncriptionSendAvailableEvent(_value);
-    }
-
     /// Block address
     /// @param _address address  Available flag
     function addBlockAddress(address _address) external onlyOwner {
@@ -137,13 +121,13 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
 
     /// Validate income transfer by hash
     /// @param _transferHash bytes32
-    function validIncomeTarnsferHash(bytes32 _transferHash) external view returns(bool) {
+    function validIncomeTransferHash(bytes32 _transferHash) external view returns(bool) {
         return sendedTransfers[_transferHash].successIncome;
     }
 
     /// Validate outhoing transfer by hash
     /// @param _transferHash bytes32
-    function validOutgoingTarnsferHash(bytes32 _transferHash) external view returns(bool) {
+    function validOutgoingTransferHash(bytes32 _transferHash) external view returns(bool) {
         return sendedTransfers[_transferHash].successOutgoing;
     }
 
@@ -159,13 +143,10 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
     function initTransfer(IzIninTransferRequestDto calldata _dto) external payable {
         require(!blockAddresses[msg.sender], "AsterizmInitializer: sender address is blocked");
         require(!blockAddresses[_dto.dstAddress], "AsterizmInitializer: target address is blocked");
-        _dto.useEncryption ?
-            require(isEncSendAvailable, "AsterizmInitializer: encode transfer is unavailable") :
-            require(isDecSendAvailable, "AsterizmInitializer: decode transfer is unavailable");
 
         TrSendMessageRequestDto memory dto = _buildTrSendMessageRequestDto(
             msg.sender, _dto.dstChainId, _dto.dstAddress, _dto.useForceOrder ? outboundNonce.increaseNonce(_dto.dstChainId, abi.encodePacked(msg.sender, _dto.dstAddress)) : 0,
-            _dto.useEncryption, _dto.useForceOrder, _dto.txId, _dto.transferHash, _dto.payload
+            _dto.useForceOrder, _dto.txId, _dto.transferHash, _dto.payload
         );
         translatorLib.sendMessage{value: msg.value}(dto);
     }
@@ -174,7 +155,6 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
     /// @param _dto IzReceivePayloadRequestDto  Method DTO
     function receivePayload(IzReceivePayloadRequestDto calldata _dto) external onlyTranslator {
         require(!blockAddresses[_dto.dstAddress], "AsterizmInitializer: target address is blocked");
-        require(!sendedTransfers[_dto.transferHash].successIncome, "AsterizmInitializer: message sent already");
         if (_dto.forceOrder) {
             require(
                 inboundNonce.increaseNonceWithValidation(_dto.srcChainId, abi.encodePacked(_dto.srcAddress, _dto.dstAddress), _dto.nonce) == _dto.nonce,

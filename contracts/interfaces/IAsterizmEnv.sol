@@ -31,6 +31,20 @@ interface IAsterizmEnv {
         bytes payload;
     }
 
+    /// Internal client initiation transfer request DTO
+    /// @param dstChainId uint64  Destination chain ID
+    /// @param dstAddress address  Destination address
+    /// @param feeAmount uint  Fee amount
+    /// @param txId uint  Transaction ID
+    /// @param transferHash bytes32  Transfer hash
+    /// @param payload bytes  Payload
+    struct InternalClInitTransferRequestDto {
+        uint64 dstChainId;
+        address dstAddress;
+        uint feeAmount;
+        bytes payload;
+    }
+
     /// Client initiation transfer event DTO
     /// @param dstChainId uint64  Destination chain ID
     /// @param dstAddress address  Destination address
@@ -77,7 +91,6 @@ interface IAsterizmEnv {
         uint64 dstChainId;
         address dstAddress;
         uint nonce;
-        bool useEncryption;
         bool forceOrder;
         uint txId;
         bytes32 transferHash;
@@ -102,7 +115,6 @@ interface IAsterizmEnv {
         uint64 dstChainId;
         address dstAddress;
         bytes32 transferHash;
-        bool useEncryption;
         bool useForceOrder;
         uint txId;
         bytes payload;

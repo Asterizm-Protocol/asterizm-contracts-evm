@@ -157,7 +157,7 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
 
         bytes memory payload = abi.encode(
             _dto.nonce, localChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress,
-            msg.value, _dto.useEncryption, _dto.forceOrder, _dto.txId, _dto.transferHash, _dto.payload
+            msg.value, _dto.forceOrder, _dto.txId, _dto.transferHash, _dto.payload
         );
         if (_dto.dstChainId == localChainId) {
             TrTransferMessageRequestDto memory dto = _buildTrTarnsferMessageRequestDto(gasleft(), payload);
@@ -188,11 +188,11 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
         bytes memory pl = _dto.payload;
         (
             uint nonce, uint64 srcChainId, address srcAddress, uint64 dstChainId,
-            address dstAddress, , , bool forceOrder, uint txId,
+            address dstAddress, , bool forceOrder, uint txId,
             bytes32 transferHash, bytes memory payload
         ) = abi.decode(
             pl,
-            (uint, uint64, address, uint64, address, uint, bool, bool, uint, bytes32, bytes)
+            (uint, uint64, address, uint64, address, uint, bool, uint, bytes32, bytes)
         );
 
         require(dstChainId == localChainId, "Translator: wrong chain id");

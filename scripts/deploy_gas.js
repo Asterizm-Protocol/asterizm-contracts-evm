@@ -1,4 +1,5 @@
 const hre = require("hardhat");
+const {BigNumber} = require("ethers");
 
 async function deployBase() {
     const [owner] = await ethers.getSigners();
@@ -125,38 +126,44 @@ async function deployBase() {
     //     },
     // ];
 
-    let currentChain = null;
+    let currentChain;
     for (let i = 0; i < chains.length; i++) {
         if (chains[i].isCurrent) {
             currentChain = chains[i];
         }
     }
 
-    const translator = await Transalor.attach('0xBEeF2C3178cA1F450D953F40Ada3C89e0a7cBdEB'); // change translator address here
-    const initializer = await Initializer.attach('0xA0fD7958590B95c53dF1127E1400c9F1D737823b'); // change initializer address here
+    let gasLimit = BigNumber.from(0);
+    const translator = await Transalor.attach('0xbf2ad38fd09F37f50f723E35dd84EEa1C282c5C9'); // change translator address here
+    const initializer = await Initializer.attach('0xFC4EE541377F3b6641c23CBE82F6f04388290421'); // change initializer address here
 
-    return {initializer, translator, owner, currentChain};
+    return {initializer, translator, owner, currentChain, gasLimit};
 }
 
 async function main() {
 
-    let {initializer, translator, owner, currentChain} = await deployBase();
+    let {initializer, translator, owner, currentChain, gasLimit} = await deployBase();
 
+    let tx;
     const minUsdAmount = 100; // change minUsdAmount here
     const useEncryption = true; // change useEncryption here
     const useForceOrder = false; // change useForceOrder here
     console.log("Deployig gas station contract...");
     const GasStation = await ethers.getContractFactory("GasStation");
     const gasStation = await GasStation.deploy(initializer.address, useEncryption, useForceOrder);
-    await gasStation.deployed();
+    tx = await gasStation.deployed();
+    gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
     console.log("Gas station was deployed with address: %s", gasStation.address);
-    await gasStation.setMinUsdAmount(minUsdAmount);
+    tx = await gasStation.setMinUsdAmount(minUsdAmount);
+    gasLimit = gasLimit.add(tx.gasLimit);
     for (let i = 0; i < currentChain.stableCoins.length; i++) {
-        await gasStation.addStableCoin(currentChain.stableCoins[i]);
+        tx = await gasStation.addStableCoin(currentChain.stableCoins[i]);
+        gasLimit = gasLimit.add(tx.gasLimit);
     }
     console.log("Added stable coins");
 
     console.log("Deployment was done. Wrap up...\n");
+    console.log("Total gas limit: %s", gasLimit);
     console.log("Owner address: %s", owner.address);
     console.log("Translator address: %s", translator.address);
     console.log("Initializer address: %s", initializer.address);

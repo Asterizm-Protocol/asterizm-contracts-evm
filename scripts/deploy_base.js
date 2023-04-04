@@ -1,4 +1,5 @@
 const hre = require("hardhat");
+const {BigNumber} = require("ethers");
 
 async function deployBase() {
   const [owner] = await ethers.getSigners();
@@ -135,48 +136,60 @@ async function deployBase() {
     }
   }
 
+  let gasLimit = BigNumber.from(0);
+  let tx;
   console.log("Deploying translator...");
   // const translator = await Transalor.attach('0x...');
   const translator = await Transalor.deploy(currentChain.id);
-  await translator.deployed();
+  tx = await translator.deployed();
+  gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
   console.log("Translator was deployed with address: %s", translator.address);
-  await translator.addChains(chainIds);
+  tx = await translator.addChains(chainIds);
+  gasLimit = gasLimit.add(tx.gasLimit);
   console.log("Chains is set");
 
   console.log("Deploying initialzier...");
   // const initializer = await Initializer.attach('0x...');
   const initializer = await Initializer.deploy(translator.address);
-  await initializer.deployed();
+  tx = await initializer.deployed();
+  gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
   console.log("Initializer was deployed with address: %s", initializer.address);
-  await initializer.setIsEncSendAvailable(true);
+  tx = await initializer.setIsEncSendAvailable(true);
+  gasLimit = gasLimit.add(tx.gasLimit);
   // await initializer.setIsDecSendAvailable(true);
 
   console.log("Setting endpoint for translator contract...");
-  await translator.setInitializer(initializer.address);
+  tx = await translator.setInitializer(initializer.address);
+  gasLimit = gasLimit.add(tx.gasLimit);
   console.log("Initializer has been set: %s", initializer.address);
 
   console.log("Deploying Nonce contracts...");
   // Initializer Nonce deployment
   const outboundInitializerNonce = await Nonce.deploy(initializer.address);
-  await outboundInitializerNonce.deployed();
+  tx = await outboundInitializerNonce.deployed();
+  gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
   console.log("Initializer outbound nonce has been deployed: %s", outboundInitializerNonce.address);
-  await initializer.setOutBoundNonce(outboundInitializerNonce.address);
+  tx = await initializer.setOutBoundNonce(outboundInitializerNonce.address);
+  gasLimit = gasLimit.add(tx.gasLimit);
   console.log("Initializer outbound nonce has been set",);
 
   const inboundInitializerNonce = await Nonce.deploy(initializer.address);
-  await inboundInitializerNonce.deployed();
+  tx = await inboundInitializerNonce.deployed();
+  gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
   console.log("Initializer outbound nonce has been deployed: %s", inboundInitializerNonce.address);
-  await initializer.setInBoundNonce(inboundInitializerNonce.address);
+  tx = await initializer.setInBoundNonce(inboundInitializerNonce.address);
+  gasLimit = gasLimit.add(tx.gasLimit);
   console.log("Initializer inbound nonce has been set",);
 
-  return {initializer, translator, owner};
+  return {initializer, translator, owner, gasLimit};
 }
 
 async function main() {
 
-  let {initializer, translator, owner} = await deployBase();
+  let {initializer, translator, owner, gasLimit} = await deployBase();
 
   console.log("Deployment was done. Wrap up...\n");
+  console.log("Total gas limit: %s", gasLimit);
   console.log("Owner address: %s", owner.address);
   console.log("Translator address: %s", translator.address);
   console.log("Initializer address: %s\n", initializer.address);

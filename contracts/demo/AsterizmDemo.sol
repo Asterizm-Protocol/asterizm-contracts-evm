@@ -10,7 +10,7 @@ contract AsterizmDemo is BaseAsterizmClient {
     string public currentChainMessage;
     string public externalChainMessage;
 
-    constructor (IInitializerSender _initializerLib) BaseAsterizmClient(_initializerLib, false, true) {
+    constructor (IInitializerSender _initializerLib) BaseAsterizmClient(_initializerLib, true) {
         currentChainMessage = "Hello from source chain";
         externalChainMessage = "Here is nothing yet";
     }
@@ -28,11 +28,9 @@ contract AsterizmDemo is BaseAsterizmClient {
     /// @param _message string  Message
     function sendMessage(uint64 _dstChainId, address _dstAddress, string calldata _message) public payable {
         bytes memory payload = abi.encode(_message);
-        _initAsterizmTransferInternal(_buildClInitTransferRequestDto(
+        _initAsterizmTransferClient(_buildInternalClInitTransferRequestDto(
             _dstChainId,
             _dstAddress,
-            _getTxId(),
-            _buildTransferHash(_getLocalChainId(), address(this), _dstChainId, _dstAddress, _getTxId(), payload),
             msg.value,
             payload
         ));
@@ -40,7 +38,7 @@ contract AsterizmDemo is BaseAsterizmClient {
 
     /// Receive non-encoded payload
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal override {
+    function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal override onlyValidTransferHash(_dto) {
         require(
             _validTransferHash(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.payload, _dto.transferHash),
             "AsterizmDemo: transfer hash is invalid"

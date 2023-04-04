@@ -28,8 +28,6 @@ In parallel mode, the Client Server in the recipient chain is responsible for ma
 - `translator`: The address of the Translator Contract
 - `blockAddresses`: Blocking address list map that can not call `initTransfer`, `receivePayload` and `receiveEncryptedPayload` methods
 - `sendedTransfers`: Sent transfers list map that was transferred through initializer (successIncome - transfer success income, successOutgoing - transfer success outgoing)
-- `isDecSendAvailable`: Flag for available sending decoded messages
-- `isEncSendAvailable`: Flag for available sending encoded messages
 
 ## Key Methods
 - `initTransfer`: A method to send messages to the Translator Contract
