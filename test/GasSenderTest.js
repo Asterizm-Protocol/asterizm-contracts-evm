@@ -614,6 +614,76 @@ describe("Gas sender test", function () {
     expect(psPayload).not.null;
     expect(ethers.utils.defaultAbiCoder.decode(['string'], psReason.toString())[0]).to.equal('BaseAsterizmClient: wrong source address');
   });
+  it("Should revert transfers with outbound transfer errors", async function () {
+    let valueInUsd = 100;
+    let address = "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168";
+    const failedTransferHash = '0x0000000000000000000000000000000000000000000000000000000000000000';
+    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, Gas, gas_sender1, gas_sender2, gas_sender3, owner, user1, currentChainIds  } = await loadFixture(deployContractsFixture);
+    let value = BigNumber.from(valueInUsd).mul(pow);
+    await expect(gas_sender3.addStableCoin(token1.address)).not.to.be.reverted;
+    await expect(gas_sender2.addStableCoin(token2.address)).not.to.be.reverted;
+    expect(await owner.sendTransaction({
+      to: gas_sender3.address,
+      value: ethers.utils.parseEther("1.0"),
+    })).not.to.be.reverted;
+    expect(await owner.sendTransaction({
+      to: gas_sender2.address,
+      value: ethers.utils.parseEther("1.0"),
+    })).not.to.be.reverted;
+    expect(await token1.approve(gas_sender3.address, value.toString())).not.to.be.reverted;
+    const initial_token_balance = await token1.balanceOf(owner.address);
+    let dstChainId, dstAddress, txId, transferHash, payload, gasDstChainId, gasDstAddress, gasTxId, gasPayload;
+    await expect(gas_sender3.sendGas([currentChainIds[1]], [value.toString()], [gas_sender2.address], [address], token1.address))
+        .to.emit(gas_sender3, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        )
+        .to.emit(gas_sender3, 'GasSendEvent')
+        .withArgs(
+            (value) => {gasDstChainId = value; return true;},
+            (value) => {gasDstAddress = value; return true;},
+            (value) => {gasTxId = value; return true;},
+            (value) => {gasPayload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstChainId).to.equal(gasDstChainId);
+    expect(dstAddress).to.equal(gas_sender2.address);
+    expect(dstAddress).to.equal(gasDstAddress);
+    expect(txId).to.not.null;
+    expect(gasTxId).to.not.null;
+    expect(txId).to.equal(gasTxId);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    expect(gasPayload).to.not.null;
+    expect(payload).to.equal(gasPayload);
+    expect(await token1.balanceOf(gas_sender3.address)).to.equal(value);
+    expect(await token1.balanceOf(owner.address)).not.to.equal(initial_token_balance);
+    let PacketValue;
+    await expect(gas_sender3.initAsterizmTransfer(dstChainId, dstAddress, txId, failedTransferHash, payload)).to.be
+        .revertedWith("BaseAsterizmClient: outbound transfer not exists");
+    await expect(gas_sender3.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
+        .to.emit(translator1, 'SendMessageEvent')
+        .withArgs((value) => {PacketValue = value; return true;});
+    // Check decoded Packet data
+    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], PacketValue);
+    // decodedValue[0] - nonce
+    expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
+    expect(decodedValue[2]).to.equal(gas_sender3.address); // srcAddress
+    expect(decodedValue[3]).to.equal(currentChainIds[1]); // dstChainId
+    expect(decodedValue[4]).to.equal(gas_sender2.address); // dstAddress
+    expect(decodedValue[5]).to.equal(0); // feeValue
+    expect(decodedValue[6]).to.equal(true); // useForceOrder
+    expect(decodedValue[7]).to.equal(txId); // txId
+    expect(decodedValue[8]).to.equal(transferHash); // transferHash
+    // decodedValue[9] - payload
+    await expect(gas_sender3.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload)).to.be
+        .revertedWith("BaseAsterizmClient: outbound transfer executed already");
+
+  });
   it("Should withdraw coins", async function () {
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, Gas, gas_sender1, gas_sender2, gas_sender3, owner, user1, currentChainIds } = await loadFixture(deployContractsFixture);
     const balance = ethers.utils.parseEther("1.0");

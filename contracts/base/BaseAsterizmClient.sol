@@ -68,7 +68,8 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     IInitializerSender private initializerLib;
     mapping(address => bool) private admins;
     mapping(uint64 => address) private trustedSrcAddresses;
-    mapping(bytes32 => AsterizmTransfer) private transfers;
+    mapping(bytes32 => AsterizmTransfer) private inboundTransfers;
+    mapping(bytes32 => AsterizmTransfer) private outboundTransfers;
     uint private trustedAddressCount;
     bool private useForceOrder;
     uint private txId;
@@ -126,28 +127,50 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// @param _transferHash bytes32  Transfer hash
     modifier setReceiveTransfer(bytes32 _transferHash) {
         _;
-        transfers[_transferHash].successReceive = true;
+        inboundTransfers[_transferHash].successReceive = true;
     }
 
     /// Set execute transfer modifier
     /// @param _transferHash bytes32  Transfer hash
     modifier setExecuteTransfer(bytes32 _transferHash) {
         _;
-        transfers[_transferHash].successReceive = true;
-        transfers[_transferHash].successExecute = true;
+        inboundTransfers[_transferHash].successReceive = true;
+        inboundTransfers[_transferHash].successExecute = true;
     }
 
     /// Only received transfer modifier
     /// @param _transferHash bytes32  Transfer hash
     modifier onlyReceivedTransfer(bytes32 _transferHash) {
-        require(transfers[_transferHash].successReceive, "BaseAsterizmClient: transfer not received");
+        require(inboundTransfers[_transferHash].successReceive, "BaseAsterizmClient: transfer not received");
         _;
     }
 
     /// Only non-executed transfer modifier
     /// @param _transferHash bytes32  Transfer hash
     modifier onlyNonExecuted(bytes32 _transferHash) {
-        require(!transfers[_transferHash].successExecute, "BaseAsterizmClient: transfer executed already");
+        require(!inboundTransfers[_transferHash].successExecute, "BaseAsterizmClient: transfer executed already");
+        _;
+    }
+
+    /// Set executed outbound transfer modifier
+    /// @param _transferHash bytes32  Transfer hash
+    modifier setExecutedOutboundTransfer(bytes32 _transferHash) {
+        _;
+        outboundTransfers[_transferHash].successReceive = true;
+        outboundTransfers[_transferHash].successExecute = true;
+    }
+
+    /// Only exists outbound transfer modifier
+    /// @param _transferHash bytes32  Transfer hash
+    modifier onlyExistsOutboundTransfer(bytes32 _transferHash) {
+        require(outboundTransfers[_transferHash].successReceive, "BaseAsterizmClient: outbound transfer not exists");
+        _;
+    }
+
+    /// Only not executed outbound transfer modifier
+    /// @param _transferHash bytes32  Transfer hash
+    modifier onlyNotExecutedOutboundTransfer(bytes32 _transferHash) {
+        require(!outboundTransfers[_transferHash].successExecute, "BaseAsterizmClient: outbound transfer executed already");
         _;
     }
 
@@ -268,6 +291,16 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
 
     /** Sending logic */
 
+    /// Initiate transfer event
+    /// Generate event for client server
+    /// @param _dto ClInitTransferEventDto  Init transfer DTO
+    function _initAsterizmTransferEvent(ClInitTransferEventDto memory _dto) internal {
+        uint id = txId++;
+        bytes32 transferHash = _buildTransferHash(_getLocalChainId(), address(this), _dto.dstChainId, _dto.dstAddress, id, _dto.payload);
+        outboundTransfers[transferHash].successReceive = true;
+        emit InitiateTransferEvent(_dto.dstChainId, _dto.dstAddress, id, transferHash, _dto.payload);
+    }
+
     /// External initiation transfer
     /// This function needs for external initiating non-encoded payload transfer
     /// @param _dstChainId uint64  Destination chain ID
@@ -284,10 +317,12 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// This function needs for internal initiating non-encoded payload transfer
     /// @param _dto InternalClInitTransferRequestDto  Init transfer DTO
     function _initAsterizmTransferClient(InternalClInitTransferRequestDto memory _dto) internal {
+        bytes32 transferHash = _buildTransferHash(_getLocalChainId(), address(this), _dto.dstChainId, _dto.dstAddress, _getTxId(), _dto.payload);
+        outboundTransfers[transferHash].successReceive = true;
         _initAsterizmTransferPrivate(
             _buildClInitTransferRequestDto(
                 _dto.dstChainId, _dto.dstAddress, _getTxId(),
-                _buildTransferHash(_getLocalChainId(), address(this), _dto.dstChainId, _dto.dstAddress, _getTxId(), _dto.payload),
+                transferHash,
                 msg.value, _dto.payload
             )
         );
@@ -296,25 +331,15 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// Private initiation transfer
     /// This function needs for internal initiating non-encoded payload transfer
     /// @param _dto ClInitTransferRequestDto  Init transfer DTO
-    function _initAsterizmTransferPrivate(ClInitTransferRequestDto memory _dto) private {
+    function _initAsterizmTransferPrivate(ClInitTransferRequestDto memory _dto) private
+        onlyExistsOutboundTransfer(_dto.transferHash)
+        onlyNotExecutedOutboundTransfer(_dto.transferHash)
+        setExecutedOutboundTransfer(_dto.transferHash)
+    {
         require(address(this).balance >= _dto.feeAmount, "BaseAsterizmClient: contract balance is not enough");
         require(_dto.txId <= _getTxId(), "BaseAsterizmClient: wrong txId param");
         initializerLib.initTransfer{value: _dto.feeAmount} (
             _buildIzIninTransferRequestDto(_dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash, useForceOrder, _dto.payload)
-        );
-    }
-
-    /// Initiate transfer event
-    /// Generate event for client server
-    /// @param _dto ClInitTransferEventDto  Init transfer DTO
-    function _initAsterizmTransferEvent(ClInitTransferEventDto memory _dto) internal {
-        uint id = txId++;
-        emit InitiateTransferEvent(
-            _dto.dstChainId,
-            _dto.dstAddress,
-            id,
-            _buildTransferHash(_getLocalChainId(), address(this), _dto.dstChainId, _dto.dstAddress, id, _dto.payload),
-            _dto.payload
         );
     }
 
