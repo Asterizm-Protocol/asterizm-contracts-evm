@@ -56,9 +56,13 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// @param _flag bool  Use encryption flag
     event SetUseEncryptionEvent(bool _flag);
 
-    /// Set use force order flag
+    /// Set use force order flag event
     /// @param _flag bool  Use force order flag
     event SetUseForceOrderEvent(bool _flag);
+
+    /// Set disable hash validation flag event
+    /// @param _flag bool  Use force order flag
+    event SetDisableHashValidationEvent(bool _flag);
 
     struct AsterizmTransfer {
         bool successReceive;
@@ -72,13 +76,15 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     mapping(bytes32 => AsterizmTransfer) private outboundTransfers;
     uint private trustedAddressCount;
     bool private useForceOrder;
+    bool private disableHashValidation;
     uint private txId;
     uint64 private localChainId;
 
-    constructor(IInitializerSender _initializerLib, bool _useForceOrder) {
+    constructor(IInitializerSender _initializerLib, bool _useForceOrder, bool _disableHashValidation) {
         _setInitializer(_initializerLib);
         _setLocalChainId(initializerLib.getLocalChainId());
         _setUseForceOrder(_useForceOrder);
+        _setDisableHashValidation(_disableHashValidation);
     }
 
     /// Only admin modifier
@@ -177,10 +183,12 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// Only nvalid transfer hash modifier
     /// @param _dto ClAsterizmReceiveRequestDto  Transfer data
     modifier onlyValidTransferHash(ClAsterizmReceiveRequestDto memory _dto) {
-        require(
-            _validTransferHash(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.payload, _dto.transferHash),
-            "BaseAsterizmClient: transfer hash is invalid"
-        );
+        if (!disableHashValidation) {
+            require(
+                _validTransferHash(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.payload, _dto.transferHash),
+                "BaseAsterizmClient: transfer hash is invalid"
+            );
+        }
         _;
     }
 
@@ -219,6 +227,13 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     function _setUseForceOrder(bool _flag) private onlyOwner {
         useForceOrder = _flag;
         emit SetUseForceOrderEvent(_flag);
+    }
+
+    /// Set disable hash validation flag
+    /// _flag bool  Disable hash validation flag
+    function _setDisableHashValidation(bool _flag) private onlyOwner {
+        disableHashValidation = _flag;
+        emit SetDisableHashValidationEvent(_flag);
     }
 
     /// Add trusted source address
@@ -388,14 +403,15 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
         onlyTrustedSrcAddress(_dto.srcChainId, _dto.srcAddress)
         onlyTrustedTransfer(_dto.transferHash)
         onlyNonExecuted(_dto.transferHash)
-        setExecuteTransfer(_dto.transferHash) {
+        setExecuteTransfer(_dto.transferHash)
+        onlyValidTransferHash(_dto) {
         _asterizmReceive(_dto);
     }
 
     /// Receive non-encoded payload
     /// You must realize this function if you want to transfer non-encoded payload
     /// You must use onlyTrustedSrcAddress modifier!
-    /// Validate transferHash with validTransferHash() or use onlyValidTransferHash modifyer for more security!
+    /// If disableHashValidation = true you must validate transferHash with _validTransferHash() or use onlyValidTransferHash modifyer for more security!
     /// For validate transfer you can use onlyTrustedTransfer modifier
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal virtual {}
