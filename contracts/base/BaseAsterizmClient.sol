@@ -88,6 +88,7 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     }
 
     /// Only admin modifier
+    /// Admin addresses are used for internal logic (_setInitializer() for example)
     modifier onlyAdmin {
         require(admins[msg.sender], "BaseAsterizmClient: only admin");
         _;
@@ -140,7 +141,6 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// @param _transferHash bytes32  Transfer hash
     modifier setExecuteTransfer(bytes32 _transferHash) {
         _;
-        inboundTransfers[_transferHash].successReceive = true;
         inboundTransfers[_transferHash].successExecute = true;
     }
 
@@ -162,7 +162,6 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// @param _transferHash bytes32  Transfer hash
     modifier setExecutedOutboundTransfer(bytes32 _transferHash) {
         _;
-        outboundTransfers[_transferHash].successReceive = true;
         outboundTransfers[_transferHash].successExecute = true;
     }
 
@@ -210,28 +209,28 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
 
     /// Set initizlizer library
     /// _initializerLib IInitializerSender  Initializer library
-    function _setInitializer(IInitializerSender _initializerLib) private onlyOwnerOrAdmin {
+    function _setInitializer(IInitializerSender _initializerLib) public onlyOwnerOrAdmin {
         initializerLib = _initializerLib;
         emit SetInitializerEvent(address(_initializerLib));
     }
 
     /// Set local chain id library
     /// _localChainId uint64
-    function _setLocalChainId(uint64 _localChainId) private onlyOwner {
+    function _setLocalChainId(uint64 _localChainId) private {
         localChainId = _localChainId;
         emit SetLocalChainIdEvent(_localChainId);
     }
 
     /// Set use force order flag
     /// _flag bool  Use force order flag
-    function _setUseForceOrder(bool _flag) private onlyOwner {
+    function _setUseForceOrder(bool _flag) private {
         useForceOrder = _flag;
         emit SetUseForceOrderEvent(_flag);
     }
 
     /// Set disable hash validation flag
     /// _flag bool  Disable hash validation flag
-    function _setDisableHashValidation(bool _flag) private onlyOwner {
+    function _setDisableHashValidation(bool _flag) private {
         disableHashValidation = _flag;
         emit SetDisableHashValidationEvent(_flag);
     }
@@ -369,12 +368,10 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// Receive encoded payload
     /// This methos needs for transfer encoded data
     /// You must use onlyTrustedSrcAddress modifier!
-    /// For validate transfer you can use onlyTrustedTransfer modifier
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function _asterizmReceiveEncoded(ClAsterizmReceiveRequestDto calldata _dto) private
         onlyOwnerOrInitializer
         onlyTrustedSrcAddress(_dto.srcChainId, _dto.srcAddress)
-        onlyTrustedTransfer(_dto.transferHash)
         onlyNonExecuted(_dto.transferHash)
         setReceiveTransfer(_dto.transferHash)
     {

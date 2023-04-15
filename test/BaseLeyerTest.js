@@ -77,8 +77,66 @@ describe("Base layer test", function () {
       return true
     }
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Demo, demo1, demo2, owner1, owner2, currentChainIds } = await loadFixture(deployContractsFixture);
-    await expect(demo1.sendMessage(currentChainIds[1], demo1.address, "New message"))
-      .to.emit(translator1, 'SendMessageEvent')
+    let dstChainId, dstAddress, txId, transferHash, payload;
+    await expect(demo1.sendMessage(currentChainIds[1], demo2.address, "New message"))
+        .to.emit(demo1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(demo2.address);
+    expect(txId).to.equal(0);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    let PacketValue;
+    await expect(demo1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
+        .to.emit(translator1, 'SendMessageEvent')
+        .withArgs((value) => {PacketValue = value; return true;});
+  });
+
+  it("Should send message from packet to Initializer", async function () {
+    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Demo, demo1, demo2, owner1, owner2, currentChainIds } = await loadFixture(deployContractsFixture);
+    let dstChainId, dstAddress, txId, transferHash, payload;
+    await expect(demo1.sendMessage(currentChainIds[0], demo1.address, "New message"))
+        .to.emit(demo1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[0]);
+    expect(dstAddress).to.equal(demo1.address);
+    expect(txId).to.equal(0);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    await expect(demo1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
+        .to.emit(translator1, 'SuccessTransferEvent');
+
+    await expect(demo1.sendMessage(currentChainIds[1], demo2.address, "New message"))
+        .to.emit(demo1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(demo2.address);
+    expect(txId).to.equal(1);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    let PacketValue;
+    await expect(demo1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
+        .to.emit(translator1, 'SendMessageEvent')
+        .withArgs((value) => {PacketValue = value; return true;});
+    await translator2.transferMessage(300000, PacketValue);
   });
 
   it("Should send message from packet to Initializer", async function () {
@@ -88,61 +146,132 @@ describe("Base layer test", function () {
       return true
     }
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Demo, demo1, demo2, owner1, owner2, currentChainIds } = await loadFixture(deployContractsFixture);
+    let dstChainId, dstAddress, txId, transferHash, payload;
     await expect(demo1.sendMessage(currentChainIds[0], demo1.address, "New message"))
+        .to.emit(demo1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[0]);
+    expect(dstAddress).to.equal(demo1.address);
+    expect(txId).to.equal(0);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    await expect(demo1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
         .to.emit(translator1, 'SuccessTransferEvent');
-    await expect(demo1.sendMessage(currentChainIds[1], demo1.address, "New message"))
-        .to.emit(translator1, 'SendMessageEvent')
-        .withArgs(captureValue)
-    await translator2.transferMessage(300000, capturedValue);
-  });
 
-  it("Should send message from packet to Initializer", async function () {
-    let capturedValue
-    const captureValue = (value) => {
-      capturedValue = value
-      return true
-    }
-    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Demo, demo1, demo2, owner1, owner2, currentChainIds } = await loadFixture(deployContractsFixture);
-    await expect(demo1.sendMessage(currentChainIds[0], demo1.address, "New message"))
-        .to.emit(translator1, 'SuccessTransferEvent');
-    await expect(demo1.sendMessage(currentChainIds[1], demo1.address, "New message"))
+    await expect(demo1.sendMessage(currentChainIds[1], demo2.address, "New message"))
+        .to.emit(demo1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(demo2.address);
+    expect(txId).to.equal(1);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    let PacketValue;
+    await expect(demo1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
         .to.emit(translator1, 'SendMessageEvent')
-        .withArgs(captureValue);
-    const messageBefore = await demo1.externalChainMessage();
-    await translator2.transferMessage(300000, capturedValue);
-    expect(await demo1.externalChainMessage()).to.equal(messageBefore);
+        .withArgs((value) => {PacketValue = value; return true;});
+    await translator2.transferMessage(300000, PacketValue);
   });
 
   it("Should not sent from/to blocked address, then success send message", async function () {
-    let capturedValue
-    const captureValue = (value) => {
-      capturedValue = value
-      return true
-    }
+    let PacketValue, dstChainId, dstAddress, txId, transferHash, payload;
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Demo, demo1, demo2, owner1, owner2, currentChainIds } = await loadFixture(deployContractsFixture);
+
     await expect(initializer1.addBlockAddress(demo2.address))
         .to.emit(initializer1, 'AddBlockAddressEvent');
-    await expect(demo1.sendMessage(currentChainIds[0], demo2.address, "New message"))
+    await expect(demo1.sendMessage(currentChainIds[1], demo2.address, "New message"))
+        .to.emit(demo1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(demo2.address);
+    expect(txId).to.equal(0);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    await expect(demo1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
         .to.be.revertedWith("AsterizmInitializer: target address is blocked");
+
     await expect(initializer1.addBlockAddress(demo1.address))
         .to.emit(initializer1, 'AddBlockAddressEvent');
-    await expect(demo1.sendMessage(currentChainIds[0], demo2.address, "New message"))
+    await expect(demo1.sendMessage(currentChainIds[1], demo2.address, "New message"))
+        .to.emit(demo1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(demo2.address);
+    expect(txId).to.equal(1);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    await expect(demo1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
         .to.be.revertedWith("AsterizmInitializer: sender address is blocked");
+
     await expect(initializer1.removeBlockAddress(demo1.address))
         .to.emit(initializer1, 'RemoveBlockAddressEvent');
     await expect(initializer1.removeBlockAddress(demo2.address))
         .to.emit(initializer1, 'RemoveBlockAddressEvent');
     await expect(demo1.sendMessage(currentChainIds[0], demo1.address, "New message"))
+        .to.emit(demo1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[0]);
+    expect(dstAddress).to.equal(demo1.address);
+    expect(txId).to.equal(2);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    await expect(demo1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
         .to.emit(translator1, 'SuccessTransferEvent');
-    await expect(demo1.sendMessage(currentChainIds[1], demo1.address, "New message"))
+
+    await expect(demo1.sendMessage(currentChainIds[1], demo2.address, "New message"))
+        .to.emit(demo1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(demo2.address);
+    expect(txId).to.equal(3);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    await expect(demo1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
         .to.emit(translator1, 'SendMessageEvent')
-        .withArgs(captureValue);
+        .withArgs((value) => {PacketValue = value; return true;});
     const messageBefore = await demo1.externalChainMessage();
-    await translator2.transferMessage(300000, capturedValue);
+    await translator2.transferMessage(300000, PacketValue);
     expect(await demo1.externalChainMessage()).to.equal(messageBefore);
   });
 
   it("Should send message with fee", async function () {
+    let PacketValue, dstChainId, dstAddress, txId, transferHash, payload;
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Demo, demo1, demo2, owner1, owner2, currentChainIds } = await loadFixture(deployContractsFixture);
     const provider = ethers.provider;
     const feeAmount = ethers.utils.parseEther("1");
@@ -151,7 +280,21 @@ describe("Base layer test", function () {
     expect(await provider.getBalance(demo1.address)).to.equal(0);
     expect(await provider.getBalance(translator1.address)).to.equal(0);
     let capturedValue;
-    await expect(demo1.sendMessage(currentChainIds[1], demo2.address, "New message", {value: feeAmount}))
+    await expect(demo1.sendMessage(currentChainIds[1], demo2.address, "New message"))
+        .to.emit(demo1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(demo2.address);
+    expect(txId).to.equal(0);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    await expect(demo1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload, {value: feeAmount}))
         .to.emit(translator1, 'SendMessageEvent')
         .withArgs((value) => {capturedValue = value; return true;});
     let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], capturedValue);

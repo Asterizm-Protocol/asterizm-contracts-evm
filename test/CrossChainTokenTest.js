@@ -90,24 +90,44 @@ describe("Crosschain token", function () {
     );
   });
   it("Should emit event from Translator", async function () {
-    let capturedValue
-    const captureValue = (value) => {
-      capturedValue = value
-      return true
-    }
+    let dstChainId, dstAddress, txId, transferHash, payload;
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, owner, currentChainIds } = await loadFixture(deployContractsFixture);
     await expect(token1.crossChainTransfer(currentChainIds[1], owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", 100, token2.address))
-      .to.emit(translator1, 'SendMessageEvent')
+        .to.emit(token1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(token2.address);
+    expect(txId).to.equal(0);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    await expect(token1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
+      .to.emit(translator1, 'SendMessageEvent');
   });
   it("Should burn token", async function () {
-    let capturedValue
-    const captureValue = (value) => {
-      capturedValue = value
-      return true
-    }
+    let dstChainId, dstAddress, txId, transferHash, payload;
     let value = 100;
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, owner, currentChainIds } = await loadFixture(deployContractsFixture);
     await expect(token1.crossChainTransfer(currentChainIds[1], owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", value, token2.address))
+        .to.emit(token1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(token2.address);
+    expect(txId).to.equal(0);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    await expect(token1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
       .to.emit(translator1, 'SendMessageEvent');
     expect(await token1.balanceOf(owner.address)).to.equal(
       (TOKEN_AMOUNT.sub(value))
@@ -117,18 +137,28 @@ describe("Crosschain token", function () {
     );
   });
   it("Should burn and then mint token", async function () {
-    let capturedValue
-    const captureValue = (value) => {
-      capturedValue = value
-      return true
-    }
+    let packetValue, dstChainId, dstAddress, txId, transferHash, payload;
     let addressTo = '0x89F5C7d4580065fd9135Eff13493AaA5ad10A168';
     let value = 100;
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, owner, currentChainIds } = await loadFixture(deployContractsFixture);
     await expect(token1.crossChainTransfer(currentChainIds[1], owner.address, addressTo, value, token2.address))
+        .to.emit(token1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(token2.address);
+    expect(txId).to.equal(0);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    await expect(token1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
       .to.emit(translator1, 'SendMessageEvent')
-      .withArgs(captureValue);
-    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], capturedValue);
+      .withArgs((value) => {packetValue = value; return true;})
+    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], packetValue);
     // decodedValue[0] - nonce
     expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
     expect(decodedValue[2]).to.equal(token1.address); // srcAddress
@@ -142,7 +172,7 @@ describe("Crosschain token", function () {
     expect(await token1.balanceOf(owner.address)).to.equal(
         (TOKEN_AMOUNT.sub(value))
     );
-    await expect(translator2.transferMessage(300000, capturedValue))
+    await expect(translator2.transferMessage(300000, packetValue))
         .to.emit(token2, 'EncodedPayloadReceivedEvent');
     await expect(token2.asterizmClReceive(currentChainIds[0], token1.address, currentChainIds[1], token2.address, decodedValue[0], decodedValue[7], decodedValue[8], decodedValue[9])).to.not.reverted;
     expect(await token1.balanceOf(owner.address)).to.equal(

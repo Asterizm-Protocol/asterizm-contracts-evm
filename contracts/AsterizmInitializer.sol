@@ -59,16 +59,11 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
     /// @param _transferHash bytes32  Transfer hash
     event SentPayloadEvent(bytes32 _transferHash);
 
-    struct SendedTransfer {
-        bool successIncome;
-        bool successOutgoing;
-    }
-
     INonce private inboundNonce;
     INonce private outboundNonce;
     ITranslator private translatorLib;
     mapping(address => bool) public blockAddresses;
-    mapping(bytes32 => SendedTransfer) private sendedTransfers;
+    mapping(bytes32 => bool) private outgoingTransfers;
 
     constructor (ITranslator _translatorLibrary) {
         setTransalor(_translatorLibrary);
@@ -122,13 +117,7 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
     /// Validate income transfer by hash
     /// @param _transferHash bytes32
     function validIncomeTransferHash(bytes32 _transferHash) external view returns(bool) {
-        return sendedTransfers[_transferHash].successIncome;
-    }
-
-    /// Validate outhoing transfer by hash
-    /// @param _transferHash bytes32
-    function validOutgoingTransferHash(bytes32 _transferHash) external view returns(bool) {
-        return sendedTransfers[_transferHash].successOutgoing;
+        return outgoingTransfers[_transferHash];
     }
 
     /// Return local chain id
@@ -169,7 +158,6 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
             _dto.dstAddress, _dto.nonce, _dto.txId, _dto.transferHash, _dto.payload
         );
 
-        sendedTransfers[_dto.transferHash].successIncome = true;
         try IClientReceiverContract(_dto.dstAddress).asterizmIzReceive{gas: _dto.gasLimit}(dto) {
         } catch Error(string memory _err) {
             emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.nonce, _dto.transferHash, _dto.payload, abi.encode(_err));
@@ -177,7 +165,7 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
             emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.nonce, _dto.transferHash, _dto.payload, reason);
         }
 
-        sendedTransfers[_dto.transferHash].successOutgoing = true;
+        outgoingTransfers[_dto.transferHash] = true;
         emit SentPayloadEvent(_dto.transferHash);
     }
 }

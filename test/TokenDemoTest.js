@@ -75,18 +75,28 @@ describe("Token contract test", function () {
   });
 
   it("Should claim token", async function () {
-    let capturedValue;
-    const captureValue = (value) => {
-      capturedValue = value
-      return true
-    };
+    let packetValue, dstChainId, dstAddress, txId, transferHash, payload;
     const address = '0x89F5C7d4580065fd9135Eff13493AaA5ad10A168';
     const value = 100;
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, Claimer, claimer1, claimer2, owner, currentChainIds } = await loadFixture(deployContractsFixture);
     await expect(token1.crossChainTransfer(currentChainIds[1], owner.address, address, value, token2.address))
-      .to.emit(translator1, 'SendMessageEvent')
-      .withArgs(captureValue);
-    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], capturedValue);
+        .to.emit(token1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(token2.address);
+    expect(txId).to.equal(0);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    await expect(token1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
+        .to.emit(translator1, 'SendMessageEvent')
+        .withArgs((value) => {packetValue = value; return true;});
+    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], packetValue);
     // decodedValue[0] - nonce
     expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
     expect(decodedValue[2]).to.equal(token1.address); // srcAddress
@@ -100,7 +110,7 @@ describe("Token contract test", function () {
     expect(await token1.balanceOf(owner.address)).to.equal(
       (TOKEN_AMOUNT.sub(value))
     );
-    await expect(translator2.transferMessage(300000, capturedValue))
+    await expect(translator2.transferMessage(300000, packetValue))
         .to.emit(token2, 'EncodedPayloadReceivedEvent');
     await expect(token2.asterizmClReceive(currentChainIds[0], token1.address, currentChainIds[1], token2.address, decodedValue[0], decodedValue[7], decodedValue[8], decodedValue[9])).to.not.reverted;
     expect(await token1.balanceOf(owner.address)).to.equal(
@@ -112,26 +122,50 @@ describe("Token contract test", function () {
     expect(await token1.totalSupply()).to.equal(TOKEN_AMOUNT.sub(value));
     expect(await token2.totalSupply()).to.equal(TOKEN_AMOUNT.add(value));
     await token1.transfer(claimer1.address, await token1.balanceOf(owner.address));
-    const amounts = [10,20];
-    const addresses = [token1.address, token2.address];
-    await expect(claimer1.claim(currentChainIds, amounts, addresses))
-      .to.emit(translator1, 'SendMessageEvent')
-      .withArgs(captureValue);
+    const amounts = [20];
+    const addresses = [token2.address];
+    await expect(claimer1.claim([currentChainIds[1]], amounts, addresses))
+        .to.emit(token1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(token2.address);
+    expect(txId).to.equal(1);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    await expect(token1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
+        .to.emit(translator1, 'SendMessageEvent')
+        .withArgs((value) => {packetValue = value; return true;});
   });
 
   it("Should claim and send token", async function () {
-    let capturedValue
-    const captureValue = (value) => {
-      capturedValue = value
-      return true
-    };
+    let packetValue, dstChainId, dstAddress, txId, transferHash, payload;
     const address = '0x89F5C7d4580065fd9135Eff13493AaA5ad10A168';
     const value = 100;
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, Claimer, claimer1, claimer2, owner, currentChainIds } = await loadFixture(deployContractsFixture);
     await expect(token1.crossChainTransfer(currentChainIds[1], owner.address, address, value, token2.address))
+        .to.emit(token1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(token2.address);
+    expect(txId).to.equal(0);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    await expect(token1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
       .to.emit(translator1, 'SendMessageEvent')
-      .withArgs(captureValue);
-    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], capturedValue);
+        .withArgs((value) => {packetValue = value; return true;});
+    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], packetValue);
     // decodedValue[0] - nonce
     expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
     expect(decodedValue[2]).to.equal(token1.address); // srcAddress
@@ -145,7 +179,7 @@ describe("Token contract test", function () {
     expect(await token1.balanceOf(owner.address)).to.equal(
         (TOKEN_AMOUNT.sub(value))
     );
-    await expect(translator2.transferMessage(300000, capturedValue))
+    await expect(translator2.transferMessage(300000, packetValue))
         .to.emit(token2, 'EncodedPayloadReceivedEvent');
     await expect(token2.asterizmClReceive(currentChainIds[0], token1.address, currentChainIds[1], token2.address, decodedValue[0], decodedValue[7], decodedValue[8], decodedValue[9])).to.not.reverted;
     expect(await token2.balanceOf(owner.address)).to.equal(
@@ -158,27 +192,51 @@ describe("Token contract test", function () {
     await token1.transfer(claimer1.address, await token1.balanceOf(owner.address));
 
     const amounts = [10];
-    await expect(await claimer1.claim([currentChainIds[1]], amounts, [token1.address]))
-      .to.emit(translator1, 'SendMessageEvent')
-      .withArgs(captureValue);
-    await translator2.transferMessage(300000, capturedValue);
+    await expect(await claimer1.claim([currentChainIds[1]], amounts, [token2.address]))
+        .to.emit(token1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(token2.address);
+    expect(txId).to.equal(1);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    await expect(token1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
+        .to.emit(translator1, 'SendMessageEvent')
+        .withArgs((value) => {packetValue = value; return true;});
+    await translator2.transferMessage(300000, packetValue);
     expect(await token2.totalSupply()).to.equal(TOKEN_AMOUNT.add(value));
     expect(await token2.balanceOf(owner.address)).to.equal(TOKEN_AMOUNT);
   });
 
   it("Should claim, send and receive token", async function () {
-    let capturedValue
-    const captureValue = (value) => {
-      capturedValue = value
-      return true
-    };
+    let packetValue, dstChainId, dstAddress, txId, transferHash, payload;
     const address = '0x89F5C7d4580065fd9135Eff13493AaA5ad10A168';
     const value = 100;
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, Claimer, claimer1, claimer2, owner, currentChainIds } = await loadFixture(deployContractsFixture);
     await expect(token1.crossChainTransfer(currentChainIds[1], owner.address, address, value, token2.address))
-      .to.emit(translator1, 'SendMessageEvent')
-      .withArgs(captureValue);
-    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], capturedValue);
+        .to.emit(token1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(token2.address);
+    expect(txId).to.equal(0);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    await expect(token1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
+        .to.emit(translator1, 'SendMessageEvent')
+        .withArgs((value) => {packetValue = value; return true;});
+    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], packetValue);
     // decodedValue[0] - nonce
     expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
     expect(decodedValue[2]).to.equal(token1.address); // srcAddress
@@ -192,7 +250,7 @@ describe("Token contract test", function () {
     expect(await token1.balanceOf(owner.address)).to.equal(
         (TOKEN_AMOUNT.sub(value))
     );
-    await expect(translator2.transferMessage(300000, capturedValue))
+    await expect(translator2.transferMessage(300000, packetValue))
         .to.emit(token2, 'EncodedPayloadReceivedEvent');
     await expect(token2.asterizmClReceive(currentChainIds[0], token1.address, currentChainIds[1], token2.address, decodedValue[0], decodedValue[7], decodedValue[8], decodedValue[9])).to.not.reverted;
     expect(await token2.balanceOf(owner.address)).to.equal(

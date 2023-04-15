@@ -97,12 +97,6 @@ describe("Gas sender test", function () {
       value: ethers.utils.parseEther("1"),
     })).not.to.be.reverted;
   });
-  it("Should emit event from Translator", async function () {
-    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, owner, currentChainIds } = await loadFixture(deployContractsFixture);
-    expect(await token1.crossChainTransfer(currentChainIds[0], owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", 100, token1.address)).not.to.be.reverted;
-    await expect(token1.crossChainTransfer(currentChainIds[1], owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", 100, token1.address))
-      .to.emit(translator1, 'SendMessageEvent');
-  });
   it("Should emit event from Initializer", async function () {
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, Gas, gas_sender1, gas_sender2, gas_sender3, owner, currentChainIds  } = await loadFixture(deployContractsFixture);
     await expect(gas_sender1.addStableCoin(token1.address)).not.to.be.reverted;
