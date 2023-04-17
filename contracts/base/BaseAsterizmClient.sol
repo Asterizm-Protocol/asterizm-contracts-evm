@@ -9,14 +9,6 @@ import "./BaseAsterizmEnv.sol";
 
 abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceiverContract, BaseAsterizmEnv {
 
-    /// Add admin event
-    /// @param _adminAddress address  Admin address
-    event AddAdminEvent(address _adminAddress);
-
-    /// Remove admin event
-    /// @param _adminAddress address  Admin address
-    event RemoveAdminEvent(address _adminAddress);
-
     /// Set initializer event
     /// @param _initializerAddress address  Initializer address
     event SetInitializerEvent(address _initializerAddress);
@@ -70,7 +62,6 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     }
 
     IInitializerSender private initializerLib;
-    mapping(address => bool) private admins;
     mapping(uint64 => address) private trustedSrcAddresses;
     mapping(bytes32 => AsterizmTransfer) private inboundTransfers;
     mapping(bytes32 => AsterizmTransfer) private outboundTransfers;
@@ -85,19 +76,6 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
         _setLocalChainId(initializerLib.getLocalChainId());
         _setUseForceOrder(_useForceOrder);
         _setDisableHashValidation(_disableHashValidation);
-    }
-
-    /// Only admin modifier
-    /// Admin addresses are used for internal logic (_setInitializer() for example)
-    modifier onlyAdmin {
-        require(admins[msg.sender], "BaseAsterizmClient: only admin");
-        _;
-    }
-
-    /// Only owner or admin modifier
-    modifier onlyOwnerOrAdmin {
-        require(msg.sender == owner() || admins[msg.sender], "BaseAsterizmClient: only owner or admin");
-        _;
     }
 
     /// Only initializer modifier
@@ -193,23 +171,9 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
 
     /** Internal logic */
 
-    /// Add admin (only for owner)
-    /// @param _adminAddress address  Admin address
-    function addAdmin(address _adminAddress) external onlyOwner {
-        admins[_adminAddress] = true;
-        emit AddAdminEvent(_adminAddress);
-    }
-
-    /// Remove admin (only for owner)
-    /// @param _adminAddress address  Admin address
-    function removeAdmin(address _adminAddress) external onlyOwner {
-        delete admins[_adminAddress];
-        emit RemoveAdminEvent(_adminAddress);
-    }
-
     /// Set initizlizer library
     /// _initializerLib IInitializerSender  Initializer library
-    function _setInitializer(IInitializerSender _initializerLib) public onlyOwnerOrAdmin {
+    function _setInitializer(IInitializerSender _initializerLib) private {
         initializerLib = _initializerLib;
         emit SetInitializerEvent(address(_initializerLib));
     }
@@ -327,21 +291,6 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
         _initAsterizmTransferPrivate(dto);
     }
 
-    /// Internal initiation transfer
-    /// This function needs for internal initiating non-encoded payload transfer
-    /// @param _dto InternalClInitTransferRequestDto  Init transfer DTO
-    function _initAsterizmTransferClient(InternalClInitTransferRequestDto memory _dto) internal {
-        bytes32 transferHash = _buildTransferHash(_getLocalChainId(), address(this), _dto.dstChainId, _dto.dstAddress, _getTxId(), _dto.payload);
-        outboundTransfers[transferHash].successReceive = true;
-        _initAsterizmTransferPrivate(
-            _buildClInitTransferRequestDto(
-                _dto.dstChainId, _dto.dstAddress, _getTxId(),
-                transferHash,
-                msg.value, _dto.payload
-            )
-        );
-    }
-
     /// Private initiation transfer
     /// This function needs for internal initiating non-encoded payload transfer
     /// @param _dto ClInitTransferRequestDto  Init transfer DTO
@@ -400,8 +349,8 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
         onlyTrustedSrcAddress(_dto.srcChainId, _dto.srcAddress)
         onlyTrustedTransfer(_dto.transferHash)
         onlyNonExecuted(_dto.transferHash)
-        setExecuteTransfer(_dto.transferHash)
-        onlyValidTransferHash(_dto) {
+        onlyValidTransferHash(_dto) 
+        setExecuteTransfer(_dto.transferHash) {
         _asterizmReceive(_dto);
     }
 

@@ -54,7 +54,7 @@ contract GasStation is BaseAsterizmClient {
         address tokenAddress = address(_token);
         require(stableCoins[tokenAddress].exists, "GasStation: token not exists");
         require(stableCoins[tokenAddress].balance >= _amount, "GasStation: tokens balance not enough");
-        _token.transfer(_target, _amount);
+        _token.safeTransfer(_target, _amount);
         stableCoins[tokenAddress].balance = stableCoins[tokenAddress].balance.sub(_amount);
         emit WithdrawTokensEvent(address(_token), _target, _amount);
     }
@@ -65,7 +65,7 @@ contract GasStation is BaseAsterizmClient {
     /// @param _amount uint  Amount
     function withdrawNotExistsTokens(IERC20 _token, address _target, uint _amount) external onlyOwner {
         require(_token.balanceOf(address(this)) >= _amount, "GasStation: tokens balance not enough");
-        _token.transfer(_target, _amount);
+        _token.safeTransfer(_target, _amount);
         address tokenAddress = address(_token);
         if (stableCoins[tokenAddress].exists) {
             stableCoins[tokenAddress].balance = stableCoins[tokenAddress].balance.sub(_amount);
@@ -127,7 +127,7 @@ contract GasStation is BaseAsterizmClient {
             require(sumInUsd <= maxUsdAmount, "GasStation: maximum amount validation error");
         }
 
-        require(_token.transferFrom(msg.sender, address(this), sum), "GasStation: token transfer failed");
+        _token.safeTransferFrom(msg.sender, address(this), sum);
         stableCoins[address(_token)].balance = stableCoins[address(_token)].balance.add(sum);
         for (uint i = 0; i < _amounts.length; i++) {
             uint txId = _getTxId();
