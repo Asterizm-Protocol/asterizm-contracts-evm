@@ -44,10 +44,6 @@ contract MultichainToken is IMultiChainToken, ERC20, BaseAsterizmClient {
     /// Receive non-encoded payload
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal override {
-        require(
-            _validTransferHash(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.payload, _dto.transferHash),
-            "MultichainToken: transfer hash is invalid"
-        );
         (address dstAddress, uint amount, ) = abi.decode(_dto.payload, (address, uint, uint));
         _mint(dstAddress, amount);
     }
