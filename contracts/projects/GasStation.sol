@@ -3,9 +3,9 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "../base/BaseAsterizmClient.sol";
+import "../base/AsterizmClient.sol";
 
-contract GasStation is BaseAsterizmClient {
+contract GasStation is AsterizmClient {
 
     using SafeMath for uint;
     using SafeERC20 for IERC20;
@@ -30,7 +30,7 @@ contract GasStation is BaseAsterizmClient {
     uint public maxUsdAmount;
 
     constructor(IInitializerSender _initializerLib, bool _useForceOrder)
-        BaseAsterizmClient(_initializerLib, _useForceOrder, true) {}
+        AsterizmClient(_initializerLib, _useForceOrder, true) {}
 
     receive() external payable {}
     fallback() external payable {}

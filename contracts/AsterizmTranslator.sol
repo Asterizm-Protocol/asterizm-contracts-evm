@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IInitializerReceiver.sol";
-import "./interfaces/INonce.sol";
 import "./interfaces/ITranslator.sol";
 import "./base/BaseAsterizmEnv.sol";
 

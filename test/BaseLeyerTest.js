@@ -189,7 +189,7 @@ describe("Base layer test", function () {
     let PacketValue, dstChainId, dstAddress, txId, transferHash, payload;
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Demo, demo1, demo2, owner1, owner2, currentChainIds } = await loadFixture(deployContractsFixture);
 
-    await expect(initializer1.addBlockAddress(demo2.address))
+    await expect(initializer1.addBlockAddress(currentChainIds[1], demo2.address))
         .to.emit(initializer1, 'AddBlockAddressEvent');
     await expect(demo1.sendMessage(currentChainIds[1], demo2.address, "New message"))
         .to.emit(demo1, 'InitiateTransferEvent')
@@ -208,7 +208,7 @@ describe("Base layer test", function () {
     await expect(demo1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
         .to.be.revertedWith("AsterizmInitializer: target address is blocked");
 
-    await expect(initializer1.addBlockAddress(demo1.address))
+    await expect(initializer1.addBlockAddress(currentChainIds[0], demo1.address))
         .to.emit(initializer1, 'AddBlockAddressEvent');
     await expect(demo1.sendMessage(currentChainIds[1], demo2.address, "New message"))
         .to.emit(demo1, 'InitiateTransferEvent')
@@ -227,9 +227,9 @@ describe("Base layer test", function () {
     await expect(demo1.initAsterizmTransfer(dstChainId, dstAddress, txId, transferHash, payload))
         .to.be.revertedWith("AsterizmInitializer: sender address is blocked");
 
-    await expect(initializer1.removeBlockAddress(demo1.address))
+    await expect(initializer1.removeBlockAddress(currentChainIds[0], demo1.address))
         .to.emit(initializer1, 'RemoveBlockAddressEvent');
-    await expect(initializer1.removeBlockAddress(demo2.address))
+    await expect(initializer1.removeBlockAddress(currentChainIds[1], demo2.address))
         .to.emit(initializer1, 'RemoveBlockAddressEvent');
     await expect(demo1.sendMessage(currentChainIds[0], demo1.address, "New message"))
         .to.emit(demo1, 'InitiateTransferEvent')

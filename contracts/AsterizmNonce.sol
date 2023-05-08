@@ -17,6 +17,12 @@ contract AsterizmNonce is INonce, Ownable {
     /// @param _nonce uint  Nonce
     event ForceSetNonceEvent(uint64 _chainId, bytes _pathData, uint _nonce);
 
+    /// Nonce increacement event
+    /// @param _chainId uint64  Chain ID
+    /// @param _pathData bytes  Path data
+    /// @param _nonce uint  Nonce
+    event NonceIncreacementEvent(uint64 _chainId, bytes _pathData, uint _nonce);
+
     mapping(uint64 => mapping(bytes => uint)) private nonce;
     address private manipulator;
 
@@ -40,7 +46,9 @@ contract AsterizmNonce is INonce, Ownable {
     /// @param _chainId uint64  Chain ID
     /// @param _pathData bytes  Nonce data
     function increaseNonce(uint64 _chainId, bytes calldata _pathData) public onlyManipulator returns (uint) {
-        return ++nonce[_chainId][_pathData];
+        emit NonceIncreacementEvent(_chainId, _pathData, ++nonce[_chainId][_pathData]);
+
+        return getNonce(_chainId, _pathData);
     }
 
     /// Increase nonce with validation

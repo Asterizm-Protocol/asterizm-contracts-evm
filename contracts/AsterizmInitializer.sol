@@ -27,21 +27,19 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
     /// @param _nonceAddress address
     event SetInBoundNonceEvent(address _nonceAddress);
 
-    /// Set decryption send availeble event
-    /// @param _flag bool
-    event SetDecriptionSendAvailableEvent(bool _flag);
-
-    /// Set encryption send availeble event
-    /// @param _flag bool
-    event SetEncriptionSendAvailableEvent(bool _flag);
+    /// Set local chain id event
+    /// @param _localChainId uint64
+    event SetLocalChainIdEvent(uint64 _localChainId);
 
     /// Block address event
+    /// @param _chainId uint64
     /// @param _address address
-    event AddBlockAddressEvent(address _address);
+    event AddBlockAddressEvent(uint64 _chainId, address _address);
 
     /// Remove block address event
+    /// @param _chainId uint64
     /// @param _address address
-    event RemoveBlockAddressEvent(address _address);
+    event RemoveBlockAddressEvent(uint64 _chainId, address _address);
 
     /// Payload error event
     /// Client can listen it for moniroting error transfers
@@ -62,11 +60,15 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
     INonce private inboundNonce;
     INonce private outboundNonce;
     ITranslator private translatorLib;
-    mapping(address => bool) public blockAddresses;
+    uint64 private localChainId;
+    mapping(uint64 => mapping(address => bool)) public blockAddresses;
     mapping(bytes32 => bool) private outgoingTransfers;
 
     constructor (ITranslator _translatorLibrary) {
         setTransalor(_translatorLibrary);
+
+        localChainId = translatorLib.getLocalChainId();
+        emit SetLocalChainIdEvent(localChainId);
     }
 
     /// Only translator modifier
@@ -99,17 +101,19 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
     }
 
     /// Block address
-    /// @param _address address  Available flag
-    function addBlockAddress(address _address) external onlyOwner {
-        blockAddresses[_address] = true;
-        emit AddBlockAddressEvent(_address);
+    /// @param _chainId uint64  Chain id
+    /// @param _address address  Address for blocking
+    function addBlockAddress(uint64 _chainId, address _address) external onlyOwner {
+        blockAddresses[_chainId][_address] = true;
+        emit AddBlockAddressEvent(_chainId, _address);
     }
 
     /// Unblock address
-    /// @param _address address  Available flag
-    function removeBlockAddress(address _address) external onlyOwner {
-        delete blockAddresses[_address];
-        emit RemoveBlockAddressEvent(_address);
+    /// @param _chainId uint64  Chain id
+    /// @param _address address  Address for unblocking
+    function removeBlockAddress(uint64 _chainId, address _address) external onlyOwner {
+        delete blockAddresses[_chainId][_address];
+        emit RemoveBlockAddressEvent(_chainId, _address);
     }
 
     /** External logic */
@@ -123,15 +127,15 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
     /// Return local chain id
     /// @return uint64
     function getLocalChainId() external view returns(uint64) {
-        return translatorLib.getLocalChainId();
+        return localChainId;
     }
 
     /// Initiate asterizm transfer
     /// Only clients can call this method
     /// @param _dto IzIninTransferRequestDto  Method DTO
     function initTransfer(IzIninTransferRequestDto calldata _dto) external payable {
-        require(!blockAddresses[msg.sender], "AsterizmInitializer: sender address is blocked");
-        require(!blockAddresses[_dto.dstAddress], "AsterizmInitializer: target address is blocked");
+        require(!blockAddresses[localChainId][msg.sender], "AsterizmInitializer: sender address is blocked");
+        require(!blockAddresses[_dto.dstChainId][_dto.dstAddress], "AsterizmInitializer: target address is blocked");
 
         TrSendMessageRequestDto memory dto = _buildTrSendMessageRequestDto(
             msg.sender, _dto.dstChainId, _dto.dstAddress, _dto.useForceOrder ? outboundNonce.increaseNonce(_dto.dstChainId, abi.encodePacked(msg.sender, _dto.dstAddress)) : 0,
@@ -143,7 +147,7 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
     /// Receive payload from translator
     /// @param _dto IzReceivePayloadRequestDto  Method DTO
     function receivePayload(IzReceivePayloadRequestDto calldata _dto) external onlyTranslator {
-        require(!blockAddresses[_dto.dstAddress], "AsterizmInitializer: target address is blocked");
+        require(!blockAddresses[localChainId][_dto.dstAddress], "AsterizmInitializer: target address is blocked");
         if (_dto.forceOrder) {
             require(
                 inboundNonce.increaseNonceWithValidation(_dto.srcChainId, abi.encodePacked(_dto.srcAddress, _dto.dstAddress), _dto.nonce) == _dto.nonce,

@@ -247,7 +247,7 @@ describe("Gas sender test", function () {
         .to.emit(translator1, 'SendMessageEvent')
         .withArgs((value) => {capturedValue = value; return true;});
     await expect(translator2.transferMessage(300000, capturedValue))
-        .to.emit(gas_sender2, 'EncodedPayloadReceivedEvent');
+        .to.emit(gas_sender2, 'PayloadReceivedEvent');
   });
   it("Should not transfer same message second time", async function () {
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, Gas, gas_sender1, gas_sender2, gas_sender3, owner, user1, currentChainIds  } = await loadFixture(deployContractsFixture);
@@ -326,7 +326,7 @@ describe("Gas sender test", function () {
     expect(decodedValue[8]).to.not.null; // transferHash
     // decodedValue[9] - payload
     await expect(translator2.transferMessage(300000, capturedValue))
-        .to.emit(gas_sender2, 'EncodedPayloadReceivedEvent');
+        .to.emit(gas_sender2, 'PayloadReceivedEvent');
     let payloadValue = ethers.utils.defaultAbiCoder.decode(['address', 'uint', 'uint', 'address', 'uint'], decodedValue[9].toString());
     expect(payloadValue[0]).to.equal(address);
     expect(payloadValue[1]).to.equal(value);
@@ -429,7 +429,7 @@ describe("Gas sender test", function () {
     expect(decodedValue[8]).to.not.null; // transferHash
     // decodedValue[9] - payload
     await expect(translator2.transferMessage(300000, PacketValue))
-        .to.emit(gas_sender2, 'EncodedPayloadReceivedEvent');
+        .to.emit(gas_sender2, 'PayloadReceivedEvent');
     let payloadValue = ethers.utils.defaultAbiCoder.decode(['address', 'uint', 'uint', 'address', 'uint'], decodedValue[9].toString());
     expect(payloadValue[0]).to.equal(address);
     expect(payloadValue[1]).to.equal(value);
@@ -499,7 +499,7 @@ describe("Gas sender test", function () {
     expect(decodedValue[8]).to.not.null; // transferHash
     // decodedValue[9] - payload
     await expect(translator2.transferMessage(300000, PacketValue))
-        .to.emit(gas_sender2, 'EncodedPayloadReceivedEvent');
+        .to.emit(gas_sender2, 'PayloadReceivedEvent');
     payloadValue = ethers.utils.defaultAbiCoder.decode(['address', 'uint', 'uint', 'address', 'uint'], decodedValue[9].toString());
     expect(payloadValue[0]).to.equal(address);
     expect(payloadValue[1]).to.equal(value);

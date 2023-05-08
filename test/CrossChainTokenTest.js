@@ -173,7 +173,7 @@ describe("Crosschain token", function () {
         (TOKEN_AMOUNT.sub(value))
     );
     await expect(translator2.transferMessage(300000, packetValue))
-        .to.emit(token2, 'EncodedPayloadReceivedEvent');
+        .to.emit(token2, 'PayloadReceivedEvent');
     await expect(token2.asterizmClReceive(currentChainIds[0], token1.address, currentChainIds[1], token2.address, decodedValue[0], decodedValue[7], decodedValue[8], decodedValue[9])).to.not.reverted;
     expect(await token1.balanceOf(owner.address)).to.equal(
       (TOKEN_AMOUNT.sub(value))

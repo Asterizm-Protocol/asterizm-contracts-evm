@@ -7,7 +7,7 @@ import "../interfaces/IInitializerSender.sol";
 import "../interfaces/IClientReceiverContract.sol";
 import "./BaseAsterizmEnv.sol";
 
-abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceiverContract, BaseAsterizmEnv {
+abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverContract, BaseAsterizmEnv {
 
     /// Set initializer event
     /// @param _initializerAddress address  Initializer address
@@ -25,14 +25,14 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// @param _payload bytes  Payload
     event InitiateTransferEvent(uint64 _dstChainId, address _dstAddress, uint _txId, bytes32 _transferHash, bytes _payload);
 
-    /// Encoded payload receive event (for client server logic)
+    /// Payload receive event (for client server logic)
     /// @param _srcChainId uint64  Source chain ID
     /// @param _srcAddress address  Source address
     /// @param _nonce uint  Transaction nonce
     /// @param _txId uint  Transfer ID
     /// @param _transferHash bytes32  Transaction hash
     /// @param _payload bytes  Payload
-    event EncodedPayloadReceivedEvent(uint64 _srcChainId, address _srcAddress, uint _nonce, uint _txId, bytes32 _transferHash, bytes _payload);
+    event PayloadReceivedEvent(uint64 _srcChainId, address _srcAddress, uint _nonce, uint _txId, bytes32 _transferHash, bytes _payload);
 
     /// Add trusted address event
     /// @param _chainId uint64  Chain ID
@@ -65,7 +65,7 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     mapping(uint64 => address) private trustedSrcAddresses;
     mapping(bytes32 => AsterizmTransfer) private inboundTransfers;
     mapping(bytes32 => AsterizmTransfer) private outboundTransfers;
-    uint private trustedAddressCount;
+    bool private mustCheckTrustedSrcAddresses;
     bool private useForceOrder;
     bool private disableHashValidation;
     uint private txId;
@@ -93,7 +93,7 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// Only trusted source address modifier
     /// You must add trusted source addresses in production networks!
     modifier onlyTrustedSrcAddress(uint64 _chainId, address _address) {
-        if (trustedAddressCount > 0) {
+        if (mustCheckTrustedSrcAddresses) {
             require(trustedSrcAddresses[_chainId] == _address, "BaseAsterizmClient: wrong source address");
         }
         _;
@@ -203,11 +203,9 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// @param _chainId uint64  Chain ID
     /// @param _trustedAddress address  Trusted address
     function addTrustedSourceAddress(uint64 _chainId, address _trustedAddress) public onlyOwner {
-        bool shouldIncCount = trustedSrcAddresses[_chainId] == address(0);
         trustedSrcAddresses[_chainId] = _trustedAddress;
-        if (shouldIncCount) {
-            trustedAddressCount++;
-        }
+        mustCheckTrustedSrcAddresses = true;
+
         emit AddTrustedSourceAddressEvent(_chainId, _trustedAddress);
     }
 
@@ -220,13 +218,19 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
         }
     }
 
+    /// Change checking trusted source addresses flag
+    /// @param _flag bool  Checking logic flag
+    function changeCheckingTrustedSourceAddresses(bool _flag) external onlyOwner {
+        mustCheckTrustedSrcAddresses = _flag;
+    }
+
     /// Remove trusted address
     /// @param _chainId uint64  Chain ID
     function removeTrustedSourceAddress(uint64 _chainId) external onlyOwner {
         require(trustedSrcAddresses[_chainId] != address(0), "BaseAsterizmClient: trusted address not found");
         address removingAddress = trustedSrcAddresses[_chainId];
         delete trustedSrcAddresses[_chainId];
-        trustedAddressCount--;
+
         emit RemoveTrustedSourceAddressEvent(_chainId, removingAddress);
     }
 
@@ -263,6 +267,37 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// @return uint64
     function _getLocalChainId() internal view returns(uint64) {
         return localChainId;
+    }
+
+    /// Return initializer address
+    /// @return address
+    function getInitializerAddress() external view returns(address) {
+        return address(initializerLib);
+    }
+
+    /// Return trusted src addresses
+    /// @param _chainId uint64  Chain id
+    /// @return address
+    function getTrustedSrcAddresses(uint64 _chainId) external view returns(address) {
+        return trustedSrcAddresses[_chainId];
+    }
+
+    /// Return must check trusted src addresses flag
+    /// @return bool
+    function getTrustedSrcAddresses() external view returns(bool) {
+        return mustCheckTrustedSrcAddresses;
+    }
+
+    /// Return use force order flag
+    /// @return bool
+    function getUseForceOrder() external view returns(bool) {
+        return useForceOrder;
+    }
+
+    /// Return disable hash validation flag
+    /// @return bool
+    function getDisableHashValidation() external view returns(bool) {
+        return disableHashValidation;
     }
 
     /** External logic */
@@ -311,20 +346,18 @@ abstract contract BaseAsterizmClient is Ownable, ReentrancyGuard, IClientReceive
     /// Receive payload from initializer
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function asterizmIzReceive(ClAsterizmReceiveRequestDto calldata _dto) external onlyInitializer nonReentrant {
-        _asterizmReceiveEncoded(_dto);
+        _asterizmReceiveExternal(_dto);
     }
 
-    /// Receive encoded payload
-    /// This methos needs for transfer encoded data
-    /// You must use onlyTrustedSrcAddress modifier!
+    /// Receive external payload
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function _asterizmReceiveEncoded(ClAsterizmReceiveRequestDto calldata _dto) private
+    function _asterizmReceiveExternal(ClAsterizmReceiveRequestDto calldata _dto) private
         onlyOwnerOrInitializer
         onlyTrustedSrcAddress(_dto.srcChainId, _dto.srcAddress)
         onlyNonExecuted(_dto.transferHash)
         setReceiveTransfer(_dto.transferHash)
     {
-        emit EncodedPayloadReceivedEvent(_dto.srcChainId, _dto.srcAddress, _dto.nonce, _dto.txId, _dto.transferHash, _dto.payload);
+        emit PayloadReceivedEvent(_dto.srcChainId, _dto.srcAddress, _dto.nonce, _dto.txId, _dto.transferHash, _dto.payload);
     }
 
     /// Receive payload from client server

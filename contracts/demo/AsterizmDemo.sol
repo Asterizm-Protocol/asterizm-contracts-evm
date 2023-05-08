@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../base/BaseAsterizmClient.sol";
+import "../base/AsterizmClient.sol";
 
-contract AsterizmDemo is BaseAsterizmClient {
+contract AsterizmDemo is AsterizmClient {
 
     event SetExternalChainMessageEvent(string message);
 
     string public currentChainMessage;
     string public externalChainMessage;
 
-    constructor (IInitializerSender _initializerLib) BaseAsterizmClient(_initializerLib, true, false) {
+    constructor (IInitializerSender _initializerLib) AsterizmClient(_initializerLib, true, false) {
         currentChainMessage = "Hello from source chain";
         externalChainMessage = "Here is nothing yet";
     }
