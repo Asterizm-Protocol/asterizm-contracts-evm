@@ -11,7 +11,7 @@ contract GasStation is AsterizmClient {
     using SafeERC20 for IERC20;
 
     event CoinsReceivedEvent(uint _amount, uint _transactionId, address dstAddress);
-    event GasSendEvent(uint64 _dstChainId, address _dstAddress, uint _transactionId, bytes _payload);
+    event GasSendEvent(uint64 _dstChainId, uint _transactionId, bytes _payload);
     event AddStableCoinEvent(address _address);
     event RemoveStableCoinEvent(address _address);
     event SetMinUsdAmountEvent(uint _amount);
@@ -104,10 +104,9 @@ contract GasStation is AsterizmClient {
     /// Send gas logic
     /// @param _chainIds uint64[]  Chains IDs
     /// @param _amounts uint[]  Amounts
-    /// @param _addresses address[]  Addresses
     /// @param _receivers address  Receivers
     /// @param _token IERC20  Token
-    function sendGas(uint64[] memory _chainIds, uint[] memory _amounts, address[] memory _addresses, address[] memory _receivers, IERC20 _token) external nonReentrant {
+    function sendGas(uint64[] memory _chainIds, uint[] memory _amounts, address[] memory _receivers, IERC20 _token) external nonReentrant {
         require(stableCoins[address(_token)].exists, "GasStation: wrong token");
         (bool success, bytes memory result) = address(_token).call(abi.encodeWithSignature("decimals()"));
         require(success, "GasStation: decimals request failed");
@@ -131,9 +130,9 @@ contract GasStation is AsterizmClient {
         stableCoins[address(_token)].balance = stableCoins[address(_token)].balance.add(sum);
         for (uint i = 0; i < _amounts.length; i++) {
             uint txId = _getTxId();
-            ClInitTransferEventDto memory dto = _buildClInitTransferEventDto(_chainIds[i], _addresses[i], abi.encode(_receivers[i], _amounts[i], txId, address(_token), decimals));
+            ClInitTransferEventDto memory dto = _buildClInitTransferEventDto(_chainIds[i], abi.encode(_receivers[i], _amounts[i], txId, address(_token), decimals));
             _initAsterizmTransferEvent(dto);
-            emit GasSendEvent(_chainIds[i], _addresses[i], txId, dto.payload);
+            emit GasSendEvent(_chainIds[i], txId, dto.payload);
         }
     }
 

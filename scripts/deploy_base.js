@@ -110,19 +110,19 @@ async function deployBase() {
   ];
   // const chains = [
   //     {
-  //         id: 5,
+  //         id: 11155111,
   //         title: "ETH",
-  //         isCurrent: true,
+  //         isCurrent: false,
   //         stableCoins: [
-  //             '0xB528B84BBcc7c6737F984dfD8ed7C9A77C530a4D',
+  //             '0xc8e37E456c517D682ca8F343e46BF4DEFFd24D13',
   //         ],
   //     },
   //     {
-  //         id: 8001,
+  //         id: 80001,
   //         title: "POL",
-  //         isCurrent: false,
+  //         isCurrent: true,
   //         stableCoins: [
-  //             '0xEeE2BDEC78fE7D7b4f981aDA6CaA31a4d9b32BF6',
+  //             '0x7f4F94A70e5E7236c7a14D04fd749FF5b7023bE8',
   //         ],
   //     },
   // ];
@@ -154,9 +154,6 @@ async function deployBase() {
   tx = await initializer.deployed();
   gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
   console.log("Initializer was deployed with address: %s", initializer.address);
-  tx = await initializer.setIsEncSendAvailable(true);
-  gasLimit = gasLimit.add(tx.gasLimit);
-  // await initializer.setIsDecSendAvailable(true);
 
   console.log("Setting endpoint for translator contract...");
   tx = await translator.setInitializer(initializer.address);

@@ -109,19 +109,19 @@ async function deployBase() {
     ];
     // const chains = [
     //     {
-    //         id: 5,
+    //         id: 11155111,
     //         title: "ETH",
-    //         isCurrent: true,
+    //         isCurrent: false,
     //         stableCoins: [
-    //             '0xB528B84BBcc7c6737F984dfD8ed7C9A77C530a4D',
+    //             '0xc8e37E456c517D682ca8F343e46BF4DEFFd24D13',
     //         ],
     //     },
     //     {
-    //         id: 8001,
+    //         id: 80001,
     //         title: "POL",
-    //         isCurrent: false,
+    //         isCurrent: true,
     //         stableCoins: [
-    //             '0xEeE2BDEC78fE7D7b4f981aDA6CaA31a4d9b32BF6',
+    //             '0x7f4F94A70e5E7236c7a14D04fd749FF5b7023bE8',
     //         ],
     //     },
     // ];
@@ -134,8 +134,8 @@ async function deployBase() {
     }
 
     let gasLimit = BigNumber.from(0);
-    const translator = await Transalor.attach('0xbf2ad38fd09F37f50f723E35dd84EEa1C282c5C9'); // change translator address here
-    const initializer = await Initializer.attach('0xFC4EE541377F3b6641c23CBE82F6f04388290421'); // change initializer address here
+    const translator = await Transalor.attach('0x521023c8913b93f917A91AAd12987FD8AE9c9E8e'); // change translator address here
+    const initializer = await Initializer.attach('0x376dbABCFf28B5602bAAc92F58dcB6181c053139'); // change initializer address here
 
     return {initializer, translator, owner, currentChain, gasLimit};
 }
@@ -146,11 +146,10 @@ async function main() {
 
     let tx;
     const minUsdAmount = 100; // change minUsdAmount here
-    const useEncryption = true; // change useEncryption here
     const useForceOrder = false; // change useForceOrder here
     console.log("Deployig gas station contract...");
     const GasStation = await ethers.getContractFactory("GasStation");
-    const gasStation = await GasStation.deploy(initializer.address, useEncryption, useForceOrder);
+    const gasStation = await GasStation.deploy(initializer.address, useForceOrder);
     tx = await gasStation.deployed();
     gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
     console.log("Gas station was deployed with address: %s", gasStation.address);

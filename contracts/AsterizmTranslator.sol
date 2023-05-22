@@ -2,15 +2,17 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IInitializerReceiver.sol";
 import "./interfaces/ITranslator.sol";
+import "./libs/AddressLib.sol";
+import "./libs/UintLib.sol";
 import "./base/BaseAsterizmEnv.sol";
 
 contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
 
-    using Address for address;
+    using AddressLib for address;
+    using UintLib for uint;
     using SafeMath for uint;
 
     /// Set initializer event
@@ -38,20 +40,21 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
     event SetLocalChainEvent(uint64 _chainId);
 
     /// Send message event
+    /// @param _feeValue uint  Fee value
     /// @param _payload bytes  Transfer payload
-    event SendMessageEvent(bytes _payload);
+    event SendMessageEvent(uint _feeValue, bytes _payload);
 
     /// Success transfer event
     event SuccessTransferEvent();
 
     /// Transfer send event
     /// @param _srcChainId uint64  Source chain ID
-    /// @param _srcAddress address  Source address
-    /// @param _dstAddress address  Destination address
+    /// @param _srcAddress uint  Source address
+    /// @param _dstAddress uint  Destination address
     /// @param _nonce uint  Nonce
     /// @param _transferHash bytes32  Transfer hash
     /// @param _payloadHash  bytes32  Payload hash
-    event TransferSendEvent(uint64 indexed _srcChainId, address indexed _srcAddress, address indexed _dstAddress, uint _nonce, bytes32 _transferHash, bytes32 _payloadHash);
+    event TransferSendEvent(uint64 indexed _srcChainId, uint indexed _srcAddress, uint indexed _dstAddress, uint _nonce, bytes32 _transferHash, bytes32 _payloadHash);
 
     struct Chain {
         bool exists;
@@ -156,7 +159,7 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
 
         bytes memory payload = abi.encode(
             _dto.nonce, localChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress,
-            msg.value, _dto.forceOrder, _dto.txId, _dto.transferHash, _dto.payload
+            _dto.forceOrder, _dto.txId, _dto.transferHash, _dto.payload
         );
         if (_dto.dstChainId == localChainId) {
             TrTransferMessageRequestDto memory dto = _buildTrTarnsferMessageRequestDto(gasleft(), payload);
@@ -165,7 +168,7 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
             return;
         }
 
-        emit SendMessageEvent(payload);
+        emit SendMessageEvent(msg.value, payload);
     }
 
     /// Initernal transfer message (for transfers in one chain)
@@ -184,24 +187,22 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
     /// Base transfer message
     /// @param _dto TrTransferMessageRequestDto  Method DTO
     function _baseTransferMessage(TrTransferMessageRequestDto memory _dto) private {
-        bytes memory pl = _dto.payload;
         (
-            uint nonce, uint64 srcChainId, address srcAddress, uint64 dstChainId,
-            address dstAddress, , bool forceOrder, uint txId,
+            uint nonce, uint64 srcChainId, uint srcAddress, uint64 dstChainId,
+            uint dstAddress, bool forceOrder, uint txId,
             bytes32 transferHash, bytes memory payload
         ) = abi.decode(
-            pl,
-            (uint, uint64, address, uint64, address, uint, bool, uint, bytes32, bytes)
+            _dto.payload,
+            (uint, uint64, uint, uint64, uint, bool, uint, bytes32, bytes)
         );
 
         require(dstChainId == localChainId, "Translator: wrong chain id");
-        require(dstAddress.isContract(), "Translator: destination address is non-contract");
+        require(dstAddress.toAddress().isContract(), "Translator: destination address is non-contract");
 
-        uint gasLimit = _dto.gasLimit;
-        IzReceivePayloadRequestDto memory dto = _buildIzReceivePayloadRequestDto(
-            _buildBaseTransferDirectionDto(srcChainId, srcAddress, localChainId, dstAddress), nonce, gasLimit, forceOrder, txId, transferHash, payload
-        );
-        initializerLib.receivePayload(dto);
+        initializerLib.receivePayload(_buildIzReceivePayloadRequestDto(
+            _buildBaseTransferDirectionDto(srcChainId, srcAddress, localChainId, dstAddress),
+            nonce, _dto.gasLimit, forceOrder, txId, transferHash, payload
+        ));
 
         emit TransferSendEvent(srcChainId, srcAddress, dstAddress, nonce, transferHash, keccak256(payload));
     }

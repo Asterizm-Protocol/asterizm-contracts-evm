@@ -93,6 +93,11 @@ const config = {
       accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
       chainId: 5
     },
+    ethereumSepolia: {
+      url: process.env.NETWORK_HOST_ETHEREUM_SEPOLIA,
+      accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
+      chainId: 11155111
+    },
     polygonMumbai: {
       url: process.env.NETWORK_HOST_POLYGON_MUMBAI,
       accounts: [process.env.OWNER_PK_ASTERIZM_TEST],

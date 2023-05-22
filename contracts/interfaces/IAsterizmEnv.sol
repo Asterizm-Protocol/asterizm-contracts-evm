@@ -5,26 +5,26 @@ interface IAsterizmEnv {
 
     /// Base transfer direction DTO
     /// @param srcChainId uint64  Source chain ID
-    /// @param srcAddress address  Source address
+    /// @param srcAddress uint  Source address
     /// @param dstChainId uint64  Destination chain ID
-    /// @param dstAddress address  Destination address
+    /// @param dstAddress uint  Destination address
     struct BaseTransferDirectionDto {
         uint64 srcChainId;
-        address srcAddress;
+        uint srcAddress;
         uint64 dstChainId;
-        address dstAddress;
+        uint dstAddress;
     }
 
     /// Client initiation transfer request DTO
     /// @param dstChainId uint64  Destination chain ID
-    /// @param dstAddress address  Destination address
+    /// @param dstAddress uint  Destination address
     /// @param feeAmount uint  Fee amount
     /// @param txId uint  Transaction ID
     /// @param transferHash bytes32  Transfer hash
     /// @param payload bytes  Payload
     struct ClInitTransferRequestDto {
         uint64 dstChainId;
-        address dstAddress;
+        uint dstAddress;
         uint feeAmount;
         uint txId;
         bytes32 transferHash;
@@ -33,42 +33,42 @@ interface IAsterizmEnv {
 
     /// Internal client initiation transfer request DTO
     /// @param dstChainId uint64  Destination chain ID
-    /// @param dstAddress address  Destination address
+    /// @param dstAddress uint  Destination address
     /// @param feeAmount uint  Fee amount
     /// @param txId uint  Transaction ID
     /// @param transferHash bytes32  Transfer hash
     /// @param payload bytes  Payload
     struct InternalClInitTransferRequestDto {
         uint64 dstChainId;
-        address dstAddress;
+        uint dstAddress;
         uint feeAmount;
         bytes payload;
     }
 
     /// Client initiation transfer event DTO
     /// @param dstChainId uint64  Destination chain ID
-    /// @param dstAddress address  Destination address
+    /// @param dstAddress uint  Destination address
     /// @param payload bytes  Payload
     struct ClInitTransferEventDto {
         uint64 dstChainId;
-        address dstAddress;
+        uint dstAddress;
         bytes payload;
     }
 
     /// Client asterizm receive request DTO
     /// @param srcChainId uint64  Source chain ID
-    /// @param srcAddress address  Source address
+    /// @param srcAddress uint  Source address
     /// @param dstChainId uint64  Destination chain ID
-    /// @param dstAddress address  Destination address
+    /// @param dstAddress uint  Destination address
     /// @param nonce uint  Nonce
     /// @param txId uint  Transaction ID
     /// @param transferHash bytes32  Transfer hash
     /// @param payload bytes  Payload
     struct ClAsterizmReceiveRequestDto {
         uint64 srcChainId;
-        address srcAddress;
+        uint srcAddress;
         uint64 dstChainId;
-        address dstAddress;
+        uint dstAddress;
         uint nonce;
         uint txId;
         bytes32 transferHash;
@@ -76,9 +76,9 @@ interface IAsterizmEnv {
     }
 
     /// Translator send message request DTO
-    /// @param srcAddress address  Source address
+    /// @param srcAddress uint  Source address
     /// @param dstChainId uint64  Destination chain ID
-    /// @param dstAddress address  Destination address
+    /// @param dstAddress uint  Destination address
     /// @param nonce uint  Nonce
     /// @param useEncryption bool  Use encryption flag
     /// @param forceOrder bool  Force order flag
@@ -87,9 +87,9 @@ interface IAsterizmEnv {
     /// @param transferHash bytes32  Transfer hash
     /// @param payload bytes  Payload
     struct TrSendMessageRequestDto {
-        address srcAddress;
+        uint srcAddress;
         uint64 dstChainId;
-        address dstAddress;
+        uint dstAddress;
         uint nonce;
         bool forceOrder;
         uint txId;
@@ -107,13 +107,13 @@ interface IAsterizmEnv {
 
     /// Initializator initizte transfer request DTO
     /// @param dstChainId uint64  Destination chain ID
-    /// @param dstAddress address  Destination address
+    /// @param dstAddress uint  Destination address
     /// @param transferHash bytes32  Transfer hash
     /// @param txId uint  Transaction ID
     /// @param payload bytes  Payload
     struct IzIninTransferRequestDto {
         uint64 dstChainId;
-        address dstAddress;
+        uint dstAddress;
         bytes32 transferHash;
         bool useForceOrder;
         uint txId;
@@ -122,9 +122,9 @@ interface IAsterizmEnv {
 
     /// Initializator receive payload request DTO
     /// @param srcChainId uint64  Source chain ID
-    /// @param srcAddress address  Source address
+    /// @param srcAddress uint  Source address
     /// @param dstChainId uint64  Destination chain ID
-    /// @param dstAddress address  Destination address
+    /// @param dstAddress uint  Destination address
     /// @param nonce uint  Nonce
     /// @param gasLimit uint  Gas limit
     /// @param forceOrder bool  Force order flag
@@ -133,9 +133,9 @@ interface IAsterizmEnv {
     /// @param payload bytes  Payload
     struct IzReceivePayloadRequestDto {
         uint64 srcChainId;
-        address srcAddress;
+        uint srcAddress;
         uint64 dstChainId;
-        address dstAddress;
+        uint dstAddress;
         uint nonce;
         uint gasLimit;
         bool forceOrder;
@@ -146,9 +146,9 @@ interface IAsterizmEnv {
 
     /// Initializator retry payload request DTO
     /// @param srcChainId uint64  Source chain ID
-    /// @param srcAddress address  Source address
+    /// @param srcAddress uint  Source address
     /// @param dstChainId uint64  Destination chain ID
-    /// @param dstAddress address  Destination address
+    /// @param dstAddress uint  Destination address
     /// @param nonce uint  Nonce
     /// @param gasLimit uint  Gas limit
     /// @param forceOrder bool  Force order flag
@@ -157,9 +157,9 @@ interface IAsterizmEnv {
     /// @param payload bytes  Payload
     struct IzRetryPayloadRequestDto {
         uint64 srcChainId;
-        address srcAddress;
+        uint srcAddress;
         uint64 dstChainId;
-        address dstAddress;
+        uint dstAddress;
         uint nonce;
         uint gasLimit;
         bool forceOrder;

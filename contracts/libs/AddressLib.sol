@@ -1,10 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-/**
- * @dev Collection of functions related to the address type
- */
 library AddressLib {
+
+    /// Convert address to uint (uint256) format
+    /// @param _address address
+    /// @return uint
+    function toUint(address _address) internal pure returns(uint) {
+        return uint(uint160(_address));
+    }
+
     /**
      * @dev Returns true if `account` is a contract.
      *

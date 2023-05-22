@@ -34,11 +34,10 @@ contract MultichainToken is IMultiChainToken, ERC20, AsterizmClient {
     /// @param _dstChainId uint64  Destination chain ID
     /// @param _from address  From address
     /// @param _to address  To address
-    /// @param _target address  Target address
-    function crossChainTransfer(uint64 _dstChainId, address _from, address _to, uint _amount, address _target) public payable {
+    function crossChainTransfer(uint64 _dstChainId, address _from, address _to, uint _amount) public payable {
         uint amount = _debitFrom(_from, _amount); // amount returned should not have dust
         require(amount > 0, "MultichainToken: amount too small");
-        _initAsterizmTransferEvent(_buildClInitTransferEventDto(_dstChainId, _target, abi.encode(_to, amount, _getTxId())));
+        _initAsterizmTransferEvent(_buildClInitTransferEventDto(_dstChainId, abi.encode(_to, amount, _getTxId())));
     }
 
     /// Receive non-encoded payload
