@@ -4,11 +4,13 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../base/AsterizmClient.sol";
+import "../libs/UintLib.sol";
 
 contract GasStation is AsterizmClient {
 
     using SafeMath for uint;
     using SafeERC20 for IERC20;
+    using UintLib for uint;
 
     event CoinsReceivedEvent(uint _amount, uint _transactionId, address dstAddress);
     event GasSendEvent(uint64 _dstChainId, uint _transactionId, bytes _payload);
@@ -104,9 +106,9 @@ contract GasStation is AsterizmClient {
     /// Send gas logic
     /// @param _chainIds uint64[]  Chains IDs
     /// @param _amounts uint[]  Amounts
-    /// @param _receivers address  Receivers
+    /// @param _receivers uint[]  Receivers
     /// @param _token IERC20  Token
-    function sendGas(uint64[] memory _chainIds, uint[] memory _amounts, address[] memory _receivers, IERC20 _token) external nonReentrant {
+    function sendGas(uint64[] memory _chainIds, uint[] memory _amounts, uint[] memory _receivers, IERC20 _token) external nonReentrant {
         require(stableCoins[address(_token)].exists, "GasStation: wrong token");
         (bool success, bytes memory result) = address(_token).call(abi.encodeWithSignature("decimals()"));
         require(success, "GasStation: decimals request failed");
@@ -139,11 +141,13 @@ contract GasStation is AsterizmClient {
     /// Receive non-encoded payload
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal override {
-        (address payable dstAddress, uint amount, uint txId , address tokenAddress, uint decimals, uint stableRate) = abi.decode(_dto.payload, (address, uint, uint, address, uint, uint));
+        (uint dstAddressUint, uint amount, uint txId , address tokenAddress, uint decimals, uint stableRate) = abi.decode(_dto.payload, (uint, uint, uint, address, uint, uint));
         require(
-            _validTransferHash(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.txId, abi.encode(dstAddress, amount, txId, tokenAddress, decimals), _dto.transferHash),
+            _validTransferHash(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.txId, abi.encode(dstAddressUint, amount, txId, tokenAddress, decimals), _dto.transferHash),
             "GasStation: transfer hash is invalid"
         );
+
+        address dstAddress = dstAddressUint.toAddress();
         uint amountToSend = amount.mul(stableRate).div(10 ** decimals);
         if (dstAddress != address(this)) {
             (bool success, ) = dstAddress.call{value: amountToSend}("");
