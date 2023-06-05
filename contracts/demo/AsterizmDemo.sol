@@ -26,7 +26,7 @@ contract AsterizmDemo is AsterizmClient {
     /// @param _dstChainId uint64  Destination chain ID
     /// @param _message string  Message
     function sendMessage(uint64 _dstChainId, string calldata _message) public payable {
-        _initAsterizmTransferEvent(_buildClInitTransferEventDto(_dstChainId, abi.encode(_message)));
+        _initAsterizmTransferEvent(_dstChainId, abi.encode(_message));
     }
 
     /// Receive non-encoded payload

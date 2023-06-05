@@ -1,8 +1,12 @@
 import "@nomicfoundation/hardhat-toolbox";
-import './tasks/accounts_task';
-
 require('dotenv').config();
 require("@nomicfoundation/hardhat-chai-matchers");
+
+import './tasks/accounts_task';
+import './tasks/deploy_base_task';
+import './tasks/deploy_gas_task';
+import './tasks/deploy_claim_task';
+import './tasks/deploy_trustaddresses_task';
 
 const config = {
   solidity: {
@@ -102,6 +106,16 @@ const config = {
       url: process.env.NETWORK_HOST_POLYGON_MUMBAI,
       accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
       chainId: 80001
+    },
+    venidiumMainnet: {
+      url: process.env.NETWORK_HOST_VENIDIUM,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 4919
+    },
+    venidiumTestnet: {
+      url: process.env.NETWORK_HOST_VENIDIUM_TESTNET,
+      accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
+      chainId: 4918
     }
   },
   etherscan: {

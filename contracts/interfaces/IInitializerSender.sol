@@ -17,4 +17,9 @@ interface IInitializerSender is IAsterizmEnv {
     /// Return local chain id
     /// @return uint64
     function getLocalChainId() external view returns(uint64);
+
+    /// Return chain type by id
+    /// @param _chainId  Chain id
+    /// @return uint8  Chain type
+    function getChainType(uint64 _chainId) external view returns(uint8);
 }

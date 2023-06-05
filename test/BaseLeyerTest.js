@@ -9,19 +9,16 @@ describe("Base layer test", function () {
     const Demo = await ethers.getContractFactory("AsterizmDemo");
     const [owner1, owner2] = await ethers.getSigners();
     const currentChainIds = [1, 2];
-    let chainIds = [];
-    for (let i = 0; i < currentChainIds.length; i++) {
-      chainIds.push(currentChainIds[i]);
-    }
+    const chainTypes = {EVM: 1, TVM: 2};
 
-    const translator1 = await Transalor.deploy(currentChainIds[0]);
+    const translator1 = await Transalor.deploy(currentChainIds[0], chainTypes.EVM);
     await translator1.deployed();
-    await translator1.addChains(chainIds);
+    await translator1.addChains(currentChainIds, [chainTypes.EVM, chainTypes.EVM]);
     await translator1.addRelayer(owner1.address);
 
-    const translator2 = await Transalor.deploy(currentChainIds[1]);
+    const translator2 = await Transalor.deploy(currentChainIds[1], chainTypes.EVM);
     await translator2.deployed();
-    await translator2.addChains(chainIds);
+    await translator2.addChains(currentChainIds, [chainTypes.EVM, chainTypes.EVM]);
     await translator2.addRelayer(owner1.address);
 
     // Initializer1 deployment
@@ -312,7 +309,7 @@ describe("Base layer test", function () {
             (value) => {feeValue = value; return true;},
             (value) => {capturedValue = value; return true;},
         );
-    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'bool', 'uint', 'bytes32', 'bytes'], capturedValue);
+    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'uint', 'uint64', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], capturedValue);
     // decodedValue[0] - nonce
     expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
     expect(decodedValue[2]).to.equal(demo1.address); // srcAddress

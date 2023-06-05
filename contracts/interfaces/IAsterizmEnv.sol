@@ -45,16 +45,6 @@ interface IAsterizmEnv {
         bytes payload;
     }
 
-    /// Client initiation transfer event DTO
-    /// @param dstChainId uint64  Destination chain ID
-    /// @param dstAddress uint  Destination address
-    /// @param payload bytes  Payload
-    struct ClInitTransferEventDto {
-        uint64 dstChainId;
-        uint dstAddress;
-        bytes payload;
-    }
-
     /// Client asterizm receive request DTO
     /// @param srcChainId uint64  Source chain ID
     /// @param srcAddress uint  Source address

@@ -1,7 +1,7 @@
 const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { expect } = require("chai");
-const {BigNumber} = require("ethers");
+const { BigNumber } = require("ethers");
 const bigInt = require("big-integer");
 
 const pow = BigNumber.from(10).pow(18);
@@ -16,15 +16,16 @@ describe("Gas sender test", function () {
     const Gas = await ethers.getContractFactory("GasStation");
     const [owner, user1] = await ethers.getSigners();
     const currentChainIds = [1, 2, 3];
+    const chainTypes = {EVM: 1, TVM: 2};
 
-    const translator1 = await Transalor.deploy(currentChainIds[0]);
+    const translator1 = await Transalor.deploy(currentChainIds[0], chainTypes.EVM);
     await translator1.deployed();
-    await translator1.addChains(currentChainIds);
+    await translator1.addChains(currentChainIds, [chainTypes.EVM, chainTypes.EVM, chainTypes.EVM]);
     await translator1.addRelayer(owner.address);
 
-    const translator2 = await Transalor.deploy(currentChainIds[1]);
+    const translator2 = await Transalor.deploy(currentChainIds[1], chainTypes.EVM);
     await translator2.deployed();
-    await translator2.addChains(currentChainIds);
+    await translator2.addChains(currentChainIds, [chainTypes.EVM, chainTypes.EVM, chainTypes.EVM]);
     await translator2.addRelayer(owner.address);
 
     // Initializer1 deployment
@@ -315,8 +316,8 @@ describe("Gas sender test", function () {
             (value) => {feeValue = value; return true;},
             (value) => {capturedValue = value; return true;},
         );
-    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'bool', 'uint', 'bytes32', 'bytes'], capturedValue);
-    // decodedValue[0] - nonce
+    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'uint', 'uint64', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], capturedValue);
+    expect(decodedValue[0]).to.not.null; // nonce
     expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
     expect(decodedValue[2]).to.equal(gas_sender1.address); // srcAddress
     expect(decodedValue[3]).to.equal(currentChainIds[1]); // dstChainId
@@ -325,10 +326,10 @@ describe("Gas sender test", function () {
     expect(decodedValue[5]).to.equal(true); // useForceOrder
     expect(decodedValue[6]).to.equal(0); // txId
     expect(decodedValue[7]).to.not.null; // transferHash
-    // decodedValue[8] - payload
+    expect(decodedValue[8]).to.not.null; // payload
     await expect(translator2.transferMessage(300000, capturedValue))
         .to.emit(gas_sender2, 'PayloadReceivedEvent');
-    let payloadValue = ethers.utils.defaultAbiCoder.decode(['address', 'uint', 'uint', 'address', 'uint'], decodedValue[8].toString());
+    let payloadValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint', 'uint', 'uint', 'uint'], decodedValue[8].toString());
     expect(payloadValue[0]).to.equal(address);
     expect(payloadValue[1]).to.equal(value);
     expect(payloadValue[2]).to.equal(0);
@@ -419,8 +420,8 @@ describe("Gas sender test", function () {
             (value) => {PacketValue = value; return true;},
         );
     // Check decoded Packet data
-    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'bool', 'uint', 'bytes32', 'bytes'], PacketValue);
-    // decodedValue[0] - nonce
+    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'uint', 'uint64', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], PacketValue);
+    expect(decodedValue[0]).to.not.null; // nonce
     expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
     expect(decodedValue[2]).to.equal(gas_sender1.address); // srcAddress
     expect(decodedValue[3]).to.equal(currentChainIds[1]); // dstChainId
@@ -429,10 +430,10 @@ describe("Gas sender test", function () {
     expect(decodedValue[5]).to.equal(true); // useForceOrder
     expect(decodedValue[6]).to.equal(0); // txId
     expect(decodedValue[7]).to.not.null; // transferHash
-    // decodedValue[8] - payload
+    expect(decodedValue[8]).to.not.null; // payload
     await expect(translator2.transferMessage(300000, PacketValue))
         .to.emit(gas_sender2, 'PayloadReceivedEvent');
-    let payloadValue = ethers.utils.defaultAbiCoder.decode(['address', 'uint', 'uint', 'address', 'uint'], decodedValue[8].toString());
+    let payloadValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint', 'uint', 'uint', 'uint'], decodedValue[8].toString());
     expect(payloadValue[0]).to.equal(address);
     expect(payloadValue[1]).to.equal(value);
     expect(payloadValue[2]).to.equal(0);
@@ -490,8 +491,8 @@ describe("Gas sender test", function () {
             (value) => {PacketValue = value; return true;},
         );
     // Check decoded Packet data
-    decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'bool', 'uint', 'bytes32', 'bytes'], PacketValue);
-    // decodedValue[0] - nonce
+    decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'uint', 'uint64', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], PacketValue);
+    expect(decodedValue[0]).to.not.null; // nonce
     expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
     expect(decodedValue[2]).to.equal(gas_sender1.address); // srcAddress
     expect(decodedValue[3]).to.equal(currentChainIds[1]); // dstChainId
@@ -500,10 +501,10 @@ describe("Gas sender test", function () {
     expect(decodedValue[5]).to.equal(true); // useForceOrder
     expect(decodedValue[6]).to.equal(1); // txId
     expect(decodedValue[7]).to.not.null; // transferHash
-    // decodedValue[8] - payload
+    expect(decodedValue[8]).to.not.null; // payload
     await expect(translator2.transferMessage(300000, PacketValue))
         .to.emit(gas_sender2, 'PayloadReceivedEvent');
-    payloadValue = ethers.utils.defaultAbiCoder.decode(['address', 'uint', 'uint', 'address', 'uint'], decodedValue[8].toString());
+    payloadValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint', 'uint', 'uint', 'uint'], decodedValue[8].toString());
     expect(payloadValue[0]).to.equal(address);
     expect(payloadValue[1]).to.equal(value);
     expect(payloadValue[2]).to.equal(1);
@@ -582,8 +583,8 @@ describe("Gas sender test", function () {
             (value) => {PacketValue = value; return true;},
         );
     // Check decoded Packet data
-    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'bool', 'uint', 'bytes32', 'bytes'], PacketValue);
-    // decodedValue[0] - nonce
+    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'uint', 'uint64', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], PacketValue);
+    expect(decodedValue[0]).to.not.null; // nonce
     expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
     expect(decodedValue[2]).to.equal(gas_sender3.address); // srcAddress
     expect(decodedValue[3]).to.equal(currentChainIds[1]); // dstChainId
@@ -592,7 +593,7 @@ describe("Gas sender test", function () {
     expect(decodedValue[5]).to.equal(true); // useForceOrder
     expect(decodedValue[6]).to.equal(0); // txId
     expect(decodedValue[7]).to.not.null; // transferHash
-    // decodedValue[8] - payload
+    expect(decodedValue[8]).to.not.null; // payload
     let psSrcChainId, psSrcAddress, psDstChainId, psDstAddress, psNonce, psTransferHash, psPayload, psReason;
     await expect(translator2.transferMessage(300000, PacketValue))
         .to.emit(initializer2, 'PayloadErrorEvent')
@@ -674,8 +675,8 @@ describe("Gas sender test", function () {
             (value) => {PacketValue = value; return true;},
         );
     // Check decoded Packet data
-    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'bool', 'uint', 'bytes32', 'bytes'], PacketValue);
-    // decodedValue[0] - nonce
+    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'uint', 'uint64', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], PacketValue);
+    expect(decodedValue[0]).to.not.null; // nonce
     expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
     expect(decodedValue[2]).to.equal(gas_sender3.address); // srcAddress
     expect(decodedValue[3]).to.equal(currentChainIds[1]); // dstChainId
@@ -684,7 +685,7 @@ describe("Gas sender test", function () {
     expect(decodedValue[5]).to.equal(true); // useForceOrder
     expect(decodedValue[6]).to.equal(txId); // txId
     expect(decodedValue[7]).to.equal(transferHash); // transferHash
-    // decodedValue[8] - payload
+    expect(decodedValue[8]).to.not.null; // payload
     await expect(gas_sender3.initAsterizmTransfer(dstChainId, txId, transferHash, payload)).to.be
         .revertedWith("AsterizmClient: outbound transfer executed already");
   });

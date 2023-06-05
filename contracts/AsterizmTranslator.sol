@@ -7,9 +7,10 @@ import "./interfaces/IInitializerReceiver.sol";
 import "./interfaces/ITranslator.sol";
 import "./libs/AddressLib.sol";
 import "./libs/UintLib.sol";
-import "./base/BaseAsterizmEnv.sol";
+import "./base/AsterizmEnv.sol";
+import "./base/AsterizmChainEnv.sol";
 
-contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
+contract AsterizmTranslator is Ownable, ITranslator, AsterizmEnv, AsterizmChainEnv {
 
     using AddressLib for address;
     using UintLib for uint;
@@ -29,7 +30,8 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
 
     /// Add chain event
     /// @param _chainId uint64
-    event AddChainEvent(uint64 _chainId);
+    /// @param _chainType uint8
+    event AddChainEvent(uint64 _chainId, uint8 _chainType);
 
     /// Remove chain event
     /// @param _chainId uint64
@@ -47,6 +49,11 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
     /// Success transfer event
     event SuccessTransferEvent();
 
+    /// Withdraw event
+    /// @param _target address
+    /// @param _amount uint
+    event WithdrawEvent(address _target, uint _amount);
+
     /// Transfer send event
     /// @param _srcChainId uint64  Source chain ID
     /// @param _srcAddress uint  Source address
@@ -58,6 +65,7 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
 
     struct Chain {
         bool exists;
+        uint8 chainType; // 1 - EVM, 2 - TVM
     }
     struct Relayer {
         bool exists;
@@ -68,9 +76,10 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
     mapping(uint64 => Chain) public chains;
     uint64 public localChainId;
 
-    constructor (uint64 _localChainId) {
+    /// COnstructodr
+    constructor (uint64 _localChainId, uint8 _localChainType) AsterizmChainEnv() {
         addRelayer(owner());
-        addChain(_localChainId);
+        addChain(_localChainId, _localChainType);
         _setLocalChainId(_localChainId);
     }
 
@@ -87,6 +96,16 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
     }
 
     /** Internal logic */
+
+    /// Withdraw coins
+    /// @param _target address  Target address
+    /// @param _amount uint  Amount
+    function withdraw(address _target, uint _amount) external onlyOwner {
+        require(address(this).balance >= _amount, "Translator: coins balance not enough");
+        (bool success, ) = _target.call{value: _amount}("");
+        require(success, "Translator: transfer error");
+        emit WithdrawEvent(_target, _amount);
+    }
 
     /// Add relayer
     /// @param _relayer address  Relayer address
@@ -111,16 +130,20 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
 
     /// Add chain
     /// @param _chainId uint64  Chain ID
-    function addChain(uint64 _chainId) public onlyOwner {
+    /// @param _chainType uint8  Chain type
+    function addChain(uint64 _chainId, uint8 _chainType) public onlyOwner {
+        require(_isChainTypeAwailable(_chainType), "Translator: chain type is unavailable");
         chains[_chainId].exists = true;
-        emit AddChainEvent(_chainId);
+        chains[_chainId].chainType = _chainType;
+        emit AddChainEvent(_chainId, _chainType);
     }
 
     /// Add chains list
     /// @param _chainIds uint64[]  Chain IDs
-    function addChains(uint64[] calldata _chainIds) public onlyOwner {
+    /// @param _chainTypes uint8[]  Chain types
+    function addChains(uint64[] calldata _chainIds, uint8[] calldata _chainTypes) public onlyOwner {
         for (uint i = 0; i < _chainIds.length; i++) {
-            addChain(_chainIds[i]);
+            addChain(_chainIds[i], _chainTypes[i]);
         }
     }
 
@@ -146,6 +169,14 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
     /// @return uint64
     function getLocalChainId() external view returns(uint64) {
         return localChainId;
+    }
+
+    /// Return chain type by id
+    /// @param _chainId  Chain id
+    /// @return uint8  Chain type
+    function getChainType(uint64 _chainId) external view returns(uint8) {
+        require(chains[_chainId].exists, "Translator: chain not found");
+        return chains[_chainId].chainType;
     }
 
     /// Send transfer payload
@@ -196,13 +227,15 @@ contract AsterizmTranslator is Ownable, ITranslator, BaseAsterizmEnv {
             (uint, uint64, uint, uint64, uint, bool, uint, bytes32, bytes)
         );
 
-        require(dstChainId == localChainId, "Translator: wrong chain id");
-        require(dstAddress.toAddress().isContract(), "Translator: destination address is non-contract");
+        {
+            require(dstChainId == localChainId, "Translator: wrong chain id");
+            require(dstAddress.toAddress().isContract(), "Translator: destination address is non-contract");
 
-        initializerLib.receivePayload(_buildIzReceivePayloadRequestDto(
-            _buildBaseTransferDirectionDto(srcChainId, srcAddress, localChainId, dstAddress),
-            nonce, _dto.gasLimit, forceOrder, txId, transferHash, payload
-        ));
+            initializerLib.receivePayload(_buildIzReceivePayloadRequestDto(
+                    _buildBaseTransferDirectionDto(srcChainId, srcAddress, localChainId, dstAddress),
+                    nonce, _dto.gasLimit, forceOrder, txId, transferHash, payload
+                ));
+        }
 
         emit TransferSendEvent(srcChainId, srcAddress, dstAddress, nonce, transferHash, keccak256(payload));
     }

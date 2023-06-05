@@ -5,11 +5,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "../interfaces/IInitializerSender.sol";
 import "../interfaces/IClientReceiverContract.sol";
-import "./BaseAsterizmEnv.sol";
+import "./AsterizmEnv.sol";
 import "../libs/AddressLib.sol";
 import "../libs/UintLib.sol";
 
-abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverContract, BaseAsterizmEnv {
+abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverContract, AsterizmEnv {
 
     using AddressLib for address;
     using UintLib for uint;
@@ -66,8 +66,14 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
         bool successExecute;
     }
 
+    struct AsterizmChain {
+        bool exists;
+        uint trustedAddress;
+        uint8 chainType;
+    }
+
     IInitializerSender private initializerLib;
-    mapping(uint64 => uint) private trustedAddresses;
+    mapping(uint64 => AsterizmChain) private trustedAddresses;
     mapping(bytes32 => AsterizmTransfer) private inboundTransfers;
     mapping(bytes32 => AsterizmTransfer) private outboundTransfers;
     bool private useForceOrder;
@@ -81,7 +87,6 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
         _setUseForceOrder(_useForceOrder);
         _setDisableHashValidation(_disableHashValidation);
         addTrustedAddress(localChainId, address(this).toUint());
-
     }
 
     /// Only initializer modifier
@@ -99,7 +104,7 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     /// Only trusted address modifier
     /// You must add trusted addresses in production networks!
     modifier onlyTrustedAddress(uint64 _chainId, uint _address) {
-        require(trustedAddresses[_chainId] == _address, "AsterizmClient: wrong source address");
+        require(trustedAddresses[_chainId].trustedAddress == _address, "AsterizmClient: wrong source address");
         _;
     }
 
@@ -110,20 +115,6 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     modifier onlyTrustedTransfer(bytes32 _transferHash) {
         require(initializerLib.validIncomeTransferHash(_transferHash), "AsterizmClient: transfer hash is invalid");
         _;
-    }
-
-    /// Set receive transfer modifier
-    /// @param _transferHash bytes32  Transfer hash
-    modifier setReceiveTransfer(bytes32 _transferHash) {
-        _;
-        inboundTransfers[_transferHash].successReceive = true;
-    }
-
-    /// Set execute transfer modifier
-    /// @param _transferHash bytes32  Transfer hash
-    modifier setExecuteTransfer(bytes32 _transferHash) {
-        _;
-        inboundTransfers[_transferHash].successExecute = true;
     }
 
     /// Only received transfer modifier
@@ -138,13 +129,6 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     modifier onlyNonExecuted(bytes32 _transferHash) {
         require(!inboundTransfers[_transferHash].successExecute, "AsterizmClient: transfer executed already");
         _;
-    }
-
-    /// Set executed outbound transfer modifier
-    /// @param _transferHash bytes32  Transfer hash
-    modifier setExecutedOutboundTransfer(bytes32 _transferHash) {
-        _;
-        outboundTransfers[_transferHash].successExecute = true;
     }
 
     /// Only exists outbound transfer modifier
@@ -164,7 +148,7 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     /// Only nvalid transfer hash modifier
     /// @param _dto ClAsterizmReceiveRequestDto  Transfer data
     modifier onlyValidTransferHash(ClAsterizmReceiveRequestDto memory _dto) {
-        if (!disableHashValidation) {
+        if (!disableHashValidation && _getChainType(_dto.srcChainId) == _getChainType(_dto.dstChainId)) {
             require(
                 _validTransferHash(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.payload, _dto.transferHash),
                 "AsterizmClient: transfer hash is invalid"
@@ -203,11 +187,20 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
         emit SetDisableHashValidationEvent(_flag);
     }
 
+    /// Return chain type by id
+    /// @param _chainId uint64  Chain id
+    /// @return uint8  Chain type
+    function _getChainType(uint64 _chainId) internal view returns(uint8) {
+        return initializerLib.getChainType(_chainId);
+    }
+
     /// Add trusted address
     /// @param _chainId uint64  Chain ID
     /// @param _trustedAddress address  Trusted address
     function addTrustedAddress(uint64 _chainId, uint _trustedAddress) public onlyOwner {
-        trustedAddresses[_chainId] = _trustedAddress;
+        trustedAddresses[_chainId].exists = true;
+        trustedAddresses[_chainId].trustedAddress = _trustedAddress;
+        trustedAddresses[_chainId].chainType = initializerLib.getChainType(_chainId);
 
         emit AddTrustedAddressEvent(_chainId, _trustedAddress);
     }
@@ -224,8 +217,8 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     /// Remove trusted address
     /// @param _chainId uint64  Chain ID
     function removeTrustedAddress(uint64 _chainId) external onlyOwner {
-        require(trustedAddresses[_chainId] != uint(0), "AsterizmClient: trusted address not found");
-        uint removingAddress = trustedAddresses[_chainId];
+        require(trustedAddresses[_chainId].exists, "AsterizmClient: trusted address not found");
+        uint removingAddress = trustedAddresses[_chainId].trustedAddress;
         delete trustedAddresses[_chainId];
 
         emit RemoveTrustedAddressEvent(_chainId, removingAddress);
@@ -239,7 +232,7 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     /// @param _txId uint  Transaction ID
     /// @param _payload bytes  Payload
     function _buildTransferHash(uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _txId, bytes memory _payload) internal pure returns(bytes32) {
-        return keccak256(abi.encode(_srcChainId, _srcAddress, _dstChainId, _dstAddress, _txId, _payload));
+        return sha256(abi.encode(_srcChainId, _srcAddress, _dstChainId, _dstAddress, _txId, _payload));
     }
 
     /// Check is transfer hash valid
@@ -274,8 +267,8 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
 
     /// Return trusted src addresses
     /// @param _chainId uint64  Chain id
-    /// @return uint
-    function getTrustedAddresses(uint64 _chainId) external view returns(uint) {
+    /// @return AsterizmChain
+    function getTrustedAddresses(uint64 _chainId) external view returns(AsterizmChain memory) {
         return trustedAddresses[_chainId];
     }
 
@@ -297,13 +290,14 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
 
     /// Initiate transfer event
     /// Generate event for client server
-    /// @param _dto ClInitTransferEventDto  Init transfer DTO
-    function _initAsterizmTransferEvent(ClInitTransferEventDto memory _dto) internal {
-        require(trustedAddresses[_dto.dstChainId] != uint(0), "AsterizmClient: trusted address not found");
+    /// @param _dstChainId uint64  Destination chain ID
+    /// @param _payload bytes  Payload
+    function _initAsterizmTransferEvent(uint64 _dstChainId, bytes memory _payload) internal {
+        require(trustedAddresses[_dstChainId].exists, "AsterizmClient: trusted address not found");
         uint id = txId++;
-        bytes32 transferHash = _buildTransferHash(_getLocalChainId(), address(this).toUint(), _dto.dstChainId, trustedAddresses[_dto.dstChainId], id, _dto.payload);
+        bytes32 transferHash = _buildTransferHash(_getLocalChainId(), address(this).toUint(), _dstChainId, trustedAddresses[_dstChainId].trustedAddress, id, _payload);
         outboundTransfers[transferHash].successReceive = true;
-        emit InitiateTransferEvent(_dto.dstChainId, trustedAddresses[_dto.dstChainId], id, transferHash, _dto.payload);
+        emit InitiateTransferEvent(_dstChainId, trustedAddresses[_dstChainId].trustedAddress, id, transferHash, _payload);
     }
 
     /// External initiation transfer
@@ -313,8 +307,8 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     /// @param _txId uint  Transaction ID
     /// @param _payload bytes  Payload
     function initAsterizmTransfer(uint64 _dstChainId, uint _txId, bytes32 _transferHash, bytes calldata _payload) external payable onlyOwner nonReentrant {
-        require(trustedAddresses[_dstChainId] != uint(0), "AsterizmClient: trusted address not found");
-        ClInitTransferRequestDto memory dto = _buildClInitTransferRequestDto(_dstChainId, trustedAddresses[_dstChainId], _txId, _transferHash, msg.value, _payload);
+        require(trustedAddresses[_dstChainId].exists, "AsterizmClient: trusted address not found");
+        ClInitTransferRequestDto memory dto = _buildClInitTransferRequestDto(_dstChainId, trustedAddresses[_dstChainId].trustedAddress, _txId, _transferHash, msg.value, _payload);
         _initAsterizmTransferPrivate(dto);
     }
 
@@ -324,20 +318,20 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     function _initAsterizmTransferPrivate(ClInitTransferRequestDto memory _dto) private
         onlyExistsOutboundTransfer(_dto.transferHash)
         onlyNotExecutedOutboundTransfer(_dto.transferHash)
-        setExecutedOutboundTransfer(_dto.transferHash)
     {
         require(address(this).balance >= _dto.feeAmount, "AsterizmClient: contract balance is not enough");
         require(_dto.txId <= _getTxId(), "AsterizmClient: wrong txId param");
         initializerLib.initTransfer{value: _dto.feeAmount} (
             _buildIzIninTransferRequestDto(_dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash, useForceOrder, _dto.payload)
         );
+        outboundTransfers[_dto.transferHash].successExecute = true;
     }
 
     /** Receiving logic */
 
     /// Receive payload from initializer
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function asterizmIzReceive(ClAsterizmReceiveRequestDto calldata _dto) external onlyInitializer nonReentrant {
+    function asterizmIzReceive(ClAsterizmReceiveRequestDto calldata _dto) external onlyInitializer {
         _asterizmReceiveExternal(_dto);
     }
 
@@ -347,8 +341,8 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
         onlyOwnerOrInitializer
         onlyTrustedAddress(_dto.srcChainId, _dto.srcAddress)
         onlyNonExecuted(_dto.transferHash)
-        setReceiveTransfer(_dto.transferHash)
     {
+        inboundTransfers[_dto.transferHash].successReceive = true;
         emit PayloadReceivedEvent(_dto.srcChainId, _dto.srcAddress, _dto.nonce, _dto.txId, _dto.transferHash, _dto.payload);
     }
 
@@ -374,16 +368,15 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
         onlyTrustedAddress(_dto.srcChainId, _dto.srcAddress)
         onlyTrustedTransfer(_dto.transferHash)
         onlyNonExecuted(_dto.transferHash)
-        onlyValidTransferHash(_dto) 
-        setExecuteTransfer(_dto.transferHash) {
+        onlyValidTransferHash(_dto)
+    {
         _asterizmReceive(_dto);
+        inboundTransfers[_dto.transferHash].successExecute = true;
     }
 
-    /// Receive non-encoded payload
-    /// You must realize this function if you want to transfer non-encoded payload
-    /// You must use onlyTrustedSrcAddress modifier!
-    /// If disableHashValidation = true you must validate transferHash with _validTransferHash() or use onlyValidTransferHash modifyer for more security!
-    /// For validate transfer you can use onlyTrustedTransfer modifier
+    /// Receive payload
+    /// You must realize this function if you want to transfer payload
+    /// If disableHashValidation = true you must validate transferHash with _validTransferHash() method for more security!
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal virtual {}
 }

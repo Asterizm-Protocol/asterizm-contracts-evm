@@ -14,19 +14,16 @@ describe("Crosschain token", function () {
     const Gas = await ethers.getContractFactory("GasStation");
     const [owner] = await ethers.getSigners();
     const currentChainIds = [1, 2];
-    let chainIds = [];
-    for (let i = 0; i < currentChainIds.length; i++) {
-      chainIds.push(currentChainIds[i]);
-    }
+    const chainTypes = {EVM: 1, TVM: 2};
 
-    const translator1 = await Transalor.deploy(currentChainIds[0]);
+    const translator1 = await Transalor.deploy(currentChainIds[0], chainTypes.EVM);
     await translator1.deployed();
-    await translator1.addChains(chainIds);
+    await translator1.addChains(currentChainIds, [chainTypes.EVM, chainTypes.EVM]);
     await translator1.addRelayer(owner.address);
 
-    const translator2 = await Transalor.deploy(currentChainIds[1]);
+    const translator2 = await Transalor.deploy(currentChainIds[1], chainTypes.EVM);
     await translator2.deployed();
-    await translator2.addChains(chainIds);
+    await translator2.addChains(currentChainIds, [chainTypes.EVM, chainTypes.EVM]);
     await translator2.addRelayer(owner.address);
 
     // Initializer1 deployment
@@ -161,8 +158,8 @@ describe("Crosschain token", function () {
             (value) => {feeValue = value; return true;},
             (value) => {packetValue = value; return true;},
         );
-    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'address', 'uint64', 'address', 'bool', 'uint', 'bytes32', 'bytes'], packetValue);
-    // decodedValue[0] - nonce
+    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'uint', 'uint64', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], packetValue);
+    expect(decodedValue[0]).to.not.null; // nonce
     expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
     expect(decodedValue[2]).to.equal(token1.address); // srcAddress
     expect(decodedValue[3]).to.equal(currentChainIds[1]); // dstChainId
@@ -171,7 +168,7 @@ describe("Crosschain token", function () {
     expect(decodedValue[5]).to.equal(true); // useForceOrder
     expect(decodedValue[6]).to.equal(0); // txId
     expect(decodedValue[7]).to.not.null; // transferHash
-    // decodedValue[8] - payload
+    expect(decodedValue[8]).to.not.null; // payload
     expect(await token1.balanceOf(owner.address)).to.equal(
         (TOKEN_AMOUNT.sub(value))
     );

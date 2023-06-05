@@ -5,14 +5,16 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../base/AsterizmClient.sol";
 import "../libs/UintLib.sol";
+import "../libs/AddressLib.sol";
 
 contract GasStation is AsterizmClient {
 
     using SafeMath for uint;
     using SafeERC20 for IERC20;
     using UintLib for uint;
+    using AddressLib for address;
 
-    event CoinsReceivedEvent(uint _amount, uint _transactionId, address dstAddress);
+    event CoinsReceivedEvent(uint _amount, uint _transactionId, address _dstAddress);
     event GasSendEvent(uint64 _dstChainId, uint _transactionId, bytes _payload);
     event AddStableCoinEvent(address _address);
     event RemoveStableCoinEvent(address _address);
@@ -25,6 +27,7 @@ contract GasStation is AsterizmClient {
     struct StableCoin {
         uint balance;
         bool exists;
+        uint8 decimals;
     }
 
     mapping(address => StableCoin) public stableCoins;
@@ -78,7 +81,12 @@ contract GasStation is AsterizmClient {
     /// Add stable coin
     /// @param _tokenAddress address  Token address
     function addStableCoin(address _tokenAddress) external onlyOwner {
+        (bool success, bytes memory result) = _tokenAddress.call(abi.encodeWithSignature("decimals()"));
+        require(success, "GasStation: decimals request failed");
+
+        stableCoins[_tokenAddress].decimals = abi.decode(result, (uint8));
         stableCoins[_tokenAddress].exists = true;
+
         emit AddStableCoinEvent(_tokenAddress);
     }
 
@@ -109,43 +117,49 @@ contract GasStation is AsterizmClient {
     /// @param _receivers uint[]  Receivers
     /// @param _token IERC20  Token
     function sendGas(uint64[] memory _chainIds, uint[] memory _amounts, uint[] memory _receivers, IERC20 _token) external nonReentrant {
-        require(stableCoins[address(_token)].exists, "GasStation: wrong token");
-        (bool success, bytes memory result) = address(_token).call(abi.encodeWithSignature("decimals()"));
-        require(success, "GasStation: decimals request failed");
-        uint8 decimals = abi.decode(result, (uint8));
+        address tokenAddress = address(_token);
+        require(stableCoins[tokenAddress].exists, "GasStation: wrong token");
+
         uint sum = 0;
         for (uint i = 0; i < _amounts.length; i++) {
             sum = sum.add(_amounts[i]);
         }
 
         require(sum > 0, "GasStation: wrong amounts");
-        uint sumInUsd = sum.div(10 ** decimals);
-        require(sumInUsd > 0, "GasStation: wrong amounts in USD");
-        if (minUsdAmount > 0) {
-            require(sumInUsd >= minUsdAmount, "GasStation: minimum amount validation error");
-        }
-        if (maxUsdAmount > 0) {
-            require(sumInUsd <= maxUsdAmount, "GasStation: maximum amount validation error");
+        {
+            uint sumInUsd = sum.div(10 ** stableCoins[tokenAddress].decimals);
+            require(sumInUsd > 0, "GasStation: wrong amounts in USD");
+            if (minUsdAmount > 0) {
+                require(sumInUsd >= minUsdAmount, "GasStation: minimum amount validation error");
+            }
+            if (maxUsdAmount > 0) {
+                require(sumInUsd <= maxUsdAmount, "GasStation: maximum amount validation error");
+            }
         }
 
         _token.safeTransferFrom(msg.sender, address(this), sum);
-        stableCoins[address(_token)].balance = stableCoins[address(_token)].balance.add(sum);
+        stableCoins[tokenAddress].balance = stableCoins[tokenAddress].balance.add(sum);
         for (uint i = 0; i < _amounts.length; i++) {
             uint txId = _getTxId();
-            ClInitTransferEventDto memory dto = _buildClInitTransferEventDto(_chainIds[i], abi.encode(_receivers[i], _amounts[i], txId, address(_token), decimals));
-            _initAsterizmTransferEvent(dto);
-            emit GasSendEvent(_chainIds[i], txId, dto.payload);
+            bytes memory payload = abi.encode(_receivers[i], _amounts[i], txId, tokenAddress.toUint(), stableCoins[tokenAddress].decimals);
+            _initAsterizmTransferEvent(_chainIds[i], payload);
+            emit GasSendEvent(_chainIds[i], txId, payload);
         }
     }
 
-    /// Receive non-encoded payload
+    /// Receive payload
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal override {
-        (uint dstAddressUint, uint amount, uint txId , address tokenAddress, uint decimals, uint stableRate) = abi.decode(_dto.payload, (uint, uint, uint, address, uint, uint));
-        require(
-            _validTransferHash(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.txId, abi.encode(dstAddressUint, amount, txId, tokenAddress, decimals), _dto.transferHash),
-            "GasStation: transfer hash is invalid"
-        );
+        (uint dstAddressUint, uint amount, uint txId , uint tokenAddressUint, uint decimals, uint stableRate) = abi.decode(_dto.payload, (uint, uint, uint, uint, uint, uint));
+        if (_getChainType(_dto.srcChainId) == _getChainType(_dto.dstChainId)) {
+            require(
+                _validTransferHash(
+                    _dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.txId,
+                    abi.encode(dstAddressUint, amount, txId, tokenAddressUint, decimals), _dto.transferHash
+                ),
+                "GasStation: transfer hash is invalid"
+            );
+        }
 
         address dstAddress = dstAddressUint.toAddress();
         uint amountToSend = amount.mul(stableRate).div(10 ** decimals);

@@ -6,6 +6,7 @@ typechain
 typechain-types
 .idea
 .deps
+.DS_Store
 
 #Hardhat files
 cache

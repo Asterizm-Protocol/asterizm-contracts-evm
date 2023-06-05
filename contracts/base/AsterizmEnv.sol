@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "../interfaces/IAsterizmEnv.sol";
 
-abstract contract BaseAsterizmEnv is IAsterizmEnv {
+abstract contract AsterizmEnv is IAsterizmEnv {
 
     /// Build initializer receive payload request DTO
     /// @param _srcChainId uint64  Source chain ID
@@ -55,18 +55,6 @@ abstract contract BaseAsterizmEnv is IAsterizmEnv {
         dto.dstChainId = _dstChainId;
         dto.dstAddress = _dstAddress;
         dto.feeAmount = _feeAmount;
-        dto.payload = _payload;
-
-        return dto;
-    }
-
-    /// Build client initiation transfer event DTO
-    /// @param _dstChainId uint64  Destination chain ID
-    /// @param _payload bytes  Payload
-    /// @return ClInitTransferEventDto
-    function _buildClInitTransferEventDto(uint64 _dstChainId, bytes memory _payload) internal pure returns(ClInitTransferEventDto memory) {
-        ClInitTransferEventDto memory dto;
-        dto.dstChainId = _dstChainId;
         dto.payload = _payload;
 
         return dto;

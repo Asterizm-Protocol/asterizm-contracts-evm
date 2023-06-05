@@ -10,9 +10,9 @@ import "./interfaces/IInitializerSender.sol";
 import "./interfaces/IInitializerReceiver.sol";
 import "./libs/AddressLib.sol";
 import "./libs/UintLib.sol";
-import "./base/BaseAsterizmEnv.sol";
+import "./base/AsterizmEnv.sol";
 
-contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, IInitializerReceiver, BaseAsterizmEnv {
+contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, IInitializerReceiver, AsterizmEnv {
 
     using AddressLib for address;
     using UintLib for uint;
@@ -130,6 +130,13 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
     /// @return uint64
     function getLocalChainId() external view returns(uint64) {
         return localChainId;
+    }
+
+    /// Return chain type by id
+    /// @param _chainId  Chain id
+    /// @return uint8  Chain type
+    function getChainType(uint64 _chainId) external view returns(uint8) {
+        return translatorLib.getChainType(_chainId);
     }
 
     /// Initiate asterizm transfer
