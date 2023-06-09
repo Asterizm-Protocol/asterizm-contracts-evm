@@ -150,7 +150,7 @@ contract GasStation is AsterizmClient {
     /// Receive payload
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal override {
-        (uint dstAddressUint, uint amount, uint txId , uint tokenAddressUint, uint decimals, uint stableRate) = abi.decode(_dto.payload, (uint, uint, uint, uint, uint, uint));
+        (uint dstAddressUint, uint amount, uint txId , uint tokenAddressUint, uint8 decimals, uint stableRate) = abi.decode(_dto.payload, (uint, uint, uint, uint, uint8, uint));
         if (_getChainType(_dto.srcChainId) == _getChainType(_dto.dstChainId)) {
             require(
                 _validTransferHash(

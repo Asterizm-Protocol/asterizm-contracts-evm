@@ -28,11 +28,12 @@ task("deploy:gas", "Deploy Asterizm gassender contracts")
     .addPositionalParam("translatorAddress", "Translator contract address")
     .addPositionalParam("initializerAddress", "Initializer contract address")
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
+    .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs) => {
         let {initializer, translator, owner, currentChain, gasLimit} = await deployBase(taskArgs.isTestnet, taskArgs.translatorAddress, taskArgs.initializerAddress);
 
         let tx;
-        const gasPrice = 0;
+        const gasPrice = parseInt(taskArgs.gasPrice);
         const minUsdAmount = 100; // change minUsdAmount here
         const useForceOrder = false; // change useForceOrder here
         console.log("Deployig gas station contract...");

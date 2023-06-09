@@ -3,7 +3,7 @@ import { task } from 'hardhat/config';
 import { BigNumber } from "ethers";
 import { Chains } from './base/base_chains';
 
-async function deployBase(isTestnet) {
+async function deployBase(isTestnet, gasPrice) {
     const [owner] = await ethers.getSigners();
     const Initializer = await ethers.getContractFactory("AsterizmInitializer");
     const Transalor = await ethers.getContractFactory("AsterizmTranslator");
@@ -22,9 +22,9 @@ async function deployBase(isTestnet) {
         }
     }
 
+
     let gasLimit = BigNumber.from(0);
     let tx;
-    const gasPrice = 0;
     console.log("Deploying translator...");
     // const translator = await Transalor.attach('0x...');
     const translator = await Transalor.deploy(currentChain.id, currentChain.chainType, gasPrice > 0 ? {gasPrice: gasPrice} : {});
@@ -70,8 +70,9 @@ async function deployBase(isTestnet) {
 
 task("deploy:base", "Deploy base Asterizm contracts")
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
+    .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs) => {
-        let {initializer, translator, owner, gasLimit} = await deployBase(taskArgs.isTestnet);
+        let {initializer, translator, owner, gasLimit} = await deployBase(taskArgs.isTestnet, parseInt(taskArgs.gasPrice));
 
         console.log("Deployment was done. Wrap up...\n");
         console.log("Total gas limit: %s", gasLimit);

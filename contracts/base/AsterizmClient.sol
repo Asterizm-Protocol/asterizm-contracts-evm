@@ -349,14 +349,12 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     /// Receive payload from client server
     /// @param _srcChainId uint64  Source chain ID
     /// @param _srcAddress uint  Source address
-    /// @param _dstChainId uint64  Destination chain ID
-    /// @param _dstAddress uint  Destination address
     /// @param _nonce uint  Nonce
     /// @param _txId uint  Transaction ID
     /// @param _transferHash bytes32  Transfer hash
     /// @param _payload bytes  Payload
-    function asterizmClReceive(uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _nonce, uint _txId, bytes32 _transferHash, bytes calldata _payload) external onlyOwner nonReentrant {
-        ClAsterizmReceiveRequestDto memory dto = _buildClAsterizmReceiveRequestDto(_srcChainId, _srcAddress, _dstChainId, _dstAddress, _nonce, _txId, _transferHash, _payload);
+    function asterizmClReceive(uint64 _srcChainId, uint _srcAddress, uint _nonce, uint _txId, bytes32 _transferHash, bytes calldata _payload) external onlyOwner nonReentrant {
+        ClAsterizmReceiveRequestDto memory dto = _buildClAsterizmReceiveRequestDto(_srcChainId, _srcAddress, localChainId, address(this).toUint(), _nonce, _txId, _transferHash, _payload);
         _asterizmReceiveInternal(dto);
     }
 

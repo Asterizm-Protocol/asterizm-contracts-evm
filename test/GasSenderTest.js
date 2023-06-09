@@ -336,7 +336,7 @@ describe("Gas sender test", function () {
     expect(payloadValue[3]).to.equal(token1.address);
     expect(payloadValue[4]).to.equal(decimals);
     let finalPayload = decodedValue[8].toString() + hexRate;
-    await expect(gas_sender2.asterizmClReceive(currentChainIds[0], gas_sender1.address, currentChainIds[1], gas_sender2.address, decodedValue[0], decodedValue[6], decodedValue[7], finalPayload)).to.not.reverted;
+    await expect(gas_sender2.asterizmClReceive(currentChainIds[0], gas_sender1.address, decodedValue[0], decodedValue[6], decodedValue[7], finalPayload)).to.not.reverted;
     expect(await(provider.getBalance(gas_sender2.address))).to.equal(beforeTxGasBalance.sub(valueInUsd * rate));
     expect(await(provider.getBalance(address))).to.equal(beforeTxUserBalance.add(valueInUsd * rate));
     let wrongValue = BigNumber.from(200).mul(pow);
@@ -348,7 +348,7 @@ describe("Gas sender test", function () {
     await gas_sender1.withdrawTokens(token1.address, user1.address, value);
     expect((await gas_sender1.stableCoins(token1.address)).balance).to.equal(0);
     expect(await token1.balanceOf(user1.address)).to.equal(value);
-    await expect(gas_sender2.asterizmClReceive(currentChainIds[0], gas_sender1.address, currentChainIds[1], gas_sender2.address, decodedValue[0], decodedValue[6], decodedValue[7], finalPayload))
+    await expect(gas_sender2.asterizmClReceive(currentChainIds[0], gas_sender1.address, decodedValue[0], decodedValue[6], decodedValue[7], finalPayload))
         .to.be.revertedWith("AsterizmClient: transfer executed already");
   });
   it("Should send money, receive tokens and withdraw tokens two times", async function () {
@@ -440,7 +440,7 @@ describe("Gas sender test", function () {
     expect(payloadValue[3]).to.equal(token1.address);
     expect(payloadValue[4]).to.equal(decimals);
     let finalPayload = decodedValue[8].toString() + hexRate;
-    await gas_sender2.asterizmClReceive(currentChainIds[0], gas_sender1.address, currentChainIds[1], gas_sender2.address, decodedValue[0], decodedValue[6], decodedValue[7], finalPayload);
+    await gas_sender2.asterizmClReceive(currentChainIds[0], gas_sender1.address, decodedValue[0], decodedValue[6], decodedValue[7], finalPayload);
     expect(await(provider.getBalance(gas_sender2.address))).to.equal(beforeTxGasBalance.sub(valueInUsd * rate));
     expect(await(provider.getBalance(address))).to.equal(beforeTxUserBalance.add(valueInUsd * rate));
     let wrongValue = BigNumber.from(200).mul(pow);
@@ -511,7 +511,7 @@ describe("Gas sender test", function () {
     expect(payloadValue[3]).to.equal(token1.address);
     expect(payloadValue[4]).to.equal(decimals);
     finalPayload = decodedValue[8].toString() + hexRate;
-    await gas_sender2.asterizmClReceive(currentChainIds[0], gas_sender1.address, currentChainIds[1], gas_sender2.address, decodedValue[0], decodedValue[6], decodedValue[7], finalPayload);
+    await gas_sender2.asterizmClReceive(currentChainIds[0], gas_sender1.address, decodedValue[0], decodedValue[6], decodedValue[7], finalPayload);
     expect(await(provider.getBalance(gas_sender2.address))).to.equal(beforeTxGasBalance.sub(valueInUsd * rate));
     expect(await(provider.getBalance(address))).to.equal(beforeTxUserBalance.add(valueInUsd * rate));
 

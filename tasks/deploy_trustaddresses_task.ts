@@ -29,10 +29,11 @@ task("deploy:trustedAddress", "Add trust addresses to client contract")
     .addPositionalParam("contractAddress", "Target contract address (gas, multichain, etc)")
     .addPositionalParam("contractType", "Target contract type (gas - gassender contract, claim - claim contract)", "gas")
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
+    .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs) => {
         let {targetContract, gasLimit, chainIds, trustedAddresses} = await deployBase(taskArgs.isTestnet, taskArgs.contractAddress, taskArgs.contractType);
 
-        const gasPrice = 0;
+        const gasPrice = parseInt(taskArgs.gasPrice);
         console.log("Adding contract trusted address...");
         console.log("Params:");
         console.log({ChainIds: chainIds, TrustedAddresses: trustedAddresses});
