@@ -47,6 +47,15 @@ contract MultichainToken is IMultiChainToken, ERC20, AsterizmClient {
         _mint(dstAddress, amount);
     }
 
+    /// Build packed payload (abi.encodePacked() result)
+    /// @param _payload bytes  Default payload (abi.encode() result)
+    /// @return bytes  Packed payload (abi.encodePacked() result)
+    function _buildPackedPayload(bytes memory _payload) internal pure override returns(bytes memory) {
+        (address dstAddress, uint amount, uint txId) = abi.decode(_payload, (address, uint, uint));
+        
+        return abi.encodePacked(dstAddress, amount, txId);
+    }
+
     /// Debit logic
     /// @param _from address  From address
     /// @param _amount uint  Amount

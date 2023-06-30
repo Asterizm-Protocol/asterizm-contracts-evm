@@ -69,6 +69,14 @@ contract AsterizmNonce is INonce, Ownable {
         return nonce[_chainId][_pathData];
     }
 
+    /// Return nonce (base logic)
+    /// @param _chainId uint64  Chain ID
+    /// @param _srcAddress uint  Source address
+    /// @param _dstAddress uint  Destination address
+    function getNonceBase(uint64 _chainId, uint _srcAddress, uint _dstAddress) public view returns (uint) {
+        return nonce[_chainId][abi.encodePacked(_srcAddress, _dstAddress)];
+    }
+
     /// Force set nonce
     /// @param _chainId uint64  Chain ID
     /// @param _pathData bytes  Path data

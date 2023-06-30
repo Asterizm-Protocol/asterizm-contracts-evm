@@ -151,15 +151,14 @@ contract GasStation is AsterizmClient {
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal override {
         (uint dstAddressUint, uint amount, uint txId , uint tokenAddressUint, uint8 decimals, uint stableRate) = abi.decode(_dto.payload, (uint, uint, uint, uint, uint8, uint));
-        if (_getChainType(_dto.srcChainId) == _getChainType(_dto.dstChainId)) {
-            require(
-                _validTransferHash(
-                    _dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.txId,
-                    abi.encode(dstAddressUint, amount, txId, tokenAddressUint, decimals), _dto.transferHash
-                ),
-                "GasStation: transfer hash is invalid"
-            );
-        }
+        require(
+            _validTransferHash(
+                _dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.txId,
+                abi.encode(dstAddressUint, amount, txId, tokenAddressUint, decimals),
+                _dto.transferHash
+            ),
+            "GasStation: transfer hash is invalid"
+        );
 
         address dstAddress = dstAddressUint.toAddress();
         uint amountToSend = amount.mul(stableRate).div(10 ** decimals);
@@ -169,5 +168,14 @@ contract GasStation is AsterizmClient {
         }
 
         emit CoinsReceivedEvent(amountToSend, _dto.txId, dstAddress);
+    }
+
+    /// Build packed payload (abi.encodePacked() result)
+    /// @param _payload bytes  Default payload (abi.encode() result)
+    /// @return bytes  Packed payload (abi.encodePacked() result)
+    function _buildPackedPayload(bytes memory _payload) internal pure override returns(bytes memory) {
+        (uint dstAddressUint, uint amount, uint txId , uint tokenAddressUint, uint8 decimals) = abi.decode(_payload, (uint, uint, uint, uint, uint8));
+
+        return abi.encodePacked(dstAddressUint, amount, txId, tokenAddressUint, decimals);
     }
 }

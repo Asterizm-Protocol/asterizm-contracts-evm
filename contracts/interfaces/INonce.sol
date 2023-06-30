@@ -19,4 +19,10 @@ interface INonce {
     /// @param _chainId uint64  Chain ID
     /// @param _pathData bytes  Nonce data
     function getNonce(uint64 _chainId, bytes calldata _pathData) external returns (uint);
+
+    /// Return nonce (base logic)
+    /// @param _chainId uint64  Chain ID
+    /// @param _srcAddress uint  Source address
+    /// @param _dstAddress uint  Destination address
+    function getNonceBase(uint64 _chainId, uint _srcAddress, uint _dstAddress) external view returns (uint);
 }

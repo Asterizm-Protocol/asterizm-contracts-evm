@@ -34,4 +34,13 @@ contract AsterizmDemo is AsterizmClient {
     function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal override {
         setExternalChainMessage(abi.decode(_dto.payload, (string)));
     }
+
+    /// Build packed payload (abi.encodePacked() result)
+    /// @param _payload bytes  Default payload (abi.encode() result)
+    /// @return bytes  Packed payload (abi.encodePacked() result)
+    function _buildPackedPayload(bytes memory _payload) internal pure override returns(bytes memory) {
+        (string memory message) = abi.decode(_payload, (string));
+
+        return abi.encodePacked(message);
+    }
 }

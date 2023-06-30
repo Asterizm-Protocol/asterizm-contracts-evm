@@ -171,7 +171,7 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
             _dto.dstAddress, _dto.nonce, _dto.txId, _dto.transferHash, _dto.payload
         );
 
-        try IClientReceiverContract(_dto.dstAddress.toAddress()).asterizmIzReceive{gas: _dto.gasLimit}(dto) {
+        try IClientReceiverContract(_dto.dstAddress.toAddress()).asterizmIzReceive{gas: gasleft()}(dto) {
         } catch Error(string memory _err) {
             emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.nonce, _dto.transferHash, _dto.payload, abi.encode(_err));
         } catch (bytes memory reason) {

@@ -8,11 +8,13 @@ import "../interfaces/IClientReceiverContract.sol";
 import "./AsterizmEnv.sol";
 import "../libs/AddressLib.sol";
 import "../libs/UintLib.sol";
+import "../libs/AsterizmHashLib.sol";
 
 abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverContract, AsterizmEnv {
 
     using AddressLib for address;
     using UintLib for uint;
+    using AsterizmHashLib for bytes;
 
     /// Set initializer event
     /// @param _initializerAddress address  Initializer address
@@ -148,7 +150,7 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     /// Only nvalid transfer hash modifier
     /// @param _dto ClAsterizmReceiveRequestDto  Transfer data
     modifier onlyValidTransferHash(ClAsterizmReceiveRequestDto memory _dto) {
-        if (!disableHashValidation && _getChainType(_dto.srcChainId) == _getChainType(_dto.dstChainId)) {
+        if (!disableHashValidation) {
             require(
                 _validTransferHash(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.payload, _dto.transferHash),
                 "AsterizmClient: transfer hash is invalid"
@@ -231,8 +233,10 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     /// @param _dstAddress uint  Address
     /// @param _txId uint  Transaction ID
     /// @param _payload bytes  Payload
-    function _buildTransferHash(uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _txId, bytes memory _payload) internal pure returns(bytes32) {
-        return sha256(abi.encode(_srcChainId, _srcAddress, _dstChainId, _dstAddress, _txId, _payload));
+    function _buildTransferHash(uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _txId, bytes memory _payload) internal view returns(bytes32) {
+        bytes memory encodeData = abi.encodePacked(_srcChainId, _srcAddress, _dstChainId, _dstAddress, _txId, _buildPackedPayload(_payload));
+
+        return _getChainType(_srcChainId) == _getChainType(_dstChainId) ? encodeData.buildSimpleHash() : encodeData.buildCrosschainHash();
     }
 
     /// Check is transfer hash valid
@@ -241,9 +245,9 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     /// @param _dstChainId uint64  Chain ID
     /// @param _dstAddress uint  Address
     /// @param _txId uint  Transaction ID
-    /// @param _payload bytes  Payload
+    /// @param _payload bytes  Packed payload
     /// @param _transferHash bytes32  Transfer hash
-    function _validTransferHash(uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _txId, bytes memory _payload, bytes32 _transferHash) internal pure returns(bool) {
+    function _validTransferHash(uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _txId, bytes memory _payload, bytes32 _transferHash) internal view returns(bool) {
         return _buildTransferHash(_srcChainId, _srcAddress, _dstChainId, _dstAddress, _txId, _payload) == _transferHash;
     }
 
@@ -377,4 +381,9 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     /// If disableHashValidation = true you must validate transferHash with _validTransferHash() method for more security!
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal virtual {}
+
+    /// Build packed payload (abi.encodePacked() result)
+    /// @param _payload bytes  Default payload (abi.encode() result)
+    /// @return bytes  Packed payload (abi.encodePacked() result)
+    function _buildPackedPayload(bytes memory _payload) internal view virtual returns(bytes memory) {}
 }
