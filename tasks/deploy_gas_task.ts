@@ -3,7 +3,7 @@ import { task } from 'hardhat/config';
 import { BigNumber } from "ethers";
 import { Chains } from './base/base_chains';
 
-async function deployBase(isTestnet, translatorAddress, initializerAddress) {
+async function deployBase(hre, isTestnet, translatorAddress, initializerAddress) {
     const [owner] = await ethers.getSigners();
     const Initializer = await ethers.getContractFactory("AsterizmInitializer");
     const Transalor = await ethers.getContractFactory("AsterizmTranslator");
@@ -12,9 +12,12 @@ async function deployBase(isTestnet, translatorAddress, initializerAddress) {
 
     let currentChain;
     for (let i = 0; i < chains.length; i++) {
-        if (chains[i].isCurrent) {
+        if (chains[i].networkName == hre.network.name) {
             currentChain = chains[i];
         }
+    }
+    if (!currentChain) {
+        currentChain = chains[0];
     }
 
     let gasLimit = BigNumber.from(0);
@@ -29,8 +32,8 @@ task("deploy:gas", "Deploy Asterizm gassender contracts")
     .addPositionalParam("initializerAddress", "Initializer contract address")
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
-    .setAction(async (taskArgs) => {
-        let {initializer, translator, owner, currentChain, gasLimit} = await deployBase(taskArgs.isTestnet, taskArgs.translatorAddress, taskArgs.initializerAddress);
+    .setAction(async (taskArgs, hre) => {
+        let {initializer, translator, owner, currentChain, gasLimit} = await deployBase(hre, taskArgs.isTestnet, taskArgs.translatorAddress, taskArgs.initializerAddress);
 
         let tx;
         const gasPrice = parseInt(taskArgs.gasPrice);
@@ -38,6 +41,7 @@ task("deploy:gas", "Deploy Asterizm gassender contracts")
         const useForceOrder = false; // change useForceOrder here
         console.log("Deployig gas station contract...");
         const GasStation = await ethers.getContractFactory("GasStation");
+        // const gasStation = await GasStation.attach('0x...');
         const gasStation = await GasStation.deploy(initializer.address, useForceOrder, gasPrice > 0 ? {gasPrice: gasPrice} : {});
         tx = await gasStation.deployed();
         gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);

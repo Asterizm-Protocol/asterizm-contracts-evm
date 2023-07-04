@@ -7,6 +7,8 @@ import './tasks/deploy_base_task';
 import './tasks/deploy_gas_task';
 import './tasks/deploy_claim_task';
 import './tasks/deploy_trustaddresses_task';
+import './tasks/gas_withdrawcoins_task';
+import './tasks/relay_addchain_task';
 
 const config = {
   solidity: {
@@ -72,6 +74,11 @@ const config = {
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 250
     },
+    operaTestnet: {
+      url: process.env.NETWORK_HOST_FANTOM_TESTNET,
+      accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
+      chainId: 4002
+    },
     moonbeam: {
       url: process.env.NETWORK_HOST_MOON,
       accounts: [process.env.OWNER_PK_ASTERIZM],
@@ -116,6 +123,16 @@ const config = {
       url: process.env.NETWORK_HOST_VENIDIUM_TESTNET,
       accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
       chainId: 4918
+    },
+    bitgertMainnet: {
+      url: process.env.NETWORK_HOST_BITGERT,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 32520
+    },
+    polygonZkMainnet: {
+      url: process.env.NETWORK_HOST_POLYGONZK,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 1101
     }
   },
   etherscan: {
