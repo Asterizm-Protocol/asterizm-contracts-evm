@@ -20,6 +20,8 @@ contract GasStation is AsterizmClient {
     event RemoveStableCoinEvent(address _address);
     event SetMinUsdAmountEvent(uint _amount);
     event SetMaxUsdAmountEvent(uint _amount);
+    event SetMinUsdAmountPerChainEvent(uint _amount);
+    event SetMaxUsdAmountPerChainEvent(uint _amount);
     event WithdrawCoinsEvent(address _target, uint _amount);
     event WithdrawTokensEvent(address _token, address _target, uint _amount);
     event WithdrawNotExistsTokensEvent(address _token, address _target, uint _amount);
@@ -33,6 +35,8 @@ contract GasStation is AsterizmClient {
     mapping(address => StableCoin) public stableCoins;
     uint public minUsdAmount;
     uint public maxUsdAmount;
+    uint public minUsdAmountPerChain;
+    uint public maxUsdAmountPerChain;
 
     constructor(IInitializerSender _initializerLib, bool _useForceOrder)
         AsterizmClient(_initializerLib, _useForceOrder, true) {}
@@ -111,6 +115,20 @@ contract GasStation is AsterizmClient {
         emit SetMaxUsdAmountEvent(_amount);
     }
 
+    /// Set minimum amount in USD per chain
+    /// @param _amount uint  Amount
+    function setMinUsdAmountPerChain(uint _amount) external onlyOwner {
+        minUsdAmountPerChain = _amount;
+        emit SetMinUsdAmountEvent(_amount);
+    }
+
+    /// Set maximum amount in USD per chain
+    /// @param _amount uint  Amount
+    function setMaxUsdAmountPerChain(uint _amount) external onlyOwner {
+        maxUsdAmountPerChain = _amount;
+        emit SetMaxUsdAmountEvent(_amount);
+    }
+
     /// Send gas logic
     /// @param _chainIds uint64[]  Chains IDs
     /// @param _amounts uint[]  Amounts
@@ -120,8 +138,17 @@ contract GasStation is AsterizmClient {
         address tokenAddress = address(_token);
         require(stableCoins[tokenAddress].exists, "GasStation: wrong token");
 
-        uint sum = 0;
+        uint sum;
         for (uint i = 0; i < _amounts.length; i++) {
+            if (minUsdAmountPerChain > 0) {
+                uint amountInUsd = _amounts[i].div(10 ** stableCoins[tokenAddress].decimals);
+                require(amountInUsd >= minUsdAmountPerChain, "GasStation: minimum amount per chain validation error");
+            }
+            if (maxUsdAmountPerChain > 0) {
+                uint amountInUsd = _amounts[i].div(10 ** stableCoins[tokenAddress].decimals);
+                require(amountInUsd <= maxUsdAmountPerChain, "GasStation: maximum amount per chain validation error");
+            }
+
             sum = sum.add(_amounts[i]);
         }
 

@@ -124,6 +124,16 @@ describe("Gas sender test", function () {
     await expect(gas_sender1.sendGas(currentChainIds, [value.toString(), value.toString()], [address, address], token1.address))
         .to.be.revertedWith("GasStation: maximum amount validation error");
     await expect(gas_sender1.setMaxUsdAmount(valueInUsd * 2)).not.to.be.reverted;
+
+    await expect(gas_sender1.setMinUsdAmountPerChain(1000)).not.to.be.reverted;
+    await expect(gas_sender1.sendGas(currentChainIds, [value.toString(), value.toString()], [address, address], token1.address))
+        .to.be.revertedWith("GasStation: minimum amount per chain validation error");
+    await expect(gas_sender1.setMinUsdAmountPerChain(valueInUsd)).not.to.be.reverted;
+    await expect(gas_sender1.setMaxUsdAmountPerChain(1)).not.to.be.reverted;
+    await expect(gas_sender1.sendGas(currentChainIds, [value.toString(), value.toString()], [address, address], token1.address))
+        .to.be.revertedWith("GasStation: maximum amount per chain validation error");
+    await expect(gas_sender1.setMaxUsdAmountPerChain(valueInUsd)).not.to.be.reverted;
+
     await expect(gas_sender1.sendGas(currentChainIds, [value.toString(), value.toString()], [address, address], token1.address))
         .to.emit(gas_sender1, 'InitiateTransferEvent');
     expect(await token1.balanceOf(gas_sender1.address)).to.equal(
@@ -158,6 +168,16 @@ describe("Gas sender test", function () {
     await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
         .to.be.revertedWith("GasStation: maximum amount validation error");
     await expect(gas_sender1.setMaxUsdAmount(valueInUsd)).not.to.be.reverted;
+
+    await expect(gas_sender1.setMinUsdAmountPerChain(1000)).not.to.be.reverted;
+    await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
+        .to.be.revertedWith("GasStation: minimum amount per chain validation error");
+    await expect(gas_sender1.setMinUsdAmountPerChain(valueInUsd)).not.to.be.reverted;
+    await expect(gas_sender1.setMaxUsdAmountPerChain(1)).not.to.be.reverted;
+    await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
+        .to.be.revertedWith("GasStation: maximum amount per chain validation error");
+    await expect(gas_sender1.setMaxUsdAmountPerChain(valueInUsd)).not.to.be.reverted;
+
     let dstChainId, dstAddress, txId, transferHash, payload, gasDstChainId, gasTxId, gasPayload;
     await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
         .to.emit(gas_sender1, 'InitiateTransferEvent')
@@ -212,6 +232,16 @@ describe("Gas sender test", function () {
     await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
         .to.be.revertedWith("GasStation: maximum amount validation error");
     await expect(gas_sender1.setMaxUsdAmount(valueInUsd)).not.to.be.reverted;
+
+    await expect(gas_sender1.setMinUsdAmountPerChain(1000)).not.to.be.reverted;
+    await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
+        .to.be.revertedWith("GasStation: minimum amount per chain validation error");
+    await expect(gas_sender1.setMinUsdAmountPerChain(valueInUsd)).not.to.be.reverted;
+    await expect(gas_sender1.setMaxUsdAmountPerChain(1)).not.to.be.reverted;
+    await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
+        .to.be.revertedWith("GasStation: maximum amount per chain validation error");
+    await expect(gas_sender1.setMaxUsdAmountPerChain(valueInUsd)).not.to.be.reverted;
+
     let feeValue, dstChainId, dstAddress, txId, transferHash, payload, gasDstChainId, gasTxId, gasPayload;
     await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
         .to.emit(gas_sender1, 'InitiateTransferEvent')
@@ -281,6 +311,16 @@ describe("Gas sender test", function () {
     await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
         .to.be.revertedWith("GasStation: maximum amount validation error");
     await expect(gas_sender1.setMaxUsdAmount(valueInUsd)).not.to.be.reverted;
+
+    await expect(gas_sender1.setMinUsdAmountPerChain(1000)).not.to.be.reverted;
+    await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
+        .to.be.revertedWith("GasStation: minimum amount per chain validation error");
+    await expect(gas_sender1.setMinUsdAmountPerChain(valueInUsd)).not.to.be.reverted;
+    await expect(gas_sender1.setMaxUsdAmountPerChain(1)).not.to.be.reverted;
+    await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
+        .to.be.revertedWith("GasStation: maximum amount per chain validation error");
+    await expect(gas_sender1.setMaxUsdAmountPerChain(valueInUsd)).not.to.be.reverted;
+
     let feeValue, dstChainId, dstAddress, txId, transferHash, payload, gasDstChainId, gasTxId, gasPayload;
     await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
         .to.emit(gas_sender1, 'InitiateTransferEvent')
@@ -383,6 +423,16 @@ describe("Gas sender test", function () {
     await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
         .to.be.revertedWith("GasStation: maximum amount validation error");
     await expect(gas_sender1.setMaxUsdAmount(valueInUsd)).not.to.be.reverted;
+
+    await expect(gas_sender1.setMinUsdAmountPerChain(1000)).not.to.be.reverted;
+    await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
+        .to.be.revertedWith("GasStation: minimum amount per chain validation error");
+    await expect(gas_sender1.setMinUsdAmountPerChain(valueInUsd)).not.to.be.reverted;
+    await expect(gas_sender1.setMaxUsdAmountPerChain(1)).not.to.be.reverted;
+    await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
+        .to.be.revertedWith("GasStation: maximum amount per chain validation error");
+    await expect(gas_sender1.setMaxUsdAmountPerChain(valueInUsd)).not.to.be.reverted;
+
     let dstChainId, dstAddress, txId, transferHash, payload, gasDstChainId, gasTxId, gasPayload;
     await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
         .to.emit(gas_sender1, 'InitiateTransferEvent')
