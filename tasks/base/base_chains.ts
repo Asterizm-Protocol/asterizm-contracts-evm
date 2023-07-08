@@ -195,7 +195,7 @@ export const Chains = {
             isCurrent: true,
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '1389994807113895668742586980493099848731845241920',
+                gas: '1091313221966408868913347237915118571507129432647',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [
@@ -208,7 +208,7 @@ export const Chains = {
             networkName: "polygonMumbai",
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '350986775366171753722411460791258692847517948188',
+                gas: '524483678252950907191462497318668706849509749841',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [
@@ -221,7 +221,7 @@ export const Chains = {
             networkName: "venidiumTestnet",
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '516993189345011224628327415305693039147059015087',
+                gas: '314889688339176324098060599865391262698455262059',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [],
@@ -232,7 +232,7 @@ export const Chains = {
             networkName: "operaTestnet",
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '604310581401012142295609633700276062260547048368',
+                gas: '262254645447925333379275843488529411462343473272',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [],
@@ -243,7 +243,7 @@ export const Chains = {
             networkName: "everscaleTestnet",
             chainType: ChainTypes.TVM,
             trustAddresses: {
-                gas: '14343096937700679744343233029027375202682348240768210538310188629637320800317',
+                gas: '55781409753215990494429610500862081143106455110780343957069048257042337087200',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [
@@ -256,7 +256,7 @@ export const Chains = {
             networkName: "venomTestnet",
             chainType: ChainTypes.TVM,
             trustAddresses: {
-                gas: '7618002218203172803264880100801528684811477250390419151077356660617890120024',
+                gas: '115189678983306427205412323202937228852812607524563886901978387947065467765239',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [

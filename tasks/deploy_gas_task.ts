@@ -37,7 +37,8 @@ task("deploy:gas", "Deploy Asterizm gassender contracts")
 
         let tx;
         const gasPrice = parseInt(taskArgs.gasPrice);
-        const minUsdAmount = 100; // change minUsdAmount here
+        const minUsdAmount = 15; // change minUsdAmount here
+        const minUsdAmountPerChain = 10; // change minUsdAmountPerChain here
         const useForceOrder = false; // change useForceOrder here
         console.log("Deployig gas station contract...");
         const GasStation = await ethers.getContractFactory("GasStation");
@@ -47,6 +48,7 @@ task("deploy:gas", "Deploy Asterizm gassender contracts")
         gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
         console.log("Gas station was deployed with address: %s", gasStation.address);
         tx = await gasStation.setMinUsdAmount(minUsdAmount, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+        tx = await gasStation.setMinUsdAmountPerChain(minUsdAmountPerChain, gasPrice > 0 ? {gasPrice: gasPrice} : {});
         gasLimit = gasLimit.add(tx.gasLimit);
         for (let i = 0; i < currentChain.stableCoins.length; i++) {
             tx = await gasStation.addStableCoin(currentChain.stableCoins[i], gasPrice > 0 ? {gasPrice: gasPrice} : {});

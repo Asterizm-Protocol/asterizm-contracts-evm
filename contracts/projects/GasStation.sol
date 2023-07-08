@@ -119,14 +119,14 @@ contract GasStation is AsterizmClient {
     /// @param _amount uint  Amount
     function setMinUsdAmountPerChain(uint _amount) external onlyOwner {
         minUsdAmountPerChain = _amount;
-        emit SetMinUsdAmountEvent(_amount);
+        emit SetMinUsdAmountPerChainEvent(_amount);
     }
 
     /// Set maximum amount in USD per chain
     /// @param _amount uint  Amount
     function setMaxUsdAmountPerChain(uint _amount) external onlyOwner {
         maxUsdAmountPerChain = _amount;
-        emit SetMaxUsdAmountEvent(_amount);
+        emit SetMaxUsdAmountPerChainEvent(_amount);
     }
 
     /// Send gas logic
@@ -138,14 +138,15 @@ contract GasStation is AsterizmClient {
         address tokenAddress = address(_token);
         require(stableCoins[tokenAddress].exists, "GasStation: wrong token");
 
+        uint tokenDecimals = 10 ** stableCoins[tokenAddress].decimals;
         uint sum;
         for (uint i = 0; i < _amounts.length; i++) {
             if (minUsdAmountPerChain > 0) {
-                uint amountInUsd = _amounts[i].div(10 ** stableCoins[tokenAddress].decimals);
+                uint amountInUsd = _amounts[i].div(tokenDecimals);
                 require(amountInUsd >= minUsdAmountPerChain, "GasStation: minimum amount per chain validation error");
             }
             if (maxUsdAmountPerChain > 0) {
-                uint amountInUsd = _amounts[i].div(10 ** stableCoins[tokenAddress].decimals);
+                uint amountInUsd = _amounts[i].div(tokenDecimals);
                 require(amountInUsd <= maxUsdAmountPerChain, "GasStation: maximum amount per chain validation error");
             }
 
@@ -154,7 +155,7 @@ contract GasStation is AsterizmClient {
 
         require(sum > 0, "GasStation: wrong amounts");
         {
-            uint sumInUsd = sum.div(10 ** stableCoins[tokenAddress].decimals);
+            uint sumInUsd = sum.div(tokenDecimals);
             require(sumInUsd > 0, "GasStation: wrong amounts in USD");
             if (minUsdAmount > 0) {
                 require(sumInUsd >= minUsdAmount, "GasStation: minimum amount validation error");
