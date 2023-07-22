@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-abstract contract AsterizmChainEnv {
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
+abstract contract AsterizmChainEnv is Initializable {
 
     uint8 constant private CHAIN_TYPE_EVM = 1;
     uint8 constant private CHAIN_TYPE_TVM = 2;
@@ -12,7 +14,8 @@ abstract contract AsterizmChainEnv {
 
     mapping(uint8 => ChainType) private chainTypes;
 
-    constructor () {
+    /// Contract initializer (constructor)
+    function __AsterizmChainEnv_init() initializer public {
         chainTypes[CHAIN_TYPE_EVM].exists = true;
         chainTypes[CHAIN_TYPE_TVM].exists = true;
     }

@@ -9,27 +9,36 @@ const TOKEN_AMOUNT = BigNumber.from(1000000).mul(pow);
 
 describe("Gas sender test", function () {
   async function deployContractsFixture() {
-    const Initializer = await ethers.getContractFactory("AsterizmInitializer");
-    const Transalor = await ethers.getContractFactory("AsterizmTranslator");
+    const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
+    const Transalor = await ethers.getContractFactory("AsterizmTranslatorV1");
     const Nonce = await ethers.getContractFactory("AsterizmNonce");
     const Token = await ethers.getContractFactory("MultichainToken");
-    const Gas = await ethers.getContractFactory("GasStation");
+    const Gas = await ethers.getContractFactory("GasStationUpgradeableV1");
     const [owner, user1] = await ethers.getSigners();
     const currentChainIds = [1, 2, 3];
     const chainTypes = {EVM: 1, TVM: 2};
 
-    const translator1 = await Transalor.deploy(currentChainIds[0], chainTypes.EVM);
+    const translator1 = await upgrades.deployProxy(Transalor, [currentChainIds[0], chainTypes.EVM], {
+      initialize: 'initialize',
+      kind: 'uups',
+    });
     await translator1.deployed();
     await translator1.addChains(currentChainIds, [chainTypes.EVM, chainTypes.EVM, chainTypes.EVM]);
     await translator1.addRelayer(owner.address);
 
-    const translator2 = await Transalor.deploy(currentChainIds[1], chainTypes.EVM);
+    const translator2 = await upgrades.deployProxy(Transalor, [currentChainIds[1], chainTypes.EVM], {
+      initialize: 'initialize',
+      kind: 'uups',
+    });
     await translator2.deployed();
     await translator2.addChains(currentChainIds, [chainTypes.EVM, chainTypes.EVM, chainTypes.EVM]);
     await translator2.addRelayer(owner.address);
 
     // Initializer1 deployment
-    const initializer1 = await Initializer.deploy(translator1.address);
+    const initializer1 = await upgrades.deployProxy(Initializer, [translator1.address], {
+      initialize: 'initialize',
+      kind: 'uups',
+    });
     await initializer1.deployed();
     // Initializer Nonce deployment
     const outboundInitializer1Nonce = await Nonce.deploy(initializer1.address);
@@ -40,7 +49,10 @@ describe("Gas sender test", function () {
     await initializer1.setOutBoundNonce(outboundInitializer1Nonce.address);
 
     // Initializer2 deployment
-    const initializer2 = await Initializer.deploy(translator2.address);
+    const initializer2 = await upgrades.deployProxy(Initializer, [translator2.address], {
+      initialize: 'initialize',
+      kind: 'uups',
+    });
     await initializer2.deployed();
     // Initializer Nonce deployment
     const outboundInitializer2Nonce = await Nonce.deploy(initializer2.address);
@@ -60,11 +72,20 @@ describe("Gas sender test", function () {
     await token1.addTrustedAddresses([currentChainIds[0], currentChainIds[1]], [token1.address, token2.address]);
     await token2.addTrustedAddresses([currentChainIds[0], currentChainIds[1]], [token1.address, token2.address]);
 
-    const gas_sender1 = await Gas.deploy(initializer1.address, true);
+    const gas_sender1 = await upgrades.deployProxy(Gas, [initializer1.address, true], {
+      initialize: 'initialize',
+      kind: 'uups',
+    });
     await gas_sender1.deployed();
-    const gas_sender2 = await Gas.deploy(initializer2.address, true);
+    const gas_sender2 = await upgrades.deployProxy(Gas, [initializer2.address, true], {
+      initialize: 'initialize',
+      kind: 'uups',
+    });
     await gas_sender2.deployed();
-    const gas_sender3 = await Gas.deploy(initializer1.address, true);
+    const gas_sender3 = await upgrades.deployProxy(Gas, [initializer1.address, true], {
+      initialize: 'initialize',
+      kind: 'uups',
+    });
     await gas_sender3.deployed();
     await gas_sender1.addTrustedAddresses([currentChainIds[0], currentChainIds[1]], [gas_sender1.address, gas_sender2.address]);
     await gas_sender2.addTrustedAddresses([currentChainIds[0], currentChainIds[1]], [gas_sender1.address, gas_sender2.address]);
@@ -111,10 +132,12 @@ describe("Gas sender test", function () {
       to: gas_sender2.address,
       value: ethers.utils.parseEther("1.0"),
     })).not.to.be.reverted;
+    const ownerTokenBalanceBefore = await token1.balanceOf(owner.address);
     const address = '0x89F5C7d4580065fd9135Eff13493AaA5ad10A168';
     let valueInUsd = 100;
     let value = BigNumber.from(valueInUsd).mul(pow);
     expect(await token1.approve(gas_sender1.address, value.mul(2).toString())).not.to.be.reverted;
+    expect(await token1.allowance(owner.address, gas_sender1.address)).to.equal(value.mul(2));
     const initial_token_balance = await token1.balanceOf(owner.address)
     await expect(gas_sender1.setMinUsdAmount(1000)).not.to.be.reverted;
     await expect(gas_sender1.sendGas(currentChainIds, [value.toString(), value.toString()], [address, address], token1.address))
@@ -136,12 +159,8 @@ describe("Gas sender test", function () {
 
     await expect(gas_sender1.sendGas(currentChainIds, [value.toString(), value.toString()], [address, address], token1.address))
         .to.emit(gas_sender1, 'InitiateTransferEvent');
-    expect(await token1.balanceOf(gas_sender1.address)).to.equal(
-        value.mul(2)
-    );
-    expect(await token1.balanceOf(owner.address)).not.to.equal(
-        initial_token_balance
-    )
+    expect(await token1.balanceOf(owner.address)).to.equal(ownerTokenBalanceBefore);
+    expect(await token1.allowance(owner.address, gas_sender1.address)).to.equal(0);
   });
   it("Should emit InitiateTransferEvent event on gas contract", async function () {
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, Gas, gas_sender1, gas_sender2, gas_sender3, owner, currentChainIds  } = await loadFixture(deployContractsFixture);
@@ -155,10 +174,12 @@ describe("Gas sender test", function () {
       to: gas_sender2.address,
       value: ethers.utils.parseEther("1.0"),
     })).not.to.be.reverted;
+    const ownerTokenBalanceBefore = await token1.balanceOf(owner.address);
     const address = '0x89F5C7d4580065fd9135Eff13493AaA5ad10A168';
     let valueInUsd = 100;
     let value = BigNumber.from(valueInUsd).mul(pow);
     expect(await token1.approve(gas_sender1.address, value.toString())).not.to.be.reverted;
+    expect(await token1.allowance(owner.address, gas_sender1.address)).to.equal(value);
     const initial_token_balance = await token1.balanceOf(owner.address);
     await expect(gas_sender1.setMinUsdAmount(1000)).not.to.be.reverted;
     await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
@@ -204,8 +225,8 @@ describe("Gas sender test", function () {
     expect(payload).to.not.null;
     expect(gasPayload).to.not.null;
     expect(payload).to.equal(gasPayload);
-    expect(await token1.balanceOf(gas_sender1.address)).to.equal(value);
-    expect(await token1.balanceOf(owner.address)).not.to.equal(initial_token_balance)
+    expect(await token1.balanceOf(owner.address)).to.equal(ownerTokenBalanceBefore);
+    expect(await token1.allowance(owner.address, gas_sender1.address)).to.equal(0);
   });
   it("Should send enc function", async function () {
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, Gas, gas_sender1, gas_sender2, gas_sender3, owner, currentChainIds  } = await loadFixture(deployContractsFixture);
@@ -219,10 +240,12 @@ describe("Gas sender test", function () {
       to: gas_sender2.address,
       value: ethers.utils.parseEther("1.0"),
     })).not.to.be.reverted;
+    const ownerTokenBalanceBefore = await token1.balanceOf(owner.address);
     const address = '0x89F5C7d4580065fd9135Eff13493AaA5ad10A168';
     let valueInUsd = 100;
     let value = BigNumber.from(valueInUsd).mul(pow);
     expect(await token1.approve(gas_sender1.address, value.toString())).not.to.be.reverted;
+    expect(await token1.allowance(owner.address, gas_sender1.address)).to.equal(value);
     const initial_token_balance = await token1.balanceOf(owner.address);
     await expect(gas_sender1.setMinUsdAmount(1000)).not.to.be.reverted;
     await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
@@ -268,8 +291,8 @@ describe("Gas sender test", function () {
     expect(payload).to.not.null;
     expect(gasPayload).to.not.null;
     expect(payload).to.equal(gasPayload);
-    expect(await token1.balanceOf(gas_sender1.address)).to.equal(value);
-    expect(await token1.balanceOf(owner.address)).not.to.equal(initial_token_balance);
+    expect(await token1.balanceOf(owner.address)).to.equal(ownerTokenBalanceBefore);
+    expect(await token1.allowance(owner.address, gas_sender1.address)).to.equal(0);
     let capturedValue;
     await expect(gas_sender1.initAsterizmTransfer(dstChainId, txId, transferHash, payload))
         .to.emit(translator1, 'SendMessageEvent')
@@ -292,6 +315,7 @@ describe("Gas sender test", function () {
       to: gas_sender2.address,
       value: ethers.utils.parseEther("1.0"),
     })).not.to.be.reverted;
+    const ownerTokenBalanceBefore = await token1.balanceOf(owner.address);
     const address = '0x89F5C7d4580065fd9135Eff13493AaA5ad10A168';
     let rate = 2;
     let hexRate = '0000000000000000000000000000000000000000000000000000000000000002';
@@ -302,6 +326,7 @@ describe("Gas sender test", function () {
     let valueInUsd = 100;
     let value = BigNumber.from(valueInUsd).mul(pow);
     expect(await token1.approve(gas_sender1.address, value.toString())).not.to.be.reverted;
+    expect(await token1.allowance(owner.address, gas_sender1.address)).to.equal(value);
     const initial_token_balance = await token1.balanceOf(owner.address);
     await expect(gas_sender1.setMinUsdAmount(1000)).not.to.be.reverted;
     await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
@@ -347,8 +372,8 @@ describe("Gas sender test", function () {
     expect(payload).to.not.null;
     expect(gasPayload).to.not.null;
     expect(payload).to.equal(gasPayload);
-    expect(await token1.balanceOf(gas_sender1.address)).to.equal(value);
-    expect(await token1.balanceOf(owner.address)).not.to.equal(initial_token_balance);
+    expect(await token1.balanceOf(owner.address)).to.equal(ownerTokenBalanceBefore);
+    expect(await token1.allowance(owner.address, gas_sender1.address)).to.equal(0);
     let capturedValue;
     await expect(gas_sender1.initAsterizmTransfer(dstChainId, txId, transferHash, payload))
         .to.emit(translator1, 'SendMessageEvent')
@@ -379,15 +404,8 @@ describe("Gas sender test", function () {
     await expect(gas_sender2.asterizmClReceive(currentChainIds[0], gas_sender1.address, decodedValue[0], decodedValue[6], decodedValue[7], finalPayload)).to.not.reverted;
     expect(await(provider.getBalance(gas_sender2.address))).to.equal(beforeTxGasBalance.sub(valueInUsd * rate));
     expect(await(provider.getBalance(address))).to.equal(beforeTxUserBalance.add(valueInUsd * rate));
-    let wrongValue = BigNumber.from(200).mul(pow);
-    expect(await token1.balanceOf(gas_sender1.address)).to.equal(value);
-    await expect(gas_sender1.withdrawTokens(translator1.address, user1.address, value.toString()))
-        .to.be.revertedWith("GasStation: token not exists");
-    await expect(gas_sender1.withdrawTokens(token1.address, user1.address, wrongValue.toString()))
-        .to.be.revertedWith("GasStation: tokens balance not enough");
-    await gas_sender1.withdrawTokens(token1.address, user1.address, value);
-    expect((await gas_sender1.stableCoins(token1.address)).balance).to.equal(0);
-    expect(await token1.balanceOf(user1.address)).to.equal(value);
+    expect(await token1.balanceOf(owner.address)).to.equal(ownerTokenBalanceBefore);
+    expect(await token1.allowance(owner.address, gas_sender1.address)).to.equal(0);
     await expect(gas_sender2.asterizmClReceive(currentChainIds[0], gas_sender1.address, decodedValue[0], decodedValue[6], decodedValue[7], finalPayload))
         .to.be.revertedWith("AsterizmClient: transfer executed already");
   });
@@ -410,10 +428,12 @@ describe("Gas sender test", function () {
       to: gas_sender2.address,
       value: ethers.utils.parseEther("1"),
     })).not.to.be.reverted;
+    const ownerTokenBalanceBefore = await token1.balanceOf(owner.address);
     let provider = ethers.provider;
     let beforeTxGasBalance = await(provider.getBalance(gas_sender1.address));
     let beforeTxUserBalance = await(provider.getBalance(address));
     expect(await token1.approve(gas_sender1.address, value.toString())).not.to.be.reverted;
+    expect(await token1.allowance(owner.address, gas_sender1.address)).to.equal(value);
     const initial_token_balance = await token1.balanceOf(owner.address);
     await expect(gas_sender1.setMinUsdAmount(1000)).not.to.be.reverted;
     await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
@@ -460,8 +480,8 @@ describe("Gas sender test", function () {
     expect(payload).to.not.null;
     expect(gasPayload).to.not.null;
     expect(payload).to.equal(gasPayload);
-    expect(await token1.balanceOf(gas_sender1.address)).to.equal(value);
-    expect(await token1.balanceOf(owner.address)).not.to.equal(initial_token_balance);
+    expect(await token1.balanceOf(owner.address)).to.equal(ownerTokenBalanceBefore);
+    expect(await token1.allowance(owner.address, gas_sender1.address)).to.equal(0);
     let feeValue, PacketValue;
     await expect(gas_sender1.initAsterizmTransfer(dstChainId, txId, transferHash, payload))
         .to.emit(translator1, 'SendMessageEvent')
@@ -494,18 +514,13 @@ describe("Gas sender test", function () {
     expect(await(provider.getBalance(gas_sender2.address))).to.equal(beforeTxGasBalance.sub(valueInUsd * rate));
     expect(await(provider.getBalance(address))).to.equal(beforeTxUserBalance.add(valueInUsd * rate));
     let wrongValue = BigNumber.from(200).mul(pow);
-    expect(await token1.balanceOf(gas_sender1.address)).to.equal(value);
-    await expect(gas_sender1.withdrawTokens(translator1.address, user1.address, value.toString()))
-        .to.be.revertedWith("GasStation: token not exists");
-    await expect(gas_sender1.withdrawTokens(token1.address, user1.address, wrongValue.toString()))
-        .to.be.revertedWith("GasStation: tokens balance not enough");
-    await gas_sender1.withdrawTokens(token1.address, user1.address, value);
-    expect((await gas_sender1.stableCoins(token1.address)).balance).to.equal(0);
-    expect(await token1.balanceOf(user1.address)).to.equal(value);
+    expect(await token1.balanceOf(owner.address)).to.equal(ownerTokenBalanceBefore);
+    expect(await token1.allowance(owner.address, gas_sender1.address)).to.equal(0);
 
     beforeTxGasBalance = await(provider.getBalance(gas_sender2.address));
     beforeTxUserBalance = await(provider.getBalance(address));
     expect(await token1.approve(gas_sender1.address, value.toString())).not.to.be.reverted;
+    expect(await token1.allowance(owner.address, gas_sender1.address)).to.equal(value);
     await expect(gas_sender1.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
         .to.emit(gas_sender1, 'InitiateTransferEvent')
         .withArgs(
@@ -532,8 +547,8 @@ describe("Gas sender test", function () {
     expect(payload).to.not.null;
     expect(gasPayload).to.not.null;
     expect(payload).to.equal(gasPayload);
-    expect(await token1.balanceOf(gas_sender1.address)).to.equal(value);
-    expect(await token1.balanceOf(owner.address)).not.to.equal(initial_token_balance);
+    expect(await token1.balanceOf(owner.address)).to.equal(ownerTokenBalanceBefore);
+    expect(await token1.allowance(owner.address, gas_sender1.address)).to.equal(0);
     await expect(gas_sender1.initAsterizmTransfer(dstChainId, txId, transferHash, payload))
         .to.emit(translator1, 'SendMessageEvent')
         .withArgs(
@@ -564,18 +579,8 @@ describe("Gas sender test", function () {
     await gas_sender2.asterizmClReceive(currentChainIds[0], gas_sender1.address, decodedValue[0], decodedValue[6], decodedValue[7], finalPayload);
     expect(await(provider.getBalance(gas_sender2.address))).to.equal(beforeTxGasBalance.sub(valueInUsd * rate));
     expect(await(provider.getBalance(address))).to.equal(beforeTxUserBalance.add(valueInUsd * rate));
-
-    wrongValue = BigNumber.from(200).mul(pow);
-    expect(await token1.balanceOf(gas_sender1.address)).to.equal(value);
-    await expect(gas_sender1.withdrawTokens(translator1.address, user1.address, value.toString())).to.be.revertedWith(
-        "GasStation: token not exists"
-    );
-    await expect(gas_sender1.withdrawTokens(token1.address, user1.address, wrongValue.toString())).to.be.revertedWith(
-        "GasStation: tokens balance not enough"
-    );
-    await gas_sender1.withdrawTokens(token1.address, user1.address, value);
-    expect((await gas_sender1.stableCoins(token1.address)).balance).to.equal(0);
-    expect(await token1.balanceOf(user1.address)).to.equal(value.mul(2));
+    expect(await token1.balanceOf(owner.address)).to.equal(ownerTokenBalanceBefore);
+    expect(await token1.allowance(owner.address, gas_sender1.address)).to.equal(0);
   });
   it("Should send money and failed with not trusted address", async function () {
     let valueInUsd = 100;
@@ -592,7 +597,9 @@ describe("Gas sender test", function () {
       to: gas_sender2.address,
       value: ethers.utils.parseEther("1.0"),
     })).not.to.be.reverted;
+    const ownerTokenBalanceBefore = await token1.balanceOf(owner.address);
     expect(await token1.approve(gas_sender3.address, value.toString())).not.to.be.reverted;
+    expect(await token1.allowance(owner.address, gas_sender3.address)).to.equal(value);
     const initial_token_balance = await token1.balanceOf(owner.address);
     let dstChainId, dstAddress, txId, transferHash, payload, gasDstChainId, gasTxId, gasPayload;
     await expect(gas_sender3.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
@@ -623,8 +630,8 @@ describe("Gas sender test", function () {
     expect(payload).to.not.null;
     expect(gasPayload).to.not.null;
     expect(payload).to.equal(gasPayload);
-    expect(await token1.balanceOf(gas_sender3.address)).to.equal(value);
-    expect(await token1.balanceOf(owner.address)).not.to.equal(initial_token_balance);
+    expect(await token1.balanceOf(owner.address)).to.equal(ownerTokenBalanceBefore);
+    expect(await token1.allowance(owner.address, gas_sender1.address)).to.equal(0);
     let feeValue, PacketValue;
     await expect(gas_sender3.initAsterizmTransfer(dstChainId, txId, transferHash, payload))
         .to.emit(translator1, 'SendMessageEvent')
@@ -682,7 +689,9 @@ describe("Gas sender test", function () {
       to: gas_sender2.address,
       value: ethers.utils.parseEther("1.0"),
     })).not.to.be.reverted;
+    const ownerTokenBalanceBefore = await token1.balanceOf(owner.address);
     expect(await token1.approve(gas_sender3.address, value.toString())).not.to.be.reverted;
+    expect(await token1.allowance(owner.address, gas_sender3.address)).to.equal(value);
     const initial_token_balance = await token1.balanceOf(owner.address);
     let dstChainId, dstAddress, txId, transferHash, payload, gasDstChainId, gasTxId, gasPayload;
     await expect(gas_sender3.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
@@ -713,8 +722,8 @@ describe("Gas sender test", function () {
     expect(payload).to.not.null;
     expect(gasPayload).to.not.null;
     expect(payload).to.equal(gasPayload);
-    expect(await token1.balanceOf(gas_sender3.address)).to.equal(value);
-    expect(await token1.balanceOf(owner.address)).not.to.equal(initial_token_balance);
+    expect(await token1.balanceOf(owner.address)).to.equal(ownerTokenBalanceBefore);
+    expect(await token1.allowance(owner.address, gas_sender3.address)).to.equal(0);
     let feeValue, PacketValue;
     await expect(gas_sender3.initAsterizmTransfer(dstChainId, txId, failedTransferHash, payload)).to.be
         .revertedWith("AsterizmClient: outbound transfer not exists");

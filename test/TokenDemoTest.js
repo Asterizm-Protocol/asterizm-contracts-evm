@@ -7,8 +7,8 @@ const TOKEN_AMOUNT = BigNumber.from(1000000).mul(pow);
 
 describe("Token contract test", function () {
   async function deployContractsFixture() {
-    const Initializer = await ethers.getContractFactory("AsterizmInitializer");
-    const Transalor = await ethers.getContractFactory("AsterizmTranslator");
+    const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
+    const Transalor = await ethers.getContractFactory("AsterizmTranslatorV1");
     const Token = await ethers.getContractFactory("MultichainToken");
     const Claimer = await ethers.getContractFactory("Claimer");
     const Nonce = await ethers.getContractFactory("AsterizmNonce");
@@ -16,18 +16,27 @@ describe("Token contract test", function () {
     const currentChainIds = [1, 2];
     const chainTypes = {EVM: 1, TVM: 2};
 
-    const translator1 = await Transalor.deploy(currentChainIds[0], chainTypes.EVM);
+    const translator1 = await upgrades.deployProxy(Transalor, [currentChainIds[0], chainTypes.EVM], {
+      initialize: 'initialize',
+      kind: 'uups',
+    });
     await translator1.deployed();
     await translator1.addChains(currentChainIds, [chainTypes.EVM, chainTypes.EVM]);
     await translator1.addRelayer(owner.address);
 
-    const translator2 = await Transalor.deploy(currentChainIds[1], chainTypes.EVM);
+    const translator2 = await upgrades.deployProxy(Transalor, [currentChainIds[1], chainTypes.EVM], {
+      initialize: 'initialize',
+      kind: 'uups',
+    });
     await translator2.deployed();
     await translator2.addChains(currentChainIds, [chainTypes.EVM, chainTypes.EVM]);
     await translator2.addRelayer(owner.address);
 
     // Initializer1 deployment
-    const initializer1 = await Initializer.deploy(translator1.address);
+    const initializer1 = await upgrades.deployProxy(Initializer, [translator1.address], {
+      initialize: 'initialize',
+      kind: 'uups',
+    });
     await initializer1.deployed();
     // Initializer Nonce deployment
     const outboundInitializer1Nonce = await Nonce.deploy(initializer1.address);
@@ -38,7 +47,10 @@ describe("Token contract test", function () {
     await initializer1.setOutBoundNonce(outboundInitializer1Nonce.address);
 
     // Initializer2 deployment
-    const initializer2 = await Initializer.deploy(translator2.address);
+    const initializer2 = await upgrades.deployProxy(Initializer, [translator2.address], {
+      initialize: 'initialize',
+      kind: 'uups',
+    });
     await initializer2.deployed();
     // Initializer Nonce deployment
     const outboundInitializer2Nonce = await Nonce.deploy(initializer2.address);

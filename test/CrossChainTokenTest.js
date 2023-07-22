@@ -7,27 +7,36 @@ const TOKEN_AMOUNT = BigNumber.from(1000000).mul(pow);
 
 describe("Crosschain token", function () {
   async function deployContractsFixture() {
-    const Initializer = await ethers.getContractFactory("AsterizmInitializer");
-    const Transalor = await ethers.getContractFactory("AsterizmTranslator");
+    const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
+    const Transalor = await ethers.getContractFactory("AsterizmTranslatorV1");
     const Token = await ethers.getContractFactory("MultichainToken");
     const Nonce = await ethers.getContractFactory("AsterizmNonce");
-    const Gas = await ethers.getContractFactory("GasStation");
+    const Gas = await ethers.getContractFactory("GasStationUpgradeableV1");
     const [owner] = await ethers.getSigners();
     const currentChainIds = [1, 2];
     const chainTypes = {EVM: 1, TVM: 2};
 
-    const translator1 = await Transalor.deploy(currentChainIds[0], chainTypes.EVM);
+    const translator1 = await upgrades.deployProxy(Transalor, [currentChainIds[0], chainTypes.EVM], {
+      initialize: 'initialize',
+      kind: 'uups',
+    });
     await translator1.deployed();
     await translator1.addChains(currentChainIds, [chainTypes.EVM, chainTypes.EVM]);
     await translator1.addRelayer(owner.address);
 
-    const translator2 = await Transalor.deploy(currentChainIds[1], chainTypes.EVM);
+    const translator2 = await upgrades.deployProxy(Transalor, [currentChainIds[1], chainTypes.EVM], {
+      initialize: 'initialize',
+      kind: 'uups',
+    });
     await translator2.deployed();
     await translator2.addChains(currentChainIds, [chainTypes.EVM, chainTypes.EVM]);
     await translator2.addRelayer(owner.address);
 
     // Initializer1 deployment
-    const initializer1 = await Initializer.deploy(translator1.address);
+    const initializer1 = await upgrades.deployProxy(Initializer, [translator1.address], {
+      initialize: 'initialize',
+      kind: 'uups',
+    });
     await initializer1.deployed();
     // Initializer Nonce deployment
     const outboundInitializer1Nonce = await Nonce.deploy(initializer1.address);
@@ -38,7 +47,10 @@ describe("Crosschain token", function () {
     await initializer1.setOutBoundNonce(outboundInitializer1Nonce.address);
 
     // Initializer2 deployment
-    const initializer2 = await Initializer.deploy(translator2.address);
+    const initializer2 = await upgrades.deployProxy(Initializer, [translator2.address], {
+      initialize: 'initialize',
+      kind: 'uups',
+    });
     await initializer2.deployed();
     // Initializer Nonce deployment
     const outboundInitializer2Nonce = await Nonce.deploy(initializer2.address);
@@ -58,9 +70,15 @@ describe("Crosschain token", function () {
     await token1.addTrustedAddresses(currentChainIds, [token1.address, token2.address]);
     await token2.addTrustedAddresses(currentChainIds, [token1.address, token2.address]);
 
-    const gas_sender1 = await Gas.deploy(initializer1.address, true);
+    const gas_sender1 = await upgrades.deployProxy(Gas, [initializer1.address, true], {
+      initialize: 'initialize',
+      kind: 'uups',
+    });
     await gas_sender1.deployed();
-    const gas_sender2 = await Gas.deploy(initializer2.address, true);
+    const gas_sender2 = await upgrades.deployProxy(Gas, [initializer2.address, true], {
+      initialize: 'initialize',
+      kind: 'uups',
+    });
     await gas_sender2.deployed();
     await gas_sender1.addTrustedAddresses(currentChainIds, [gas_sender1.address, gas_sender2.address]);
     await gas_sender2.addTrustedAddresses(currentChainIds, [gas_sender1.address, gas_sender2.address]);

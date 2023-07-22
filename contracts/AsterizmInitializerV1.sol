@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/INonce.sol";
 import "./interfaces/ITranslator.sol";
 import "./interfaces/IClientReceiverContract.sol";
@@ -12,7 +13,7 @@ import "./libs/AddressLib.sol";
 import "./libs/UintLib.sol";
 import "./base/AsterizmEnv.sol";
 
-contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, IInitializerReceiver, AsterizmEnv {
+contract AsterizmInitializerV1 is UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable, IInitializerSender, IInitializerReceiver, AsterizmEnv {
 
     using AddressLib for address;
     using UintLib for uint;
@@ -66,12 +67,21 @@ contract AsterizmInitializer is Ownable, ReentrancyGuard, IInitializerSender, II
     mapping(uint64 => mapping(uint => bool)) public blockAddresses;
     mapping(bytes32 => bool) private outgoingTransfers;
 
-    constructor (ITranslator _translatorLibrary) {
-        setTransalor(_translatorLibrary);
+    /// Initializing function for upgradeable contracts (constructor)
+    /// @param _translatorLibrary ITranslator  Translator library address
+    function initialize(ITranslator _translatorLibrary) initializer public {
+        __Ownable_init();
+        __ReentrancyGuard_init();
+        __UUPSUpgradeable_init();
 
+        setTransalor(_translatorLibrary);
         localChainId = translatorLib.getLocalChainId();
         emit SetLocalChainIdEvent(localChainId);
     }
+
+    /// Upgrade implementation address for UUPS logic
+    /// @param _newImplementation address  New implementation address
+    function _authorizeUpgrade(address _newImplementation) internal onlyOwner override {}
 
     /// Only translator modifier
     modifier onlyTranslator() {

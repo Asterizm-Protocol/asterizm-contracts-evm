@@ -4,8 +4,8 @@ import { BigNumber } from "ethers";
 
 async function deployBase(translatorAddress, initializerAddress) {
     const [owner] = await ethers.getSigners();
-    const Initializer = await ethers.getContractFactory("AsterizmInitializer");
-    const Transalor = await ethers.getContractFactory("AsterizmTranslator");
+    const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
+    const Transalor = await ethers.getContractFactory("AsterizmTranslatorV1");
     const translator = await Transalor.attach(translatorAddress);
     const initializer = await Initializer.attach(initializerAddress);
 

@@ -4,18 +4,27 @@ import { BigNumber } from "ethers";
 import { Chains } from './base/base_chains';
 
 async function deployBase(isTestnet, contractAddress, contractType) {
-    const TargetContract = await ethers.getContractFactory(contractType == "multichain" ? "MultichainToken" : "GasStation");
+    const TargetContract = await ethers.getContractFactory(contractType == "multichain" ? "MultichainToken" : "GasStationUpgradeableV1");
 
     const chains = isTestnet == 1 ? Chains.testnet : Chains.mainnet;
 
     let chainIds = [];
     let trustedAddresses = [];
     for (let i = 0; i < chains.length; i++) {
-        chainIds.push(chains[i].id);
         if (contractType == "multichain") {
+            if (chains[i].trustAddresses.multichain == '0x0000000000000000000000000000000000000000') {
+                continue;
+            }
+
             trustedAddresses.push(chains[i].trustAddresses.multichain);
+            chainIds.push(chains[i].id);
         } else {
+            if (chains[i].trustAddresses.gas == '0x0000000000000000000000000000000000000000') {
+                continue;
+            }
+
             trustedAddresses.push(chains[i].trustAddresses.gas);
+            chainIds.push(chains[i].id);
         }
     }
 
@@ -43,5 +52,6 @@ task("deploy:trustedAddress", "Add trust addresses to client contract")
         console.log("\nAdded trusted address successfully\n");
 
         console.log("Total gas limit: %s", gasLimit);
-        console.log("Target contract address: %s\n", targetContract.address);
+        console.log("Target contract address: %s", targetContract.address);
+        console.log("Transaction hash: %s\n", tx.hash);
     })

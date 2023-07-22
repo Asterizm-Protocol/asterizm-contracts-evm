@@ -9,7 +9,7 @@ export const Chains = {
             networkName: "mainnet",
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '0x6F6f570F45833E249e27022648a26F4076F48f78',
+                gas: '0x0000000000000000000000000000000000000000',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [
@@ -25,7 +25,7 @@ export const Chains = {
             networkName: "polygon",
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '0xEBfc0056fa29F70e1D9E04E89c3c4693133Db582',
+                gas: '0xab52cD1975906c23d876995c74B84abB3Ab651f5',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [
@@ -41,7 +41,7 @@ export const Chains = {
             networkName: "opera",
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '0x4032e9c3DBB3DAc6Ab498bf52e1E7862344FBb6E',
+                gas: '0xae7c11BaadE21d177111ecDdF069d705BF6CF3Ea',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [
@@ -55,7 +55,7 @@ export const Chains = {
             networkName: "bsc",
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '0x0fF8ad127b1e89dA9119B4F50ec09ECd9B9ac669',
+                gas: '0x812B2df5C33f40fe4CF349056c26D42152DBe61b',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [
@@ -71,7 +71,7 @@ export const Chains = {
             networkName: "optimisticEthereum",
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '0xbB6FfD8e72368d54038A09d8969F5e0FA5C2570B',
+                gas: '0x144919282C59b8f3ea9143B1068ad15e672Dac92',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [
@@ -86,7 +86,7 @@ export const Chains = {
             networkName: "arbitrumOne",
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '0xfE929857e1fbAa00FdCE86ecc0c510c76F05Ae8d',
+                gas: '0x417a852E28599623415102fA2138B61eEb848124',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [
@@ -101,7 +101,7 @@ export const Chains = {
             networkName: "avalanche",
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '0x5Fc4E3d2a94E7a65C3A9b4A5A1E29D7FC9545AeC',
+                gas: '0xb8451d68582d6f708ee9363799A32530E8108590',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [
@@ -115,7 +115,7 @@ export const Chains = {
             networkName: "celo",
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '0x913578e0C4De55F50B6F352e95505De41B0471F0',
+                gas: '0x4C9BFC8BA437e3fB7B746859827e162BBfDb51Ea',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [
@@ -130,7 +130,7 @@ export const Chains = {
             networkName: "boba",
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '0x5772E496d0E6969Db6e6a71828A6b001Ff94697a',
+                gas: '0xaAbbC38338266199ae346f57168B06ac95928f3f',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [
@@ -143,7 +143,7 @@ export const Chains = {
             networkName: "aurora",
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '0xEc28269d5B9C936fC812688c0D1Cd4D7bE1142f3',
+                gas: '0x7d078dF1db3885E25c1E9B44Dc36C20016F7fa13',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [
@@ -157,7 +157,7 @@ export const Chains = {
             networkName: "venidiumMainnet",
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '0x6F6f570F45833E249e27022648a26F4076F48f78',
+                gas: '0x0000000000000000000000000000000000000000',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [],
@@ -168,7 +168,7 @@ export const Chains = {
             networkName: "bitgertMainnet",
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '0x6F6f570F45833E249e27022648a26F4076F48f78',
+                gas: '0x2da63B662823d39d8AC022281C8C66EBB03B0253',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [],
@@ -179,7 +179,7 @@ export const Chains = {
             networkName: "polygonZkMainnet",
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '0x6F6f570F45833E249e27022648a26F4076F48f78',
+                gas: '0x2da63B662823d39d8AC022281C8C66EBB03B0253',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [],
@@ -213,6 +213,19 @@ export const Chains = {
             },
             stableCoins: [
                 '0x7f4F94A70e5E7236c7a14D04fd749FF5b7023bE8',
+            ],
+        },
+        {
+            id: 97,
+            title: "BSC", // BSC Testnet
+            networkName: "bscTestnet",
+            chainType: ChainTypes.EVM,
+            trustAddresses: {
+                gas: '2936373607545158941181338455647368695276129477', // 0x0083AbeA780bf5a24A0a1F026Bf80d258fA04CC5
+                multichain: '0x0000000000000000000000000000000000000000',
+            },
+            stableCoins: [
+                '0xA514927Af6404bCc86c641FAfA65BB5b9b44F13A',
             ],
         },
         {
@@ -256,11 +269,12 @@ export const Chains = {
             networkName: "venomTestnet",
             chainType: ChainTypes.TVM,
             trustAddresses: {
-                gas: '115189678983306427205412323202937228852812607524563886901978387947065467765239',
+                gas: '71616880973359577305763635684840577858376993674409891262985322004629213849328',
                 multichain: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [
-                '0:d5756401c0e2ad938bb980e72846f22f02b15d83c2c9190f93c0c2ff44771336',
+                // '0:d5756401c0e2ad938bb980e72846f22f02b15d83c2c9190f93c0c2ff44771336',
+                '0:4a2219d92ed7971c16093c04dc2f442925fcfb4f1c7f18fc4b6b18cf100b27aa',
             ],
         },
     ],

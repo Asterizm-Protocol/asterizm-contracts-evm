@@ -3,7 +3,7 @@ import { task } from 'hardhat/config';
 import { BigNumber } from "ethers";
 
 async function deployBase(hre, contractAddress) {
-    const TranslatorContract = await ethers.getContractFactory("AsterizmTranslator");
+    const TranslatorContract = await ethers.getContractFactory("AsterizmTranslatorV1");
 
     let gasLimit = BigNumber.from(0);
     const translatorContract = await TranslatorContract.attach(contractAddress);

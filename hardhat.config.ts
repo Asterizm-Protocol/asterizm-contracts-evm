@@ -1,4 +1,5 @@
 import "@nomicfoundation/hardhat-toolbox";
+import "@openzeppelin/hardhat-upgrades";
 require('dotenv').config();
 require("@nomicfoundation/hardhat-chai-matchers");
 
@@ -9,6 +10,9 @@ import './tasks/deploy_claim_task';
 import './tasks/deploy_trustaddresses_task';
 import './tasks/gas_withdrawcoins_task';
 import './tasks/relay_addchain_task';
+import './tasks/upgrade_gas_task';
+import './tasks/upgrade_translator_task';
+import './tasks/upgrade_initializer_task';
 
 const config = {
   solidity: {
@@ -44,15 +48,35 @@ const config = {
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 1
     },
+    ethereumGoerli: {
+      url: process.env.NETWORK_HOST_ETHEREUM_GOERLI,
+      accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
+      chainId: 5
+    },
+    ethereumSepolia: {
+      url: process.env.NETWORK_HOST_ETHEREUM_SEPOLIA,
+      accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
+      chainId: 11155111
+    },
     polygon: {
       url: process.env.NETWORK_HOST_POLYGON,
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 137
     },
+    polygonMumbai: {
+      url: process.env.NETWORK_HOST_POLYGON_MUMBAI,
+      accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
+      chainId: 80001
+    },
     bsc: {
       url: process.env.NETWORK_HOST_BSC,
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 56
+    },
+    bscTestnet: {
+      url: process.env.NETWORK_HOST_BSC_TESTNET,
+      accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
+      chainId: 97
     },
     avalanche: {
       url: process.env.NETWORK_HOST_AVALANCHE,
@@ -98,21 +122,6 @@ const config = {
       url: process.env.NETWORK_HOST_AURORA,
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 1313161554
-    },
-    ethereumGoerli: {
-      url: process.env.NETWORK_HOST_ETHEREUM_GOERLI,
-      accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
-      chainId: 5
-    },
-    ethereumSepolia: {
-      url: process.env.NETWORK_HOST_ETHEREUM_SEPOLIA,
-      accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
-      chainId: 11155111
-    },
-    polygonMumbai: {
-      url: process.env.NETWORK_HOST_POLYGON_MUMBAI,
-      accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
-      chainId: 80001
     },
     venidiumMainnet: {
       url: process.env.NETWORK_HOST_VENIDIUM,

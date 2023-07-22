@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/IInitializerReceiver.sol";
 import "./interfaces/ITranslator.sol";
 import "./libs/AddressLib.sol";
@@ -10,11 +11,11 @@ import "./libs/UintLib.sol";
 import "./base/AsterizmEnv.sol";
 import "./base/AsterizmChainEnv.sol";
 
-contract AsterizmTranslator is Ownable, ITranslator, AsterizmEnv, AsterizmChainEnv {
+contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslator, AsterizmEnv, AsterizmChainEnv {
 
     using AddressLib for address;
     using UintLib for uint;
-    using SafeMath for uint;
+    using SafeMathUpgradeable for uint;
 
     /// Set initializer event
     /// @param _initializerAddress address
@@ -76,12 +77,22 @@ contract AsterizmTranslator is Ownable, ITranslator, AsterizmEnv, AsterizmChainE
     mapping(uint64 => Chain) public chains;
     uint64 public localChainId;
 
-    /// COnstructodr
-    constructor (uint64 _localChainId, uint8 _localChainType) AsterizmChainEnv() {
+    /// Initializing function for upgradeable contracts (constructor)
+    /// @param _localChainId uint64  Local chain ID
+    /// @param _localChainType uint8  Local chain type
+    function initialize(uint64 _localChainId, uint8 _localChainType) initializer public {
+        __Ownable_init();
+        __UUPSUpgradeable_init();
+        __AsterizmChainEnv_init();
+
         addRelayer(owner());
         addChain(_localChainId, _localChainType);
         _setLocalChainId(_localChainId);
     }
+
+    /// Upgrade implementation address for UUPS logic
+    /// @param _newImplementation address  New implementation address
+    function _authorizeUpgrade(address _newImplementation) internal onlyOwner override {}
 
     /// Only initializer modifier
     modifier onlyInitializer() {

@@ -1,12 +1,13 @@
 import "@nomicfoundation/hardhat-toolbox";
+// import { upgrades } from 'hardhat';
 import { task } from 'hardhat/config';
 import { BigNumber } from "ethers";
 import { Chains } from './base/base_chains';
 
 async function deployBase(hre, isTestnet, gasPrice) {
     const [owner] = await ethers.getSigners();
-    const Initializer = await ethers.getContractFactory("AsterizmInitializer");
-    const Transalor = await ethers.getContractFactory("AsterizmTranslator");
+    const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
+    const Transalor = await ethers.getContractFactory("AsterizmTranslatorV1");
     const Nonce = await ethers.getContractFactory("AsterizmNonce");
 
     const chains = isTestnet == 1 ? Chains.testnet : Chains.mainnet;
@@ -30,7 +31,11 @@ async function deployBase(hre, isTestnet, gasPrice) {
     let tx;
     console.log("Deploying translator...");
     // const translator = await Transalor.attach('0x...');
-    const translator = await Transalor.deploy(currentChain.id, currentChain.chainType, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+    // const translator = await Transalor.deploy(currentChain.id, currentChain.chainType, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+    const translator = await upgrades.deployProxy(Transalor, [currentChain.id, currentChain.chainType], {
+        initialize: 'initialize',
+        kind: 'uups',
+    });
     tx = await translator.deployed();
     gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
     console.log("Translator was deployed with address: %s", translator.address);
@@ -40,7 +45,11 @@ async function deployBase(hre, isTestnet, gasPrice) {
 
     console.log("Deploying initialzier...");
     // const initializer = await Initializer.attach('0x...');
-    const initializer = await Initializer.deploy(translator.address, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+    // const initializer = await Initializer.deploy(translator.address, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+    const initializer = await upgrades.deployProxy(Initializer, [translator.address], {
+        initialize: 'initialize',
+        kind: 'uups',
+    });
     tx = await initializer.deployed();
     gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
     console.log("Initializer was deployed with address: %s", initializer.address);

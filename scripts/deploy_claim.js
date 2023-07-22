@@ -4,7 +4,7 @@ const {BigNumber} = require("ethers");
 async function deployBase() {
     const [owner] = await ethers.getSigners();
     const Initializer = await ethers.getContractFactory("AsterizmInitializer");
-    const Transalor = await ethers.getContractFactory("AsterizmTranslator");
+    const Transalor = await ethers.getContractFactory("AsterizmTranslatorV1");
     const translator = await Transalor.attach('0xbf2ad38fd09F37f50f723E35dd84EEa1C282c5C9'); // change translator address here
     const initializer = await Initializer.attach('0xFC4EE541377F3b6641c23CBE82F6f04388290421'); // change initializer address here
 

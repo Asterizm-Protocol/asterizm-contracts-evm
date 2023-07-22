@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "../base/AsterizmClient.sol";
-import "../libs/UintLib.sol";
-import "../libs/AddressLib.sol";
+import "../../base/AsterizmClientUpgradeable.sol";
+import "./interfaces/IGasStationValidator.sol";
 
-contract GasStation is AsterizmClient {
+contract GasStationUpgradeableV1 is AsterizmClientUpgradeable {
 
-    using SafeMath for uint;
     using SafeERC20 for IERC20;
     using UintLib for uint;
     using AddressLib for address;
@@ -23,11 +20,8 @@ contract GasStation is AsterizmClient {
     event SetMinUsdAmountPerChainEvent(uint _amount);
     event SetMaxUsdAmountPerChainEvent(uint _amount);
     event WithdrawCoinsEvent(address _target, uint _amount);
-    event WithdrawTokensEvent(address _token, address _target, uint _amount);
-    event WithdrawNotExistsTokensEvent(address _token, address _target, uint _amount);
 
     struct StableCoin {
-        uint balance;
         bool exists;
         uint8 decimals;
     }
@@ -38,12 +32,15 @@ contract GasStation is AsterizmClient {
     uint public minUsdAmountPerChain;
     uint public maxUsdAmountPerChain;
 
-    constructor(IInitializerSender _initializerLib, bool _useForceOrder)
-        AsterizmClient(_initializerLib, _useForceOrder, true) {}
+    /// Initializing function for upgradeable contracts (constructor)
+    /// @param _initializerLib IInitializerSender  Initializer library address
+    /// @param _useForceOrder bool  Use force transfers order (nonce validation) flag
+    function initialize(IInitializerSender _initializerLib, bool _useForceOrder) initializer public {
+        __AsterizmClientUpgradeable_init(_initializerLib, _useForceOrder, true);
+    }
 
     receive() external payable {}
     fallback() external payable {}
-    function addCoins() external payable {}
 
     /// Withdraw coins
     /// @param _target address  Target address
@@ -53,33 +50,6 @@ contract GasStation is AsterizmClient {
         (bool success, ) = _target.call{value: _amount}("");
         require(success, "GasStation: transfer error");
         emit WithdrawCoinsEvent(_target, _amount);
-    }
-
-    /// Withdraw exists tokens
-    /// @param _token IERC20  Token
-    /// @param _target address  Target address
-    /// @param _amount uint  Amount
-    function withdrawTokens(IERC20 _token, address _target, uint _amount) external onlyOwner {
-        address tokenAddress = address(_token);
-        require(stableCoins[tokenAddress].exists, "GasStation: token not exists");
-        require(stableCoins[tokenAddress].balance >= _amount, "GasStation: tokens balance not enough");
-        _token.safeTransfer(_target, _amount);
-        stableCoins[tokenAddress].balance = stableCoins[tokenAddress].balance.sub(_amount);
-        emit WithdrawTokensEvent(address(_token), _target, _amount);
-    }
-
-    /// Withdraw non-exists tokens
-    /// @param _token IERC20  Token
-    /// @param _target address  Target address
-    /// @param _amount uint  Amount
-    function withdrawNotExistsTokens(IERC20 _token, address _target, uint _amount) external onlyOwner {
-        require(_token.balanceOf(address(this)) >= _amount, "GasStation: tokens balance not enough");
-        _token.safeTransfer(_target, _amount);
-        address tokenAddress = address(_token);
-        if (stableCoins[tokenAddress].exists) {
-            stableCoins[tokenAddress].balance = stableCoins[tokenAddress].balance.sub(_amount);
-        }
-        emit WithdrawNotExistsTokensEvent(address(_token), _target, _amount);
     }
 
     /// Add stable coin
@@ -142,20 +112,20 @@ contract GasStation is AsterizmClient {
         uint sum;
         for (uint i = 0; i < _amounts.length; i++) {
             if (minUsdAmountPerChain > 0) {
-                uint amountInUsd = _amounts[i].div(tokenDecimals);
+                uint amountInUsd = _amounts[i] / tokenDecimals;
                 require(amountInUsd >= minUsdAmountPerChain, "GasStation: minimum amount per chain validation error");
             }
             if (maxUsdAmountPerChain > 0) {
-                uint amountInUsd = _amounts[i].div(tokenDecimals);
+                uint amountInUsd = _amounts[i] / tokenDecimals;
                 require(amountInUsd <= maxUsdAmountPerChain, "GasStation: maximum amount per chain validation error");
             }
 
-            sum = sum.add(_amounts[i]);
+            sum += _amounts[i];
         }
 
         require(sum > 0, "GasStation: wrong amounts");
         {
-            uint sumInUsd = sum.div(tokenDecimals);
+            uint sumInUsd = sum / tokenDecimals;
             require(sumInUsd > 0, "GasStation: wrong amounts in USD");
             if (minUsdAmount > 0) {
                 require(sumInUsd >= minUsdAmount, "GasStation: minimum amount validation error");
@@ -165,8 +135,7 @@ contract GasStation is AsterizmClient {
             }
         }
 
-        _token.safeTransferFrom(msg.sender, address(this), sum);
-        stableCoins[tokenAddress].balance = stableCoins[tokenAddress].balance.add(sum);
+        _token.safeTransferFrom(msg.sender, owner(), sum);
         for (uint i = 0; i < _amounts.length; i++) {
             uint txId = _getTxId();
             bytes memory payload = abi.encode(_receivers[i], _amounts[i], txId, tokenAddress.toUint(), stableCoins[tokenAddress].decimals);
@@ -189,7 +158,7 @@ contract GasStation is AsterizmClient {
         );
 
         address dstAddress = dstAddressUint.toAddress();
-        uint amountToSend = amount.mul(stableRate).div(10 ** decimals);
+        uint amountToSend = amount * stableRate / (10 ** decimals);
         if (dstAddress != address(this)) {
             (bool success, ) = dstAddress.call{value: amountToSend}("");
             require(success, "GasStation: transfer error");
