@@ -11,6 +11,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '0x0000000000000000000000000000000000000000',
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '0x5Fd67fee0E0f197C3eEb160a1365de11321B0423',
             },
             stableCoins: [
                 '0xdAC17F958D2ee523a2206206994597C13D831ec7',
@@ -27,6 +28,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '0xab52cD1975906c23d876995c74B84abB3Ab651f5',
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '0x2aa10870a044C6Ef116ac6A4856DF69C9223f19D',
             },
             stableCoins: [
                 '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
@@ -43,6 +45,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '0xae7c11BaadE21d177111ecDdF069d705BF6CF3Ea',
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '0x8d2094d3C096Dfd7966d686a1A97378F72702D51',
             },
             stableCoins: [
                 '0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E',
@@ -57,6 +60,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '0x812B2df5C33f40fe4CF349056c26D42152DBe61b',
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '0xfcb81E2bD7fdF5b40378E2237C34150426F0f306',
             },
             stableCoins: [
                 '0x55d398326f99059fF775485246999027B3197955',
@@ -73,6 +77,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '0x144919282C59b8f3ea9143B1068ad15e672Dac92',
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '0xD8094a1591E9Fa348d719311d613742f40574a36',
             },
             stableCoins: [
                 '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58',
@@ -88,6 +93,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '0x417a852E28599623415102fA2138B61eEb848124',
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '0xE760803388244b249a93A7355DCdad638c49B404',
             },
             stableCoins: [
                 '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
@@ -103,6 +109,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '0xb8451d68582d6f708ee9363799A32530E8108590',
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '0xf414d49d569f225945DDBb255c3bBF3f6A3cf35a',
             },
             stableCoins: [
                 '0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7',
@@ -117,6 +124,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '0x4C9BFC8BA437e3fB7B746859827e162BBfDb51Ea',
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '0xD73bAb953739C638b6F5C9a2f0c1c2D6815aE703',
             },
             stableCoins: [
                 '0x617f3112bf5397D0467D315cC709EF968D9ba546',
@@ -132,6 +140,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '0xaAbbC38338266199ae346f57168B06ac95928f3f',
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '0x11952da661D6D040EF3405F6B09cEe9A43A6328E',
             },
             stableCoins: [
                 '0x5DE1677344D3Cb0D7D465c10b72A8f60699C062d',
@@ -145,6 +154,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '0x7d078dF1db3885E25c1E9B44Dc36C20016F7fa13',
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '0x11D72C6eE71Be0bA65D06BF896F2a899fdeAa743',
             },
             stableCoins: [
                 '0xB12BFcA5A55806AaF64E99521918A4bf0fC40802',
@@ -159,6 +169,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '0x0000000000000000000000000000000000000000',
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [],
         },
@@ -170,6 +181,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '0x2da63B662823d39d8AC022281C8C66EBB03B0253',
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '0x9cBc90920e615FbEba125206e620B9767A08e3Ae',
             },
             stableCoins: [],
         },
@@ -181,6 +193,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '0x2da63B662823d39d8AC022281C8C66EBB03B0253',
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [],
         },
@@ -197,6 +210,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '1091313221966408868913347237915118571507129432647',
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '1445598615683928705817058617104577746672278202387', // 0xFd36e243BB81650c781cb79d8933682C458E6813
             },
             stableCoins: [
                 '0xc8e37E456c517D682ca8F343e46BF4DEFFd24D13',
@@ -210,6 +224,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '524483678252950907191462497318668706849509749841',
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '1173975214697860638476110722877999173771209566865', // 0xCdA2de8A34F066A8A880B4029F19e510A4a96a91
             },
             stableCoins: [
                 '0x7f4F94A70e5E7236c7a14D04fd749FF5b7023bE8',
@@ -223,6 +238,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '2936373607545158941181338455647368695276129477', // 0x0083AbeA780bf5a24A0a1F026Bf80d258fA04CC5
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [
                 '0xA514927Af6404bCc86c641FAfA65BB5b9b44F13A',
@@ -236,6 +252,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '314889688339176324098060599865391262698455262059',
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [],
         },
@@ -247,6 +264,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '262254645447925333379275843488529411462343473272',
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [],
         },
@@ -258,6 +276,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '55781409753215990494429610500862081143106455110780343957069048257042337087200',
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [
                 '0:8c6dcaa30727458527e99a479dae92a92a51c24e235e5b531659e201204d79ee',
@@ -271,6 +290,7 @@ export const Chains = {
             trustAddresses: {
                 gas: '71616880973359577305763635684840577858376993674409891262985322004629213849328',
                 multichain: '0x0000000000000000000000000000000000000000',
+                checker: '0x0000000000000000000000000000000000000000',
             },
             stableCoins: [
                 // '0:d5756401c0e2ad938bb980e72846f22f02b15d83c2c9190f93c0c2ff44771336',

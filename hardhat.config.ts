@@ -7,6 +7,7 @@ import './tasks/accounts_task';
 import './tasks/deploy_base_task';
 import './tasks/deploy_gas_task';
 import './tasks/deploy_claim_task';
+import './tasks/deploy_checker_task';
 import './tasks/deploy_trustaddresses_task';
 import './tasks/gas_withdrawcoins_task';
 import './tasks/relay_addchain_task';

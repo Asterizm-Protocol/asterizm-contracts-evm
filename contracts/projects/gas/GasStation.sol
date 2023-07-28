@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "../../base/AsterizmClient.sol";
+import "asterizmprotocol/contracts/evm/AsterizmClient.sol";
 
 contract GasStation is AsterizmClient {
 

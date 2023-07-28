@@ -4,21 +4,30 @@ import { BigNumber } from "ethers";
 import { Chains } from './base/base_chains';
 
 async function deployBase(isTestnet, contractAddress, contractType) {
-    const TargetContract = await ethers.getContractFactory(contractType == "multichain" ? "MultichainToken" : "GasStationUpgradeableV1");
-
     const chains = isTestnet == 1 ? Chains.testnet : Chains.mainnet;
 
+    let TargetContract;
     let chainIds = [];
     let trustedAddresses = [];
     for (let i = 0; i < chains.length; i++) {
         if (contractType == "multichain") {
+            TargetContract = await ethers.getContractFactory("MultichainToken");
             if (chains[i].trustAddresses.multichain == '0x0000000000000000000000000000000000000000') {
                 continue;
             }
 
             trustedAddresses.push(chains[i].trustAddresses.multichain);
             chainIds.push(chains[i].id);
+        } else if (contractType == "checker") {
+            TargetContract = await ethers.getContractFactory("Checker");
+            if (chains[i].trustAddresses.checker == '0x0000000000000000000000000000000000000000') {
+                continue;
+            }
+
+            trustedAddresses.push(chains[i].trustAddresses.checker);
+            chainIds.push(chains[i].id);
         } else {
+            TargetContract = await ethers.getContractFactory("GasStationUpgradeableV1");
             if (chains[i].trustAddresses.gas == '0x0000000000000000000000000000000000000000') {
                 continue;
             }
@@ -36,7 +45,7 @@ async function deployBase(isTestnet, contractAddress, contractType) {
 
 task("deploy:trustedAddress", "Add trust addresses to client contract")
     .addPositionalParam("contractAddress", "Target contract address (gas, multichain, etc)")
-    .addPositionalParam("contractType", "Target contract type (gas - gassender contract, claim - claim contract)", "gas")
+    .addPositionalParam("contractType", "Target contract type (gas - gassender contract, claim - claim contract, checker - checker contract)", "gas")
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs) => {
