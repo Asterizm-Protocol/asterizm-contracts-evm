@@ -65,6 +65,7 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, OwnableUpgradeable, Reentranc
     ITranslator private translatorLib;
     uint64 private localChainId;
     mapping(uint64 => mapping(uint => bool)) public blockAddresses;
+    mapping(bytes32 => bool) private ingoingTransfers;
     mapping(bytes32 => bool) private outgoingTransfers;
 
     /// Initializing function for upgradeable contracts (constructor)
@@ -86,6 +87,13 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, OwnableUpgradeable, Reentranc
     /// Only translator modifier
     modifier onlyTranslator() {
         require(msg.sender == address(translatorLib), "AsterizmInitializer: only translator");
+        _;
+    }
+
+    /// Only exists transfer modifier
+    /// @param _transferHash bytes32  Transfer hash
+    modifier onlyExistsIngoingTransfer(bytes32 _transferHash) {
+        require(ingoingTransfers[_transferHash], "AsterizmInitializer: transfer not exists");
         _;
     }
 
@@ -161,6 +169,13 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, OwnableUpgradeable, Reentranc
             _dto.useForceOrder, _dto.txId, _dto.transferHash, _dto.payload
         );
         translatorLib.sendMessage{value: msg.value}(dto);
+        ingoingTransfers[ _dto.transferHash] = true;
+    }
+
+    /// Resend failed by fee amount transfer
+    /// @param _transferHash bytes32  Transfer hash
+    function resendTransfer(bytes32 _transferHash) external payable onlyExistsIngoingTransfer(_transferHash) {
+        translatorLib.resendMessage{value: msg.value}(_transferHash, msg.sender.toUint());
     }
 
     /// Receive payload from translator

@@ -336,4 +336,82 @@ describe("Base layer test", function () {
     expect(await provider.getBalance(translator1.address)).to.equal(0);
     expect(await provider.getBalance(owner2.address)).to.equal(owner2BalanceBefore.add(feeAmount));
   });
+
+  it("Should resend message from client and initializer contracts", async function () {
+    let PacketValue, feeValue, dstChainId, dstAddress, txId, transferHash, payload;
+    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Demo, demo1, demo2, owner1, owner2, currentChainIds } = await loadFixture(deployContractsFixture);
+    const provider = ethers.provider;
+    const feeAmount = ethers.utils.parseEther("1");
+    await translator1.transferOwnership(owner2.address);
+    const owner2BalanceBefore = await provider.getBalance(owner2.address);
+    expect(await provider.getBalance(demo1.address)).to.equal(0);
+    expect(await provider.getBalance(translator1.address)).to.equal(0);
+    let capturedValue;
+    await expect(demo1.sendMessage(currentChainIds[1], "New message"))
+        .to.emit(demo1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(demo2.address);
+    expect(txId).to.equal(0);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    await expect(demo1.initAsterizmTransfer(dstChainId, txId, transferHash, payload, {value: feeAmount}))
+        .to.emit(translator1, 'SendMessageEvent')
+        .withArgs(
+            (value) => {feeValue = value; return true;},
+            (value) => {capturedValue = value; return true;},
+        );
+    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'uint', 'uint64', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], capturedValue);
+    expect(decodedValue[0]).to.not.null; // nonce
+    expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
+    expect(decodedValue[2]).to.equal(demo1.address); // srcAddress
+    expect(decodedValue[3]).to.equal(currentChainIds[1]); // dstChainId
+    expect(decodedValue[4]).to.equal(demo2.address); // dstAddress
+    expect(feeValue).to.equal(feeAmount); // feeValue
+    expect(decodedValue[5]).to.equal(true); // useForceOrder
+    expect(decodedValue[6]).to.equal(0); // txId
+    expect(decodedValue[7]).to.not.null; // transferHash
+    expect(decodedValue[8]).to.not.null; // payload
+    expect(await provider.getBalance(demo1.address)).to.equal(0);
+    expect(await provider.getBalance(translator1.address)).to.equal(0);
+    expect(await provider.getBalance(owner2.address)).to.equal(owner2BalanceBefore.add(feeAmount));
+
+    let resendFeeAmount = ethers.utils.parseEther("1");
+
+    const wrongTransferHash = '0x0000000000000000000000000000000000000000000000000000000000000001';
+    await expect(demo1.resendAsterizmTransfer(wrongTransferHash, {value: resendFeeAmount}))
+        .to.be.revertedWith("AsterizmClient: outbound transfer not exists");
+    await expect(initializer1.resendTransfer(wrongTransferHash, {value: resendFeeAmount}))
+        .to.be.revertedWith("AsterizmInitializer: transfer not exists");
+
+    let resendResultHash, resendResultSender, resendResultAmount;
+    await expect(demo1.resendAsterizmTransfer(transferHash, {value: resendFeeAmount}))
+        .to.emit(translator1, 'ResendFailedTransferEvent')
+        .withArgs(
+            (value) => {resendResultHash = value; return true;},
+            (value) => {resendResultSender = value; return true;},
+            (value) => {resendResultAmount = value; return true;},
+        );
+    expect(resendResultHash).to.equal(transferHash);
+    expect(resendResultSender).to.equal(demo1.address);
+    expect(resendResultAmount).to.equal(resendFeeAmount);
+
+    resendFeeAmount = ethers.utils.parseEther("2");
+    await expect(initializer1.resendTransfer(transferHash, {value: resendFeeAmount}))
+        .to.emit(translator1, 'ResendFailedTransferEvent')
+        .withArgs(
+            (value) => {resendResultHash = value; return true;},
+            (value) => {resendResultSender = value; return true;},
+            (value) => {resendResultAmount = value; return true;},
+        );
+    expect(resendResultHash).to.equal(transferHash);
+    expect(resendResultSender).to.equal(owner1.address);
+    expect(resendResultAmount).to.equal(resendFeeAmount);
+  });
 });

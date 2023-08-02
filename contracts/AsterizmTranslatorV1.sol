@@ -64,6 +64,12 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// @param _payloadHash  bytes32  Payload hash
     event TransferSendEvent(uint64 indexed _srcChainId, uint indexed _srcAddress, uint indexed _dstAddress, uint _nonce, bytes32 _transferHash, bytes32 _payloadHash);
 
+    /// Resend feiled transfer event
+    /// @param _transferHash bytes32
+    /// @param _senderAddress uint
+    /// @param _feeAmount uint
+    event ResendFailedTransferEvent(bytes32 _transferHash, uint _senderAddress, uint _feeAmount);
+
     struct Chain {
         bool exists;
         uint8 chainType; // 1 - EVM, 2 - TVM
@@ -211,6 +217,18 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
         }
 
         emit SendMessageEvent(msg.value, payload);
+    }
+
+    /// Resend failed by fee amount transfer
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _senderAddress uint  Sender address
+    function resendMessage(bytes32 _transferHash, uint _senderAddress) external payable onlyInitializer {
+        if (msg.value > 0) {
+            (bool success, ) = owner().call{value: msg.value}("");
+            require(success, "Translator: transfer error");
+        }
+
+        emit ResendFailedTransferEvent(_transferHash, _senderAddress, msg.value);
     }
 
     /// Initernal transfer message (for transfers in one chain)

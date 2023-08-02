@@ -160,6 +160,13 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
         _;
     }
 
+    /// Only executed outbound transfer modifier
+    /// @param _transferHash bytes32  Transfer hash
+    modifier onlyExecutedOutboundTransfer(bytes32 _transferHash) {
+        require(outboundTransfers[_transferHash].successExecute, "AsterizmClient: outbound transfer not executed");
+        _;
+    }
+
     /// Only nvalid transfer hash modifier
     /// @param _dto ClAsterizmReceiveRequestDto  Transfer data
     modifier onlyValidTransferHash(ClAsterizmReceiveRequestDto memory _dto) {
@@ -342,6 +349,17 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
             _buildIzIninTransferRequestDto(_dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash, useForceOrder, _dto.payload)
         );
         outboundTransfers[_dto.transferHash].successExecute = true;
+    }
+
+    /// Resend failed by fee amount transfer
+    /// @param _transferHash bytes32  Transfer hash
+    function resendAsterizmTransfer(bytes32 _transferHash) external payable
+        onlyOwner
+        nonReentrant
+        onlyExistsOutboundTransfer(_transferHash)
+        onlyExecutedOutboundTransfer(_transferHash)
+    {
+        initializerLib.resendTransfer{value: msg.value}(_transferHash);
     }
 
     /** Receiving logic */
