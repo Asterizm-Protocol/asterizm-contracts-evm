@@ -208,7 +208,7 @@ export const Chains = {
             isCurrent: true,
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '1091313221966408868913347237915118571507129432647',
+                gas: '487700199139922574113057653629334569881086661247', // 0x556d3BB875af7e4f4d20C2f02858C6E6Aa8B127f
                 multichain: '0x0000000000000000000000000000000000000000',
                 checker: '1445598615683928705817058617104577746672278202387', // 0xFd36e243BB81650c781cb79d8933682C458E6813
             },
@@ -222,7 +222,7 @@ export const Chains = {
             networkName: "polygonMumbai",
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '524483678252950907191462497318668706849509749841',
+                gas: '276774764469626859704716071527456298868329226929', // 0x307B027A35E5e03f2620b3618bE18d02976922b1
                 multichain: '0x0000000000000000000000000000000000000000',
                 checker: '1173975214697860638476110722877999173771209566865', // 0xCdA2de8A34F066A8A880B4029F19e510A4a96a91
             },
@@ -236,7 +236,7 @@ export const Chains = {
             networkName: "bscTestnet",
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '2936373607545158941181338455647368695276129477', // 0x0083AbeA780bf5a24A0a1F026Bf80d258fA04CC5
+                gas: '11836832196320620793238404379083707312411033', // 0x000087e152cD5bab3c635857eb355A2A4E0E9199
                 multichain: '0x0000000000000000000000000000000000000000',
                 checker: '0x0000000000000000000000000000000000000000',
             },
@@ -262,7 +262,7 @@ export const Chains = {
             networkName: "operaTestnet",
             chainType: ChainTypes.EVM,
             trustAddresses: {
-                gas: '262254645447925333379275843488529411462343473272',
+                gas: '942442252325422866658814034522812761632263172410', // 0xA514927Af6404bCc86c641FAfA65BB5b9b44F13A
                 multichain: '0x0000000000000000000000000000000000000000',
                 checker: '0x0000000000000000000000000000000000000000',
             },

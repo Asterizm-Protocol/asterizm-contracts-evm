@@ -14,6 +14,8 @@ import './tasks/relay_addchain_task';
 import './tasks/upgrade_gas_task';
 import './tasks/upgrade_translator_task';
 import './tasks/upgrade_initializer_task';
+import './tasks/demo_deploy_task';
+import './tasks/demo_sendmessage_task';
 
 const config = {
   solidity: {
