@@ -63,6 +63,11 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     /// @param _flag bool  Use force order flag
     event SetDisableHashValidationEvent(bool _flag);
 
+    /// Resend Asterizm transfer event
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _feeAmount uint  Additional fee amount
+    event ResendAsterizmTransferEvent(bytes32 _transferHash, uint _feeAmount);
+
     struct AsterizmTransfer {
         bool successReceive;
         bool successExecute;
@@ -342,11 +347,11 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     /// @param _transferHash bytes32  Transfer hash
     function resendAsterizmTransfer(bytes32 _transferHash) external payable
         onlyOwner
-        nonReentrant
         onlyExistsOutboundTransfer(_transferHash)
         onlyExecutedOutboundTransfer(_transferHash)
     {
         initializerLib.resendTransfer{value: msg.value}(_transferHash);
+        emit ResendAsterizmTransferEvent(_transferHash, msg.value);
     }
 
     /** Receiving logic */
