@@ -11,20 +11,19 @@ async function deployBase(hre, contractAddress) {
     return {gasContract, gasLimit};
 }
 
-task("gas:withdrawCoins", "Withdraw coins from gassender contract")
+task("gas:removeStableCoin", "Remove stable coin from from gassender contract")
     .addPositionalParam("contractAddress", "GasSender address")
-    .addPositionalParam("targetAddress", "Target address")
-    .addPositionalParam("amount", "Withdrawal amount")
+    .addPositionalParam("stableAddress", "Stable coin address")
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs, hre) => {
         let {gasContract, gasLimit} = await deployBase(hre, taskArgs.contractAddress);
 
         const gasPrice = parseInt(taskArgs.gasPrice);
-        console.log("Adding contract trusted address...");
-        let tx = await gasContract.withdrawCoins(taskArgs.targetAddress, taskArgs.amount, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+        console.log("Removing stable coin from contract...");
+        let tx = await gasContract.removeStableCoin(taskArgs.stableAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
         gasLimit = gasLimit.add(tx.gasLimit);
 
-        console.log("\nCoins withdrawal successfully\n");
+        console.log("\nStable coins removed successfully\n");
 
         console.log("Total gas limit: %s", gasLimit);
         console.log("Transaction hash: %s\n", tx.hash);

@@ -3,10 +3,9 @@ import { task } from 'hardhat/config';
 import { BigNumber } from "ethers";
 import { Chains } from './base/base_chains';
 
-async function deployBase(hre, isTestnet, translatorAddress, initializerAddress) {
+async function deployBase(hre, isTestnet, initializerAddress) {
     const [owner] = await ethers.getSigners();
     const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
-    const Transalor = await ethers.getContractFactory("AsterizmTranslatorV1");
 
     const chains = isTestnet == 1 ? Chains.testnet : Chains.mainnet;
 
@@ -21,19 +20,17 @@ async function deployBase(hre, isTestnet, translatorAddress, initializerAddress)
     }
 
     let gasLimit = BigNumber.from(0);
-    const translator = await Transalor.attach(translatorAddress);
     const initializer = await Initializer.attach(initializerAddress);
 
-    return {initializer, translator, owner, currentChain, gasLimit};
+    return {initializer, owner, currentChain, gasLimit};
 }
 
 task("deploy:gas", "Deploy Asterizm gassender contracts")
-    .addPositionalParam("translatorAddress", "Translator contract address")
     .addPositionalParam("initializerAddress", "Initializer contract address")
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs, hre) => {
-        let {initializer, translator, owner, currentChain, gasLimit} = await deployBase(hre, taskArgs.isTestnet, taskArgs.translatorAddress, taskArgs.initializerAddress);
+        let {initializer, owner, currentChain, gasLimit} = await deployBase(hre, taskArgs.isTestnet, taskArgs.initializerAddress);
 
         let tx;
         const gasPrice = parseInt(taskArgs.gasPrice);
@@ -67,7 +64,6 @@ task("deploy:gas", "Deploy Asterizm gassender contracts")
         console.log("Deployment was done. Wrap up...\n");
         console.log("Total gas limit: %s", gasLimit);
         console.log("Owner address: %s", owner.address);
-        console.log("Translator address: %s", translator.address);
         console.log("Initializer address: %s", initializer.address);
         console.log("Gas station address: %s\n", gasStation.address);
     })
