@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "asterizmprotocol/contracts/evm/AsterizmClient.sol";
+import "../../base/AsterizmClient.sol";
 
 contract GasStation is AsterizmClient {
 
@@ -34,7 +34,7 @@ contract GasStation is AsterizmClient {
     uint public minUsdAmountPerChain;
     uint public maxUsdAmountPerChain;
 
-    constructor(IInitializerSender _initializerLib, bool _useForceOrder)
+    constructor(IInitializerSenderV2 _initializerLib, bool _useForceOrder)
         AsterizmClient(_initializerLib, _useForceOrder, true) {}
 
     receive() external payable {}

@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "../interfaces/IInitializerSender.sol";
+import "../interfaces/IInitializerSenderV2.sol";
 import "../interfaces/IClientReceiverContract.sol";
 import "./AsterizmEnv.sol";
 import "../libs/AddressLib.sol";
@@ -19,6 +19,10 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     /// Set initializer event
     /// @param _initializerAddress address  Initializer address
     event SetInitializerEvent(address _initializerAddress);
+
+    /// Set external relay event
+    /// @param _externalRelayAddress address  External relay address
+    event SetExternalRelayEvent(address _externalRelayAddress);
 
     /// Set local chain id event
     /// @param _localChainId uint64
@@ -79,7 +83,8 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
         uint8 chainType;
     }
 
-    IInitializerSender private initializerLib;
+    IInitializerSenderV2 private initializerLib;
+    address private externalRelay;
     mapping(uint64 => AsterizmChain) private trustedAddresses;
     mapping(bytes32 => AsterizmTransfer) private inboundTransfers;
     mapping(bytes32 => AsterizmTransfer) private outboundTransfers;
@@ -88,7 +93,7 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     uint private txId;
     uint64 private localChainId;
 
-    constructor(IInitializerSender _initializerLib, bool _useForceOrder, bool _disableHashValidation) {
+    constructor(IInitializerSenderV2 _initializerLib, bool _useForceOrder, bool _disableHashValidation) {
         _setInitializer(_initializerLib);
         _setLocalChainId(initializerLib.getLocalChainId());
         _setUseForceOrder(_useForceOrder);
@@ -174,8 +179,8 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     /** Internal logic */
 
     /// Set initizlizer library
-    /// _initializerLib IInitializerSender  Initializer library
-    function _setInitializer(IInitializerSender _initializerLib) private {
+    /// _initializerLib IInitializerSenderV2  Initializer library
+    function _setInitializer(IInitializerSenderV2 _initializerLib) private {
         initializerLib = _initializerLib;
         emit SetInitializerEvent(address(_initializerLib));
     }
@@ -206,6 +211,14 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     /// @return uint8  Chain type
     function _getChainType(uint64 _chainId) internal view returns(uint8) {
         return initializerLib.getChainType(_chainId);
+    }
+
+    /// Set external relay address (one-time initiation)
+    /// _externalRelay address  External relay address
+    function setExternalRelay(address _externalRelay) public onlyOwner {
+        require(externalRelay == address(0), "AsterizmClient: relay changing not available");
+        externalRelay = _externalRelay;
+        emit SetExternalRelayEvent(_externalRelay);
     }
 
     /// Add trusted address
@@ -337,8 +350,8 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     {
         require(address(this).balance >= _dto.feeAmount, "AsterizmClient: contract balance is not enough");
         require(_dto.txId <= _getTxId(), "AsterizmClient: wrong txId param");
-        initializerLib.initTransfer{value: _dto.feeAmount} (
-            _buildIzIninTransferRequestDto(_dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash, useForceOrder, _dto.payload)
+        initializerLib.initTransferV2{value: _dto.feeAmount} (
+            _buildIzIninTransferV2RequestDto(_dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash, useForceOrder, externalRelay, _dto.payload)
         );
         outboundTransfers[_dto.transferHash].successExecute = true;
     }
@@ -350,7 +363,7 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
         onlyExistsOutboundTransfer(_transferHash)
         onlyExecutedOutboundTransfer(_transferHash)
     {
-        initializerLib.resendTransfer{value: msg.value}(_transferHash);
+        initializerLib.resendTransferV2{value: msg.value}(_transferHash, externalRelay);
         emit ResendAsterizmTransferEvent(_transferHash, msg.value);
     }
 

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "asterizmprotocol/contracts/evm/AsterizmClientUpgradeable.sol";
+import "../../base/AsterizmClientUpgradeable.sol";
 import "./interfaces/IGasStationValidator.sol";
 
 contract GasStationUpgradeableV1 is AsterizmClientUpgradeable {
@@ -33,9 +33,9 @@ contract GasStationUpgradeableV1 is AsterizmClientUpgradeable {
     uint public maxUsdAmountPerChain;
 
     /// Initializing function for upgradeable contracts (constructor)
-    /// @param _initializerLib IInitializerSender  Initializer library address
+    /// @param _initializerLib IInitializerSenderV2  Initializer library address
     /// @param _useForceOrder bool  Use force transfers order (nonce validation) flag
-    function initialize(IInitializerSender _initializerLib, bool _useForceOrder) initializer public {
+    function initialize(IInitializerSenderV2 _initializerLib, bool _useForceOrder) initializer public {
         __AsterizmClientUpgradeable_init(_initializerLib, _useForceOrder, true);
     }
 

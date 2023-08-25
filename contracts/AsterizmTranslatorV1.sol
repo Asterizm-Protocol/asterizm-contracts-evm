@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/IInitializerReceiver.sol";
 import "./interfaces/ITranslator.sol";
+import "./interfaces/IConfig.sol";
 import "./libs/AddressLib.sol";
 import "./libs/UintLib.sol";
 import "./base/AsterizmEnv.sol";
@@ -20,6 +21,10 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// Set initializer event
     /// @param _initializerAddress address
     event SetInitializerEvent(address _initializerAddress);
+
+    /// Set config event
+    /// @param _configAddress address
+    event SetConfigEvent(address _configAddress);
 
     /// Add relayer event
     /// @param _relayerAddress address
@@ -48,7 +53,13 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     event SendMessageEvent(uint _feeValue, bytes _payload);
 
     /// Success transfer event
-    event SuccessTransferEvent();
+    /// @param _transferHash bytes32  Transfer hash
+    event SuccessTransferEvent(bytes32 _transferHash);
+
+    /// Log external message event
+    /// @param _feeValue uint  Fee value
+    /// @param _payload bytes  Transfer payload
+    event LogExternalMessageEvent(uint _feeValue, bytes _payload);
 
     /// Withdraw event
     /// @param _target address
@@ -79,6 +90,7 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     }
 
     IInitializerReceiver private initializerLib;
+    IConfig private configLib;
     mapping(address => Relayer) private relayers;
     mapping(uint64 => Chain) public chains;
     uint64 public localChainId;
@@ -145,6 +157,13 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
         emit SetInitializerEvent(address(_initializerReceiver));
     }
 
+    /// Set config
+    /// @param _configLib IConfig  Config library
+    function setConfig(IConfig _configLib) public onlyOwner {
+        configLib = _configLib;
+        emit SetConfigEvent(address(_configLib));
+    }
+
     /// Add chain
     /// @param _chainId uint64  Chain ID
     /// @param _chainType uint8  Chain type
@@ -180,6 +199,12 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
         emit SetLocalChainEvent(_chainId);
     }
 
+    /// Update trusted relay fee
+    /// @param _fee uint  Relay fee
+    function updateTrustedRelayFee(uint _fee) external onlyOwner {
+        configLib.updateTrustedRelayFee(_fee);
+    }
+
     /** External logic */
 
     /// Return local chain id
@@ -212,11 +237,29 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
         if (_dto.dstChainId == localChainId) {
             TrTransferMessageRequestDto memory dto = _buildTrTarnsferMessageRequestDto(gasleft(), payload);
             _internalTransferMessage(dto);
-            emit SuccessTransferEvent();
+            emit SuccessTransferEvent(_dto.transferHash);
             return;
         }
 
         emit SendMessageEvent(msg.value, payload);
+    }
+
+    /// Log external transfer payload (for external relays logic)
+    /// @param _dto TrSendMessageRequestDto  Method DTO
+    function logExternalMessage(TrSendMessageRequestDto calldata _dto) external payable onlyInitializer {
+        require(chains[_dto.dstChainId].exists, "Translator: wrong chain id");
+        if (msg.value > 0) {
+            (bool success, ) = owner().call{value: msg.value}("");
+            require(success, "Translator: transfer error");
+        }
+
+        emit LogExternalMessageEvent(
+            msg.value,
+            abi.encode(
+                _dto.nonce, localChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress,
+                _dto.forceOrder, _dto.txId, _dto.transferHash, _dto.payload
+            )
+        );
     }
 
     /// Resend failed by fee amount transfer

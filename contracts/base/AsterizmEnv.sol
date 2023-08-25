@@ -119,6 +119,28 @@ abstract contract AsterizmEnv is IAsterizmEnv {
         return dto;
     }
 
+    /// Build initializer init transfer V2 request DTO
+    /// @param _dstChainId uint64  Destination chain ID
+    /// @param _dstAddress uint  Destination address
+    /// @param _txId uint  Transaction ID
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _useForceOrder bool  Use force order flag
+    /// @param _relay address  Relay address
+    /// @param _payload bytes  Payload
+    /// @return IzIninTransferV2RequestDto
+    function _buildIzIninTransferV2RequestDto(uint64 _dstChainId, uint _dstAddress, uint _txId, bytes32 _transferHash, bool _useForceOrder, address _relay, bytes memory _payload) internal pure returns(IzIninTransferV2RequestDto memory) {
+        IzIninTransferV2RequestDto memory dto;
+        dto.dstChainId = _dstChainId;
+        dto.dstAddress = _dstAddress;
+        dto.txId = _txId;
+        dto.transferHash = _transferHash;
+        dto.useForceOrder = _useForceOrder;
+        dto.relay = _relay;
+        dto.payload = _payload;
+
+        return dto;
+    }
+
     /// Build client asterizm receive request DTO
     /// @param _srcChainId uint64  Source chain ID
     /// @param _srcAddress uint  Source address

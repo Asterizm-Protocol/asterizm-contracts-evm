@@ -1,7 +1,7 @@
 import "@nomicfoundation/hardhat-toolbox";
 import { task } from 'hardhat/config';
 import { BigNumber } from "ethers";
-import { Chains } from './base/base_chains';
+import { Chains } from '../base/base_chains';
 
 async function deployBase(hre, isTestnet, initializerAddress) {
     const [owner] = await ethers.getSigners();

@@ -7,7 +7,7 @@ const TOKEN_AMOUNT = BigNumber.from(1000000).mul(pow);
 
 describe("Token contract test", function () {
   async function deployContractsFixture() {
-    const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
+    const Initializer = await ethers.getContractFactory("AsterizmInitializerV2");
     const Transalor = await ethers.getContractFactory("AsterizmTranslatorV1");
     const Token = await ethers.getContractFactory("MultichainToken");
     const Claimer = await ethers.getContractFactory("Claimer");

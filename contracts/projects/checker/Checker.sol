@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "asterizmprotocol/contracts/evm/AsterizmClient.sol";
+import "../../base/AsterizmClient.sol";
 
 contract Checker is AsterizmClient {
     
@@ -10,7 +10,7 @@ contract Checker is AsterizmClient {
 
     uint public morseText;
 
-    constructor (IInitializerSender _initializerLib) AsterizmClient(_initializerLib, false, false) {
+    constructor (IInitializerSenderV2 _initializerLib) AsterizmClient(_initializerLib, false, false) {
         morseText = 10100000010101010010; // -.-. .... . -.-. -.- . .-.
     }
 

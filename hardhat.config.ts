@@ -4,23 +4,23 @@ require('dotenv').config();
 require("@nomicfoundation/hardhat-chai-matchers");
 
 import './tasks/accounts_task';
-import './tasks/deploy_base_task';
-import './tasks/deploy_gas_task';
-import './tasks/deploy_claim_task';
-import './tasks/deploy_checker_task';
-import './tasks/deploy_trustaddresses_task';
-import './tasks/deploy_removetrustedaddress_task';
-import './tasks/gas_withdrawcoins_task';
-import './tasks/gas_withdrawtokens_task';
-import './tasks/gas_removestable_task';
-import './tasks/gas_coinsbalance_task';
-import './tasks/gas_updatelimits_task';
+import './tasks/deploy/deploy_base_task';
+import './tasks/deploy/deploy_gas_task';
+import './tasks/deploy/deploy_claim_task';
+import './tasks/deploy/deploy_checker_task';
+import './tasks/deploy/deploy_trustaddresses_task';
+import './tasks/deploy/deploy_removetrustedaddress_task';
+import './tasks/gas/gas_withdrawcoins_task';
+import './tasks/gas/gas_withdrawtokens_task';
+import './tasks/gas/gas_removestable_task';
+import './tasks/gas/gas_coinsbalance_task';
+import './tasks/gas/gas_updatelimits_task';
 import './tasks/relay_addchain_task';
-import './tasks/upgrade_gas_task';
-import './tasks/upgrade_translator_task';
-import './tasks/upgrade_initializer_task';
-import './tasks/demo_deploy_task';
-import './tasks/demo_sendmessage_task';
+import './tasks/deploy/upgrade_gas_task';
+import './tasks/deploy/upgrade_translator_task';
+import './tasks/deploy/upgrade_initializer_task';
+import './tasks/demo/demo_deploy_task';
+import './tasks/demo/demo_sendmessage_task';
 
 const config = {
   solidity: {

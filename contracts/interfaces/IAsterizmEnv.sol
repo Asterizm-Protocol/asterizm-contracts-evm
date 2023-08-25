@@ -110,6 +110,23 @@ interface IAsterizmEnv {
         bytes payload;
     }
 
+    /// Initializator initizte transfer V2 request DTO
+    /// @param dstChainId uint64  Destination chain ID
+    /// @param dstAddress uint  Destination address
+    /// @param transferHash bytes32  Transfer hash
+    /// @param txId uint  Transaction ID
+    /// @param relay address  Relay address
+    /// @param payload bytes  Payload
+    struct IzIninTransferV2RequestDto {
+        uint64 dstChainId;
+        uint dstAddress;
+        bytes32 transferHash;
+        bool useForceOrder;
+        uint txId;
+        address relay;
+        bytes payload;
+    }
+
     /// Initializator receive payload request DTO
     /// @param srcChainId uint64  Source chain ID
     /// @param srcAddress uint  Source address

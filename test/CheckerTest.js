@@ -3,7 +3,7 @@ const { expect } = require("chai");
 
 describe("Checker test", function () {
     async function deployContractsFixture() {
-        const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
+        const Initializer = await ethers.getContractFactory("AsterizmInitializerV2");
         const Transalor = await ethers.getContractFactory("AsterizmTranslatorV1");
         const Nonce = await ethers.getContractFactory("AsterizmNonce");
         const Checker = await ethers.getContractFactory("Checker");

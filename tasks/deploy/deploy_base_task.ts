@@ -2,7 +2,7 @@ import "@nomicfoundation/hardhat-toolbox";
 // import { upgrades } from 'hardhat';
 import { task } from 'hardhat/config';
 import { BigNumber } from "ethers";
-import { Chains } from './base/base_chains';
+import { Chains } from '../base/base_chains';
 
 async function deployBase(hre, isTestnet, gasPrice) {
     const [owner] = await ethers.getSigners();
