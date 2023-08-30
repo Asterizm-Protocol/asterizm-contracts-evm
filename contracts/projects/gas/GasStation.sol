@@ -34,7 +34,7 @@ contract GasStation is AsterizmClient {
     uint public minUsdAmountPerChain;
     uint public maxUsdAmountPerChain;
 
-    constructor(IInitializerSenderV2 _initializerLib, bool _useForceOrder)
+    constructor(IInitializerSender _initializerLib, bool _useForceOrder)
         AsterizmClient(_initializerLib, _useForceOrder, true) {}
 
     receive() external payable {}

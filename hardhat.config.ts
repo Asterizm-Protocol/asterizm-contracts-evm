@@ -10,6 +10,7 @@ import './tasks/deploy/deploy_claim_task';
 import './tasks/deploy/deploy_checker_task';
 import './tasks/deploy/deploy_trustaddresses_task';
 import './tasks/deploy/deploy_removetrustedaddress_task';
+import './tasks/deploy/deploy_externalrelay_task';
 import './tasks/gas/gas_withdrawcoins_task';
 import './tasks/gas/gas_withdrawtokens_task';
 import './tasks/gas/gas_removestable_task';
@@ -85,6 +86,11 @@ const config = {
       url: process.env.NETWORK_HOST_BSC_TESTNET,
       accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
       chainId: 97
+    },
+    opBnbTestnet: {
+      url: process.env.NETWORK_HOST_OPBNB_TESTNET,
+      accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
+      chainId: 5611
     },
     avalanche: {
       url: process.env.NETWORK_HOST_AVALANCHE,

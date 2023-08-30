@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "../interfaces/IInitializerSenderV2.sol";
+import "../interfaces/IInitializerSender.sol";
 import "../interfaces/IClientReceiverContract.sol";
 import "./AsterizmEnv.sol";
 import "../libs/AddressLib.sol";
@@ -43,8 +43,7 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
     /// @param _nonce uint  Transaction nonce
     /// @param _txId uint  Transfer ID
     /// @param _transferHash bytes32  Transaction hash
-    /// @param _payload bytes  Payload
-    event PayloadReceivedEvent(uint64 _srcChainId, uint _srcAddress, uint _nonce, uint _txId, bytes32 _transferHash, bytes _payload);
+    event PayloadReceivedEvent(uint64 _srcChainId, uint _srcAddress, uint _nonce, uint _txId, bytes32 _transferHash);
 
     /// Add trusted address event
     /// @param _chainId uint64  Chain ID
@@ -84,7 +83,7 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
         uint8 chainType;
     }
 
-    IInitializerSenderV2 private initializerLib;
+    IInitializerSender private initializerLib;
     address private externalRelay;
     mapping(uint64 => AsterizmChain) private trustedAddresses;
     mapping(bytes32 => AsterizmTransfer) private inboundTransfers;
@@ -95,10 +94,10 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
     uint64 private localChainId;
 
     /// Initializing function for upgradeable contracts (constructor)
-    /// @param _initializerLib IInitializerSenderV2  Initializer library address
+    /// @param _initializerLib IInitializerSender  Initializer library address
     /// @param _useForceOrder bool  Use force transfers order (nonce validation) flag
     /// @param _disableHashValidation bool  Disable hash validation flag
-    function __AsterizmClientUpgradeable_init(IInitializerSenderV2 _initializerLib, bool _useForceOrder, bool _disableHashValidation) initializer public {
+    function __AsterizmClientUpgradeable_init(IInitializerSender _initializerLib, bool _useForceOrder, bool _disableHashValidation) initializer public {
         __Ownable_init();
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
@@ -192,8 +191,8 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
     /** Internal logic */
 
     /// Set initizlizer library
-    /// _initializerLib IInitializerSenderV2  Initializer library
-    function _setInitializer(IInitializerSenderV2 _initializerLib) private {
+    /// _initializerLib IInitializerSender  Initializer library
+    function _setInitializer(IInitializerSender _initializerLib) private {
         initializerLib = _initializerLib;
         emit SetInitializerEvent(address(_initializerLib));
     }
@@ -347,10 +346,9 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
     /// @param _dstChainId uint64  Destination chain ID
     /// @param _transferHash bytes32  Transfer hash
     /// @param _txId uint  Transaction ID
-    /// @param _payload bytes  Payload
-    function initAsterizmTransfer(uint64 _dstChainId, uint _txId, bytes32 _transferHash, bytes calldata _payload) external payable onlyOwner nonReentrant {
+    function initAsterizmTransfer(uint64 _dstChainId, uint _txId, bytes32 _transferHash) external payable onlyOwner nonReentrant {
         require(trustedAddresses[_dstChainId].exists, "AsterizmClient: trusted address not found");
-        ClInitTransferRequestDto memory dto = _buildClInitTransferRequestDto(_dstChainId, trustedAddresses[_dstChainId].trustedAddress, _txId, _transferHash, msg.value, _payload);
+        ClInitTransferRequestDto memory dto = _buildClInitTransferRequestDto(_dstChainId, trustedAddresses[_dstChainId].trustedAddress, _txId, _transferHash, msg.value);
         _initAsterizmTransferPrivate(dto);
     }
 
@@ -363,8 +361,8 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
     {
         require(address(this).balance >= _dto.feeAmount, "AsterizmClient: contract balance is not enough");
         require(_dto.txId <= _getTxId(), "AsterizmClient: wrong txId param");
-        initializerLib.initTransferV2{value: _dto.feeAmount} (
-            _buildIzIninTransferV2RequestDto(_dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash, useForceOrder, externalRelay, _dto.payload)
+        initializerLib.initTransfer{value: _dto.feeAmount} (
+            _buildIzIninTransferRequestDto(_dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash, useForceOrder, externalRelay)
         );
         outboundTransfers[_dto.transferHash].successExecute = true;
     }
@@ -376,27 +374,27 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
         onlyExistsOutboundTransfer(_transferHash)
         onlyExecutedOutboundTransfer(_transferHash)
     {
-        initializerLib.resendTransferV2{value: msg.value}(_transferHash, externalRelay);
+        initializerLib.resendTransfer{value: msg.value}(_transferHash, externalRelay);
         emit ResendAsterizmTransferEvent(_transferHash, msg.value);
     }
 
     /** Receiving logic */
 
     /// Receive payload from initializer
-    /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function asterizmIzReceive(ClAsterizmReceiveRequestDto calldata _dto) external onlyInitializer {
+    /// @param _dto IzAsterizmReceiveRequestDto  Method DTO
+    function asterizmIzReceive(IzAsterizmReceiveRequestDto calldata _dto) external onlyInitializer {
         _asterizmReceiveExternal(_dto);
     }
 
     /// Receive external payload
-    /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function _asterizmReceiveExternal(ClAsterizmReceiveRequestDto calldata _dto) private
+    /// @param _dto IzAsterizmReceiveRequestDto  Method DTO
+    function _asterizmReceiveExternal(IzAsterizmReceiveRequestDto calldata _dto) private
         onlyOwnerOrInitializer
         onlyTrustedAddress(_dto.srcChainId, _dto.srcAddress)
         onlyNonExecuted(_dto.transferHash)
     {
         inboundTransfers[_dto.transferHash].successReceive = true;
-        emit PayloadReceivedEvent(_dto.srcChainId, _dto.srcAddress, _dto.nonce, _dto.txId, _dto.transferHash, _dto.payload);
+        emit PayloadReceivedEvent(_dto.srcChainId, _dto.srcAddress, _dto.nonce, _dto.txId, _dto.transferHash);
     }
 
     /// Receive payload from client server

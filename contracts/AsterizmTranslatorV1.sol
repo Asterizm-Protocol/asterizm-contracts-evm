@@ -58,8 +58,9 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
 
     /// Log external message event
     /// @param _feeValue uint  Fee value
+    /// @param _externalRelayAddress address  External relay address
     /// @param _payload bytes  Transfer payload
-    event LogExternalMessageEvent(uint _feeValue, bytes _payload);
+    event LogExternalMessageEvent(uint _feeValue, address _externalRelayAddress, bytes _payload);
 
     /// Withdraw event
     /// @param _target address
@@ -72,8 +73,7 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// @param _dstAddress uint  Destination address
     /// @param _nonce uint  Nonce
     /// @param _transferHash bytes32  Transfer hash
-    /// @param _payloadHash  bytes32  Payload hash
-    event TransferSendEvent(uint64 indexed _srcChainId, uint indexed _srcAddress, uint indexed _dstAddress, uint _nonce, bytes32 _transferHash, bytes32 _payloadHash);
+    event TransferSendEvent(uint64 indexed _srcChainId, uint indexed _srcAddress, uint indexed _dstAddress, uint _nonce, bytes32 _transferHash);
 
     /// Resend feiled transfer event
     /// @param _transferHash bytes32
@@ -231,8 +231,8 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
         }
 
         bytes memory payload = abi.encode(
-            _dto.nonce, localChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress,
-            _dto.forceOrder, _dto.txId, _dto.transferHash, _dto.payload
+            _dto.nonce, localChainId, _dto.srcAddress, _dto.dstChainId,
+            _dto.dstAddress, _dto.forceOrder, _dto.txId, _dto.transferHash
         );
         if (_dto.dstChainId == localChainId) {
             TrTransferMessageRequestDto memory dto = _buildTrTarnsferMessageRequestDto(gasleft(), payload);
@@ -245,8 +245,9 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     }
 
     /// Log external transfer payload (for external relays logic)
+    /// @param _externalRelayAddress address  External relay address
     /// @param _dto TrSendMessageRequestDto  Method DTO
-    function logExternalMessage(TrSendMessageRequestDto calldata _dto) external payable onlyInitializer {
+    function logExternalMessage(address _externalRelayAddress, TrSendMessageRequestDto calldata _dto) external payable onlyInitializer {
         require(chains[_dto.dstChainId].exists, "Translator: wrong chain id");
         if (msg.value > 0) {
             (bool success, ) = owner().call{value: msg.value}("");
@@ -255,9 +256,10 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
 
         emit LogExternalMessageEvent(
             msg.value,
+            _externalRelayAddress,
             abi.encode(
-                _dto.nonce, localChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress,
-                _dto.forceOrder, _dto.txId, _dto.transferHash, _dto.payload
+                _dto.nonce, localChainId, _dto.srcAddress, _dto.dstChainId,
+                _dto.dstAddress, _dto.forceOrder, _dto.txId, _dto.transferHash
             )
         );
     }
@@ -292,11 +294,10 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     function _baseTransferMessage(TrTransferMessageRequestDto memory _dto) private {
         (
             uint nonce, uint64 srcChainId, uint srcAddress, uint64 dstChainId,
-            uint dstAddress, bool forceOrder, uint txId,
-            bytes32 transferHash, bytes memory payload
+            uint dstAddress, bool forceOrder, uint txId, bytes32 transferHash
         ) = abi.decode(
             _dto.payload,
-            (uint, uint64, uint, uint64, uint, bool, uint, bytes32, bytes)
+            (uint, uint64, uint, uint64, uint, bool, uint, bytes32)
         );
 
         {
@@ -305,10 +306,10 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
 
             initializerLib.receivePayload(_buildIzReceivePayloadRequestDto(
                     _buildBaseTransferDirectionDto(srcChainId, srcAddress, localChainId, dstAddress),
-                    nonce, _dto.gasLimit, forceOrder, txId, transferHash, payload
+                    nonce, _dto.gasLimit, forceOrder, txId, transferHash
                 ));
         }
 
-        emit TransferSendEvent(srcChainId, srcAddress, dstAddress, nonce, transferHash, keccak256(payload));
+        emit TransferSendEvent(srcChainId, srcAddress, dstAddress, nonce, transferHash);
     }
 }

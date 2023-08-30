@@ -3,7 +3,7 @@ const { expect } = require("chai");
 
 describe("Checker test", function () {
     async function deployContractsFixture() {
-        const Initializer = await ethers.getContractFactory("AsterizmInitializerV2");
+        const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
         const Transalor = await ethers.getContractFactory("AsterizmTranslatorV1");
         const Nonce = await ethers.getContractFactory("AsterizmNonce");
         const Checker = await ethers.getContractFactory("Checker");
@@ -97,7 +97,7 @@ describe("Checker test", function () {
         expect(transferHash).to.not.null;
         expect(payload).to.not.null;
         let PacketValue;
-        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash, payload))
+        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash))
             .to.emit(translator1, 'SendMessageEvent')
             .withArgs(
                 (value) => {feeValue = value; return true;},
@@ -122,7 +122,7 @@ describe("Checker test", function () {
         expect(txId).to.equal(0);
         expect(transferHash).to.not.null;
         expect(payload).to.not.null;
-        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash, payload))
+        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash))
             .to.emit(translator1, 'SuccessTransferEvent');
 
         await expect(checker1.sendCheck([currentChainIds[1]]))
@@ -140,7 +140,7 @@ describe("Checker test", function () {
         expect(transferHash).to.not.null;
         expect(payload).to.not.null;
         let PacketValue;
-        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash, payload))
+        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash))
             .to.emit(translator1, 'SendMessageEvent')
             .withArgs(
                 (value) => {feeValue = value; return true;},
@@ -166,7 +166,7 @@ describe("Checker test", function () {
         expect(txId).to.equal(0);
         expect(transferHash).to.not.null;
         expect(payload).to.not.null;
-        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash, payload))
+        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash))
             .to.emit(translator1, 'SuccessTransferEvent');
 
         await expect(checker1.sendCheck([currentChainIds[1]]))
@@ -184,7 +184,7 @@ describe("Checker test", function () {
         expect(transferHash).to.not.null;
         expect(payload).to.not.null;
         let PacketValue;
-        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash, payload))
+        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash))
             .to.emit(translator1, 'SendMessageEvent')
             .withArgs(
                 (value) => {feeValue = value; return true;},
@@ -212,7 +212,7 @@ describe("Checker test", function () {
         expect(txId).to.equal(0);
         expect(transferHash).to.not.null;
         expect(payload).to.not.null;
-        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash, payload))
+        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash))
             .to.be.revertedWith("AsterizmInitializer: target address is blocked");
 
         await expect(initializer1.addBlockAddress(currentChainIds[0], checker1.address))
@@ -231,7 +231,7 @@ describe("Checker test", function () {
         expect(txId).to.equal(1);
         expect(transferHash).to.not.null;
         expect(payload).to.not.null;
-        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash, payload))
+        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash))
             .to.be.revertedWith("AsterizmInitializer: sender address is blocked");
 
         await expect(initializer1.removeBlockAddress(currentChainIds[0], checker1.address))
@@ -252,7 +252,7 @@ describe("Checker test", function () {
         expect(txId).to.equal(2);
         expect(transferHash).to.not.null;
         expect(payload).to.not.null;
-        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash, payload))
+        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash))
             .to.emit(translator1, 'SuccessTransferEvent');
 
         await expect(checker1.sendCheck([currentChainIds[1]]))
@@ -269,7 +269,7 @@ describe("Checker test", function () {
         expect(txId).to.equal(3);
         expect(transferHash).to.not.null;
         expect(payload).to.not.null;
-        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash, payload))
+        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash))
             .to.emit(translator1, 'SendMessageEvent')
             .withArgs(
                 (value) => {feeValue = value; return true;},
@@ -304,13 +304,13 @@ describe("Checker test", function () {
         expect(txId).to.equal(0);
         expect(transferHash).to.not.null;
         expect(payload).to.not.null;
-        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash, payload, {value: feeAmount}))
+        await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash, {value: feeAmount}))
             .to.emit(translator1, 'SendMessageEvent')
             .withArgs(
                 (value) => {feeValue = value; return true;},
                 (value) => {capturedValue = value; return true;},
             );
-        let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'uint', 'uint64', 'uint', 'bool', 'uint', 'bytes32', 'bytes'], capturedValue);
+        let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'uint', 'uint64', 'uint', 'bool', 'uint', 'bytes32'], capturedValue);
         expect(decodedValue[0]).to.not.null; // nonce
         expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
         expect(decodedValue[2]).to.equal(checker1.address); // srcAddress
@@ -320,7 +320,6 @@ describe("Checker test", function () {
         expect(decodedValue[5]).to.equal(false); // useForceOrder
         expect(decodedValue[6]).to.equal(0); // txId
         expect(decodedValue[7]).to.not.null; // transferHash
-        expect(decodedValue[8]).to.not.null; // payload
         expect(await provider.getBalance(checker1.address)).to.equal(0);
         expect(await provider.getBalance(translator1.address)).to.equal(0);
         expect(await provider.getBalance(owner2.address)).to.equal(owner2BalanceBefore.add(feeAmount));

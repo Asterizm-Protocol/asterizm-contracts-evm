@@ -2,12 +2,11 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/IConfig.sol";
 
 /// Asterizm config contract
-contract AsterizmConfigV1 is UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable, IConfig {
+contract AsterizmConfigV1 is UUPSUpgradeable, OwnableUpgradeable, IConfig {
 
     /// Set initializer event
     /// @param _address address  Initializer address
@@ -40,7 +39,6 @@ contract AsterizmConfigV1 is UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuar
     /// @param _initializerAddress address  Initializer address
     function initialize(address _initializerAddress) initializer public {
         __Ownable_init();
-        __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
 
         _setInitializer(_initializerAddress);
@@ -83,7 +81,7 @@ contract AsterizmConfigV1 is UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuar
 
     /// Update trusted relay fee
     /// @param _fee uint  Relay fee
-    function updateTrustedRelayFee(uint _fee) external nonReentrant onlyTrustedRelay {
+    function updateTrustedRelayFee(uint _fee) external onlyTrustedRelay {
         trustedRelays[msg.sender].fee = _fee;
 
         emit TrustedRelayEvent(msg.sender, msg.sender, _fee, trustedRelays[msg.sender].systemFee);

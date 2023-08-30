@@ -389,6 +389,27 @@ export const Chains = {
             ],
         },
         {
+            id: 5611,
+            title: "opBNB", // opBNB Testnet
+            networkName: "opBnbTestnet",
+            chainType: ChainTypes.EVM,
+            trustAddresses: {
+                gas: {
+                    address: '0xc8e37E456c517D682ca8F343e46BF4DEFFd24D13',
+                    uint: '1146871423096324818780652019202769904412751187219',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+            },
+            stableCoins: [],
+        },
+        {
             id: 4918,
             title: "XVM", // Venidium Testnet
             networkName: "venidiumTestnet",

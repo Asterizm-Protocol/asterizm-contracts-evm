@@ -2,7 +2,6 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "../interfaces/IInitializerSenderV2.sol";
 import "../interfaces/IMultiChainToken.sol";
 import "../base/AsterizmClient.sol";
 
@@ -23,7 +22,7 @@ contract MultichainToken is IMultiChainToken, ERC20, AsterizmClient {
 
     mapping (uint => CrossChainTransfer) public crosschainTransfers;
 
-    constructor(IInitializerSenderV2 _initializerLib, uint _initialSupply)
+    constructor(IInitializerSender _initializerLib, uint _initialSupply)
     ERC20("CrossToken", "CTN")
     AsterizmClient(_initializerLib, true, false)
     {

@@ -6,14 +6,16 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/INonce.sol";
 import "./interfaces/ITranslator.sol";
+import "./interfaces/IConfig.sol";
 import "./interfaces/IClientReceiverContract.sol";
 import "./interfaces/IInitializerSender.sol";
 import "./interfaces/IInitializerReceiver.sol";
+import "./interfaces/IAsterizmConfigEnv.sol";
 import "./libs/AddressLib.sol";
 import "./libs/UintLib.sol";
 import "./base/AsterizmEnv.sol";
 
-contract AsterizmInitializerV1 is UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable, IInitializerSender, IInitializerReceiver, AsterizmEnv {
+contract AsterizmInitializerV1 is UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable, IInitializerSender, IInitializerReceiver, AsterizmEnv, IAsterizmConfigEnv {
 
     using AddressLib for address;
     using UintLib for uint;
@@ -21,6 +23,10 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, OwnableUpgradeable, Reentranc
     /// Set translator event
     /// @param _translatorAddress address
     event SetTranslatorEvent(address _translatorAddress);
+
+    /// Set config event
+    /// @param _configAddress address
+    event SetConfigEvent(address _configAddress);
 
     /// Set outbound nonce event
     /// @param _nonceAddress address
@@ -52,9 +58,8 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, OwnableUpgradeable, Reentranc
     /// @param _dstAddress uint  Destination address
     /// @param _nonce uint  Nonce
     /// @param _transferHash bytes32  Tansfer hash
-    /// @param _payload bytes  Payload
     /// @param _reason bytes  Error reason
-    event PayloadErrorEvent(uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _nonce, bytes32 _transferHash, bytes _payload, bytes _reason);
+    event PayloadErrorEvent(uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _nonce, bytes32 _transferHash, bytes _reason);
 
     /// Sent payload event
     /// @param _transferHash bytes32  Transfer hash
@@ -63,6 +68,7 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, OwnableUpgradeable, Reentranc
     INonce private inboundNonce;
     INonce private outboundNonce;
     ITranslator private translatorLib;
+    IConfig private configLib;
     uint64 private localChainId;
     mapping(uint64 => mapping(uint => bool)) public blockAddresses;
     mapping(bytes32 => bool) private ingoingTransfers;
@@ -90,6 +96,12 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, OwnableUpgradeable, Reentranc
         _;
     }
 
+    /// Only translator modifier
+    modifier onlyTranslatorOrExternalRelay() {
+        require(msg.sender == address(translatorLib) || configLib.getRelayData(msg.sender).externalRelayExists, "AsterizmInitializer: only translator or external relay");
+        _;
+    }
+
     /// Only exists transfer modifier
     /// @param _transferHash bytes32  Transfer hash
     modifier onlyExistsIngoingTransfer(bytes32 _transferHash) {
@@ -104,6 +116,13 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, OwnableUpgradeable, Reentranc
     function setTransalor(ITranslator _translatorLib) public onlyOwner {
         translatorLib = _translatorLib;
         emit SetTranslatorEvent(address(_translatorLib));
+    }
+
+    /// Set config
+    /// @param _configLib IConfig  Config library
+    function setConfig(IConfig _configLib) public onlyOwner {
+        configLib = _configLib;
+        emit SetConfigEvent(address(_configLib));
     }
 
     /// Set outbound nonce
@@ -159,48 +178,72 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, OwnableUpgradeable, Reentranc
 
     /// Initiate asterizm transfer
     /// Only clients can call this method
-    /// @param _dto IzIninTransferRequestDto  Method DTO
+    /// @param _dto IzIninTransferV2RequestDto  Method DTO
     function initTransfer(IzIninTransferRequestDto calldata _dto) external payable {
         require(!blockAddresses[localChainId][msg.sender.toUint()], "AsterizmInitializer: sender address is blocked");
         require(!blockAddresses[_dto.dstChainId][_dto.dstAddress], "AsterizmInitializer: target address is blocked");
 
         TrSendMessageRequestDto memory dto = _buildTrSendMessageRequestDto(
-            msg.sender.toUint(), _dto.dstChainId, _dto.dstAddress, _dto.useForceOrder ? outboundNonce.increaseNonce(_dto.dstChainId, abi.encodePacked(msg.sender, _dto.dstAddress)) : 0,
-            _dto.useForceOrder, _dto.txId, _dto.transferHash, _dto.payload
+            msg.sender.toUint(), _dto.dstChainId, _dto.dstAddress,
+            _dto.useForceOrder ? outboundNonce.increaseNonce(_dto.dstChainId, abi.encodePacked(msg.sender, _dto.dstAddress)) : 0,
+            _dto.useForceOrder, _dto.txId, _dto.transferHash
         );
+
+        if (
+            _dto.relay != address(0) &&
+            address(configLib) != address(0) &&
+            _dto.relay != address(translatorLib)
+        ) { // External relays logic
+            ConfigDataResponseDto memory configDto = configLib.getRelayData(_dto.relay);
+            if (configDto.externalRelayExists) {
+                require(configDto.systemFee + configDto.externalRelayFee <= msg.value, "AsterizmInitializer: fee not enough");
+                ITranslator(_dto.relay).sendMessage{value: msg.value - configDto.systemFee}(dto);
+                translatorLib.logExternalMessage{value: configDto.systemFee}(_dto.relay, dto);
+
+                return;
+            }
+        }
+
         translatorLib.sendMessage{value: msg.value}(dto);
         ingoingTransfers[ _dto.transferHash] = true;
     }
 
     /// Resend failed by fee amount transfer
     /// @param _transferHash bytes32  Transfer hash
-    function resendTransfer(bytes32 _transferHash) external payable onlyExistsIngoingTransfer(_transferHash) {
+    /// @param _relay address  Relay address
+    function resendTransfer(bytes32 _transferHash, address _relay) external payable onlyExistsIngoingTransfer(_transferHash) {
+        if (
+            _relay != address(0) &&
+            address(configLib) != address(0) &&
+            _relay != address(translatorLib)
+        ) { // External relays logic
+            ConfigDataResponseDto memory configDto = configLib.getRelayData(_relay);
+            if (configDto.externalRelayExists) {
+                ITranslator(_relay).resendMessage{value: msg.value}(_transferHash, msg.sender.toUint());
+
+                return;
+            }
+        }
+
         translatorLib.resendMessage{value: msg.value}(_transferHash, msg.sender.toUint());
     }
 
     /// Receive payload from translator
     /// @param _dto IzReceivePayloadRequestDto  Method DTO
-    function receivePayload(IzReceivePayloadRequestDto calldata _dto) external onlyTranslator {
+    function receivePayload(IzReceivePayloadRequestDto calldata _dto) external onlyTranslatorOrExternalRelay {
         require(!blockAddresses[localChainId][_dto.dstAddress], "AsterizmInitializer: target address is blocked");
-        if (_dto.forceOrder) {
-            require(
-                inboundNonce.increaseNonceWithValidation(_dto.srcChainId, abi.encodePacked(_dto.srcAddress, _dto.dstAddress), _dto.nonce) == _dto.nonce,
-                "AsterizmInitializer: wrong nonce"
-            );
-        }
-
         require(_dto.dstAddress != address(this).toUint() && _dto.dstAddress != msg.sender.toUint(), "AsterizmInitializer: wrong destination address");
 
-        ClAsterizmReceiveRequestDto memory dto = _buildClAsterizmReceiveRequestDto(
+        IzAsterizmReceiveRequestDto memory dto = _buildIzAsterizmReceiveRequestDto(
             _dto.srcChainId, _dto.srcAddress, _dto.dstChainId,
-            _dto.dstAddress, _dto.nonce, _dto.txId, _dto.transferHash, _dto.payload
+            _dto.dstAddress, _dto.nonce, _dto.txId, _dto.transferHash
         );
 
         try IClientReceiverContract(_dto.dstAddress.toAddress()).asterizmIzReceive{gas: gasleft()}(dto) {
         } catch Error(string memory _err) {
-            emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.nonce, _dto.transferHash, _dto.payload, abi.encode(_err));
+            emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.nonce, _dto.transferHash, abi.encode(_err));
         } catch (bytes memory reason) {
-            emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.nonce, _dto.transferHash, _dto.payload, reason);
+            emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.nonce, _dto.transferHash, reason);
         }
 
         outgoingTransfers[_dto.transferHash] = true;

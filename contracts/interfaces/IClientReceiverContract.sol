@@ -6,8 +6,8 @@ import "./IAsterizmEnv.sol";
 interface IClientReceiverContract is IAsterizmEnv {
 
     /// Receive payload from initializer
-    /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
-    function asterizmIzReceive(ClAsterizmReceiveRequestDto calldata _dto) external;
+    /// @param _dto IzAsterizmReceiveRequestDto  Method DTO
+    function asterizmIzReceive(IzAsterizmReceiveRequestDto calldata _dto) external;
 
     /// Receive payload from client server
     /// @param _srcChainId uint64  Source chain ID

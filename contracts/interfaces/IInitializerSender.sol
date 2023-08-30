@@ -25,5 +25,6 @@ interface IInitializerSender is IAsterizmEnv {
 
     /// Resend failed by fee amount transfer
     /// @param _transferHash bytes32  Transfer hash
-    function resendTransfer(bytes32 _transferHash) external payable;
+    /// @param _relay address  Relay address
+    function resendTransfer(bytes32 _transferHash, address _relay) external payable;
 }

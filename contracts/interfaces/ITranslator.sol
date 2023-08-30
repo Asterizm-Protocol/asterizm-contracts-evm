@@ -11,8 +11,9 @@ interface ITranslator is IAsterizmEnv {
     function sendMessage(TrSendMessageRequestDto calldata _dto) external payable;
 
     /// Send transfer payload
+    /// @param _externalRelayAddress address  External relay address
     /// @param _dto TrSendMessageRequestDto  Method DTO
-    function logExternalMessage(TrSendMessageRequestDto calldata _dto) external payable;
+    function logExternalMessage(address _externalRelayAddress, TrSendMessageRequestDto calldata _dto) external payable;
 
     /// Resend failed by fee amount transfer
     /// @param _transferHash bytes32  Transfer hash

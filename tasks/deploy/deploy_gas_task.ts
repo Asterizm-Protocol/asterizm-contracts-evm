@@ -27,6 +27,7 @@ async function deployBase(hre, isTestnet, initializerAddress) {
 
 task("deploy:gas", "Deploy Asterizm gassender contracts")
     .addPositionalParam("initializerAddress", "Initializer contract address")
+    .addPositionalParam("relayAddress", "Config contract address", '0')
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs, hre) => {
@@ -34,9 +35,9 @@ task("deploy:gas", "Deploy Asterizm gassender contracts")
 
         let tx;
         const gasPrice = parseInt(taskArgs.gasPrice);
-        const minUsdAmount = 15; // change minUsdAmount here
+        const minUsdAmount = 10; // change minUsdAmount here
         const maxUsdAmount = 200; // change maxUsdAmount here
-        const minUsdAmountPerChain = 10; // change minUsdAmountPerChain here
+        const minUsdAmountPerChain = 5; // change minUsdAmountPerChain here
         const useForceOrder = false; // change useForceOrder here
         console.log("Deployig gas station contract...");
         const GasStation = await ethers.getContractFactory("GasStationUpgradeableV1");
@@ -60,6 +61,11 @@ task("deploy:gas", "Deploy Asterizm gassender contracts")
             gasLimit = gasLimit.add(tx.gasLimit);
         }
         console.log("Added stable coins");
+        if (taskArgs.relayAddress != '0') {
+            tx = await gasStation.setExternalRelay(taskArgs.relayAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+            gasLimit = gasLimit.add(tx.gasLimit);
+            console.log("Set external relay successfully. Address: %s", taskArgs.relayAddress);
+        }
 
         console.log("Deployment was done. Wrap up...\n");
         console.log("Total gas limit: %s", gasLimit);

@@ -33,9 +33,9 @@ contract GasStationUpgradeableV1 is AsterizmClientUpgradeable {
     uint public maxUsdAmountPerChain;
 
     /// Initializing function for upgradeable contracts (constructor)
-    /// @param _initializerLib IInitializerSenderV2  Initializer library address
+    /// @param _initializerLib IInitializerSender  Initializer library address
     /// @param _useForceOrder bool  Use force transfers order (nonce validation) flag
-    function initialize(IInitializerSenderV2 _initializerLib, bool _useForceOrder) initializer public {
+    function initialize(IInitializerSender _initializerLib, bool _useForceOrder) initializer public {
         __AsterizmClientUpgradeable_init(_initializerLib, _useForceOrder, true);
     }
 

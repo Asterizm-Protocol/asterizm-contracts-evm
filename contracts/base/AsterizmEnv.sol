@@ -30,16 +30,14 @@ abstract contract AsterizmEnv is IAsterizmEnv {
     /// @param _transferHash bytes32  Transfer hash
     /// @param _feeAmount uint  Fee amount
     /// @param _txId uint  Transaction ID
-    /// @param _payload bytes  Payload
     /// @return ClInitTransferRequestDto
-    function _buildClInitTransferRequestDto(uint64 _dstChainId, uint _dstAddress, uint _txId, bytes32 _transferHash, uint _feeAmount, bytes memory _payload) internal pure returns(ClInitTransferRequestDto memory) {
+    function _buildClInitTransferRequestDto(uint64 _dstChainId, uint _dstAddress, uint _txId, bytes32 _transferHash, uint _feeAmount) internal pure returns(ClInitTransferRequestDto memory) {
         ClInitTransferRequestDto memory dto;
         dto.dstChainId = _dstChainId;
         dto.dstAddress = _dstAddress;
         dto.transferHash = _transferHash;
         dto.feeAmount = _feeAmount;
         dto.txId = _txId;
-        dto.payload = _payload;
 
         return dto;
     }
@@ -68,11 +66,10 @@ abstract contract AsterizmEnv is IAsterizmEnv {
     /// @param _forceOrder bool  Force order flag
     /// @param _txId uint  Transaction ID
     /// @param _transferHash bytes32  Transfer hash
-    /// @param _payload bytes  Payload
     /// @return TrSendMessageRequestDto
     function _buildTrSendMessageRequestDto(
         uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _nonce,
-        bool _forceOrder, uint _txId, bytes32 _transferHash, bytes calldata _payload
+        bool _forceOrder, uint _txId, bytes32 _transferHash
     ) internal pure returns(TrSendMessageRequestDto memory) {
         TrSendMessageRequestDto memory dto;
         dto.srcAddress = _srcAddress;
@@ -82,7 +79,6 @@ abstract contract AsterizmEnv is IAsterizmEnv {
         dto.forceOrder = _forceOrder;
         dto.txId = _txId;
         dto.transferHash = _transferHash;
-        dto.payload = _payload;
 
         return dto;
     }
@@ -105,38 +101,41 @@ abstract contract AsterizmEnv is IAsterizmEnv {
     /// @param _txId uint  Transaction ID
     /// @param _transferHash bytes32  Transfer hash
     /// @param _useForceOrder bool  Use force order flag
-    /// @param _payload bytes  Payload
+    /// @param _relay address  External relay
     /// @return IzIninTransferRequestDto
-    function _buildIzIninTransferRequestDto(uint64 _dstChainId, uint _dstAddress, uint _txId, bytes32 _transferHash, bool _useForceOrder, bytes memory _payload) internal pure returns(IzIninTransferRequestDto memory) {
+    function _buildIzIninTransferRequestDto(uint64 _dstChainId, uint _dstAddress, uint _txId, bytes32 _transferHash, bool _useForceOrder, address _relay) internal pure returns(IzIninTransferRequestDto memory) {
         IzIninTransferRequestDto memory dto;
         dto.dstChainId = _dstChainId;
         dto.dstAddress = _dstAddress;
         dto.txId = _txId;
         dto.transferHash = _transferHash;
         dto.useForceOrder = _useForceOrder;
-        dto.payload = _payload;
+        dto.relay = _relay;
 
         return dto;
     }
 
-    /// Build initializer init transfer V2 request DTO
+    /// Build initializer asterizm receive request DTO
+    /// @param _srcChainId uint64  Source chain ID
+    /// @param _srcAddress uint  Source address
     /// @param _dstChainId uint64  Destination chain ID
     /// @param _dstAddress uint  Destination address
+    /// @param _nonce uint  Nonce
     /// @param _txId uint  Transaction ID
     /// @param _transferHash bytes32  Transfer hash
-    /// @param _useForceOrder bool  Use force order flag
-    /// @param _relay address  Relay address
-    /// @param _payload bytes  Payload
-    /// @return IzIninTransferV2RequestDto
-    function _buildIzIninTransferV2RequestDto(uint64 _dstChainId, uint _dstAddress, uint _txId, bytes32 _transferHash, bool _useForceOrder, address _relay, bytes memory _payload) internal pure returns(IzIninTransferV2RequestDto memory) {
-        IzIninTransferV2RequestDto memory dto;
+    /// @return IzAsterizmReceiveRequestDto
+    function _buildIzAsterizmReceiveRequestDto(
+        uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress,
+        uint _nonce, uint _txId, bytes32 _transferHash
+    ) internal pure returns(IzAsterizmReceiveRequestDto memory) {
+        IzAsterizmReceiveRequestDto memory dto;
+        dto.srcChainId = _srcChainId;
+        dto.srcAddress = _srcAddress;
         dto.dstChainId = _dstChainId;
         dto.dstAddress = _dstAddress;
+        dto.nonce = _nonce;
         dto.txId = _txId;
         dto.transferHash = _transferHash;
-        dto.useForceOrder = _useForceOrder;
-        dto.relay = _relay;
-        dto.payload = _payload;
 
         return dto;
     }
@@ -149,7 +148,7 @@ abstract contract AsterizmEnv is IAsterizmEnv {
     /// @param _nonce uint  Nonce
     /// @param _txId uint  Transaction ID
     /// @param _transferHash bytes32  Transfer hash
-    /// @param _payload bytes  Payload
+    /// @param _payload bytes  Transfer payload
     /// @return ClAsterizmReceiveRequestDto
     function _buildClAsterizmReceiveRequestDto(
         uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress,
@@ -175,11 +174,10 @@ abstract contract AsterizmEnv is IAsterizmEnv {
     /// @param _forceOrder bool  Force order flag
     /// @param _txId uint  Transaction ID
     /// @param _transferHash bytes32  Transfer hash
-    /// @param _payload bytes  Payload
     /// @return IzReceivePayloadRequestDto
     function _buildIzReceivePayloadRequestDto(
         BaseTransferDirectionDto memory _baseTransferDirectioDto,
-        uint _nonce, uint _gasLimit, bool _forceOrder, uint _txId, bytes32 _transferHash, bytes memory _payload
+        uint _nonce, uint _gasLimit, bool _forceOrder, uint _txId, bytes32 _transferHash
     ) internal pure returns(IzReceivePayloadRequestDto memory) {
         IzReceivePayloadRequestDto memory dto;
         dto.srcChainId = _baseTransferDirectioDto.srcChainId;
@@ -191,7 +189,6 @@ abstract contract AsterizmEnv is IAsterizmEnv {
         dto.forceOrder = _forceOrder;
         dto.txId = _txId;
         dto.transferHash = _transferHash;
-        dto.payload = _payload;
 
         return dto;
     }
