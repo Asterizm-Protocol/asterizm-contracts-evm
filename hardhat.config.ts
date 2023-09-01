@@ -11,6 +11,7 @@ import './tasks/deploy/deploy_checker_task';
 import './tasks/deploy/deploy_trustaddresses_task';
 import './tasks/deploy/deploy_removetrustedaddress_task';
 import './tasks/deploy/deploy_externalrelay_task';
+import './tasks/deploy/deploy_singletrustedaddress_task';
 import './tasks/gas/gas_withdrawcoins_task';
 import './tasks/gas/gas_withdrawtokens_task';
 import './tasks/gas/gas_removestable_task';

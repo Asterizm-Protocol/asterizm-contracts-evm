@@ -92,5 +92,5 @@ task("deploy:base", "Deploy base Asterizm contracts")
         console.log("Translator address: %s", translator.address);
         console.log("Initializer address: %s", initializer.address);
         console.log("Inbound nonce address: %s", inboundInitializerNonce.address);
-        console.log("Outbound nonce address: %s", outboundInitializerNonce.address);
+        console.log("Outbound nonce address: %s\n", outboundInitializerNonce.address);
     })

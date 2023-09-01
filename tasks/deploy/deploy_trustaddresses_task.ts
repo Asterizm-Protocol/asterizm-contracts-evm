@@ -48,7 +48,7 @@ async function deployBase(hre, isTestnet, contractType) {
     return {targetContract, gasLimit, chainIds, trustedAddresses};
 }
 
-task("deploy:trustedAddress", "Add trust addresses to client contract")
+task("deploy:fillTrustedAddresses", "Adding trusted addresses to client contract from chains list")
     .addPositionalParam("contractType", "Target contract type (gas - gassender contract, claim - claim contract, checker - checker contract)", "gas")
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
