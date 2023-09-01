@@ -9,7 +9,6 @@ async function deployBase(hre, isTestnet, gasPrice) {
     const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
     const Transalor = await ethers.getContractFactory("AsterizmTranslatorV1");
     const Nonce = await ethers.getContractFactory("AsterizmNonce");
-    const Config = await ethers.getContractFactory("AsterizmConfigV1");
 
     const chains = isTestnet == 1 ? Chains.testnet : Chains.mainnet;
 
@@ -76,30 +75,16 @@ async function deployBase(hre, isTestnet, gasPrice) {
     console.log("Initializer inbound nonce has been deployed: %s", inboundInitializerNonce.address);
     tx = await initializer.setInBoundNonce(inboundInitializerNonce.address, gasPrice > 0 ? {gasPrice: gasPrice} : {});
     gasLimit = gasLimit.add(tx.gasLimit);
-    console.log("Initializer inbound nonce has been set",);
+    console.log("Initializer inbound nonce has been set");
 
-    console.log("Deploying config...");
-    const config = await upgrades.deployProxy(Config, [translator.address], {
-        initialize: 'initialize',
-        kind: 'uups',
-    });
-    tx = await config.deployed();
-    gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
-
-    tx = await initializer.setConfig(config.address);
-    gasLimit = gasLimit.add(tx.gasLimit);
-    tx = await translator.setConfig(config.address);
-    gasLimit = gasLimit.add(tx.gasLimit);
-    console.log("Config was deployed with address: %s", config.address);
-
-    return {initializer, inboundInitializerNonce, outboundInitializerNonce, translator, config, owner, gasLimit};
+    return {initializer, inboundInitializerNonce, outboundInitializerNonce, translator, owner, gasLimit};
 }
 
 task("deploy:base", "Deploy base Asterizm contracts")
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs, hre) => {
-        let {initializer, inboundInitializerNonce, outboundInitializerNonce, translator, config, owner, gasLimit} = await deployBase(hre, taskArgs.isTestnet, parseInt(taskArgs.gasPrice));
+        let {initializer, inboundInitializerNonce, outboundInitializerNonce, translator, owner, gasLimit} = await deployBase(hre, taskArgs.isTestnet, parseInt(taskArgs.gasPrice));
 
         console.log("Deployment was done. Wrap up...\n");
         console.log("Total gas limit: %s", gasLimit);
@@ -108,5 +93,4 @@ task("deploy:base", "Deploy base Asterizm contracts")
         console.log("Initializer address: %s", initializer.address);
         console.log("Inbound nonce address: %s", inboundInitializerNonce.address);
         console.log("Outbound nonce address: %s", outboundInitializerNonce.address);
-        console.log("Config address: %s\n", config.address);
     })

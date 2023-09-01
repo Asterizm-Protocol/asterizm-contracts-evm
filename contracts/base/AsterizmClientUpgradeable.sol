@@ -325,8 +325,6 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
         return disableHashValidation;
     }
 
-    /** External logic */
-
     /** Sending logic */
 
     /// Initiate transfer event

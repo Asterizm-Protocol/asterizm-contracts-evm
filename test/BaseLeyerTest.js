@@ -7,7 +7,6 @@ describe("Base layer test", function () {
     const Transalor = await ethers.getContractFactory("AsterizmTranslatorV1");
     const Nonce = await ethers.getContractFactory("AsterizmNonce");
     const Demo = await ethers.getContractFactory("AsterizmDemo");
-    const Config = await ethers.getContractFactory("AsterizmConfigV1");
     const [owner1, owner2] = await ethers.getSigners();
     const currentChainIds = [1, 2];
     const externalFees = [1, 1];
@@ -59,6 +58,7 @@ describe("Base layer test", function () {
     await inboundInitializer1Nonce.deployed();
     await initializer1.setInBoundNonce(inboundInitializer1Nonce.address);
     await initializer1.setOutBoundNonce(outboundInitializer1Nonce.address);
+    await initializer1.manageTrustedRelay(externalTranslator1.address, externalFees[0], systemFees[0]);
 
     // Initializer2 deployment
     const initializer2 = await upgrades.deployProxy(Initializer, [translator2.address], {
@@ -73,32 +73,12 @@ describe("Base layer test", function () {
     await inboundInitializer2Nonce.deployed();
     await initializer2.setInBoundNonce(inboundInitializer2Nonce.address);
     await initializer2.setOutBoundNonce(outboundInitializer2Nonce.address);
+    await initializer2.manageTrustedRelay(externalTranslator2.address, externalFees[1], systemFees[1]);
 
     await translator1.setInitializer(initializer1.address);
     await translator2.setInitializer(initializer2.address);
     await externalTranslator1.setInitializer(initializer1.address);
     await externalTranslator2.setInitializer(initializer2.address);
-
-    const config1 = await upgrades.deployProxy(Config, [initializer1.address], {
-      initialize: 'initialize',
-      kind: 'uups',
-    });
-    await config1.deployed();
-    await config1.manageTrustedRelay(externalTranslator1.address, externalFees[0], systemFees[0]);
-
-    const config2 = await upgrades.deployProxy(Config, [initializer2.address], {
-      initialize: 'initialize',
-      kind: 'uups',
-    });
-    await config2.deployed();
-    await config2.manageTrustedRelay(externalTranslator2.address, externalFees[1], systemFees[1]);
-
-    await translator1.setConfig(config1.address);
-    await translator2.setConfig(config2.address);
-    await externalTranslator1.setConfig(config1.address);
-    await externalTranslator2.setConfig(config2.address);
-    await initializer1.setConfig(config1.address);
-    await initializer2.setConfig(config2.address);
 
     const demo1 = await Demo.deploy(initializer1.address);
     await demo1.deployed();
@@ -110,7 +90,7 @@ describe("Base layer test", function () {
     // Fixtures can return anything you consider useful for your tests
     return {
       Initializer, initializer1, initializer2, Transalor, translator1, translator2,
-      externalTranslator1, externalTranslator2, Config, config1, config2, Demo, demo1, demo2, owner1, owner2,
+      externalTranslator1, externalTranslator2, Demo, demo1, demo2, owner1, owner2,
       currentChainIds, externalFees, systemFees
     };
   }
@@ -118,7 +98,7 @@ describe("Base layer test", function () {
   it("Should successfully deploy contracts", async function () {
     const {
       Initializer, initializer1, initializer2, Transalor, translator1, translator2,
-      externalTranslator1, externalTranslator2, Config, config1, config2, Demo, demo1, demo2, owner1, owner2,
+      externalTranslator1, externalTranslator2, Demo, demo1, demo2, owner1, owner2,
       currentChainIds, externalFees, systemFees
     } = await loadFixture(deployContractsFixture);
   });
@@ -126,7 +106,7 @@ describe("Base layer test", function () {
   it("Should successfully send message", async function () {
     const {
       Initializer, initializer1, initializer2, Transalor, translator1, translator2,
-      externalTranslator1, externalTranslator2, Config, config1, config2, Demo, demo1, demo2, owner1, owner2,
+      externalTranslator1, externalTranslator2, Demo, demo1, demo2, owner1, owner2,
       currentChainIds, externalFees, systemFees
     } = await loadFixture(deployContractsFixture);
     await expect(demo1.sendMessage(currentChainIds[1], "New message")).not.to.be.reverted;
@@ -135,7 +115,7 @@ describe("Base layer test", function () {
   it("Should emit any event from Translator", async function () {
     const {
       Initializer, initializer1, initializer2, Transalor, translator1, translator2,
-      externalTranslator1, externalTranslator2, Config, config1, config2, Demo, demo1, demo2, owner1, owner2,
+      externalTranslator1, externalTranslator2, Demo, demo1, demo2, owner1, owner2,
       currentChainIds, externalFees, systemFees
     } = await loadFixture(deployContractsFixture);
     let feeValue, dstChainId, dstAddress, txId, transferHash, payload;
@@ -165,7 +145,7 @@ describe("Base layer test", function () {
   it("Should send message from packet to Initializer", async function () {
     const {
       Initializer, initializer1, initializer2, Transalor, translator1, translator2,
-      externalTranslator1, externalTranslator2, Config, config1, config2, Demo, demo1, demo2, owner1, owner2,
+      externalTranslator1, externalTranslator2, Demo, demo1, demo2, owner1, owner2,
       currentChainIds, externalFees, systemFees
     } = await loadFixture(deployContractsFixture);
     let feeValue, dstChainId, dstAddress, txId, transferHash, payload;
@@ -213,7 +193,7 @@ describe("Base layer test", function () {
   it("Should send message from packet to Initializer", async function () {
     const {
       Initializer, initializer1, initializer2, Transalor, translator1, translator2,
-      externalTranslator1, externalTranslator2, Config, config1, config2, Demo, demo1, demo2, owner1, owner2,
+      externalTranslator1, externalTranslator2, Demo, demo1, demo2, owner1, owner2,
       currentChainIds, externalFees, systemFees
     } = await loadFixture(deployContractsFixture);
     let feeValue, dstChainId, dstAddress, txId, transferHash, payload;
@@ -262,7 +242,7 @@ describe("Base layer test", function () {
     let PacketValue, feeValue, dstChainId, dstAddress, txId, transferHash, payload;
     const {
       Initializer, initializer1, initializer2, Transalor, translator1, translator2,
-      externalTranslator1, externalTranslator2, Config, config1, config2, Demo, demo1, demo2, owner1, owner2,
+      externalTranslator1, externalTranslator2, Demo, demo1, demo2, owner1, owner2,
       currentChainIds, externalFees, systemFees
     } = await loadFixture(deployContractsFixture);
 
@@ -354,7 +334,7 @@ describe("Base layer test", function () {
     let PacketValue, feeValue, dstChainId, dstAddress, txId, transferHash, payload;
     const {
       Initializer, initializer1, initializer2, Transalor, translator1, translator2,
-      externalTranslator1, externalTranslator2, Config, config1, config2, Demo, demo1, demo2, owner1, owner2,
+      externalTranslator1, externalTranslator2, Demo, demo1, demo2, owner1, owner2,
       currentChainIds, externalFees, systemFees
     } = await loadFixture(deployContractsFixture);
     const provider = ethers.provider;
@@ -403,7 +383,7 @@ describe("Base layer test", function () {
     let PacketValue, feeValue, dstChainId, dstAddress, txId, transferHash, payload;
     const {
       Initializer, initializer1, initializer2, Transalor, translator1, translator2,
-      externalTranslator1, externalTranslator2, Config, config1, config2, Demo, demo1, demo2, owner1, owner2,
+      externalTranslator1, externalTranslator2, Demo, demo1, demo2, owner1, owner2,
       currentChainIds, externalFees, systemFees
     } = await loadFixture(deployContractsFixture);
     const provider = ethers.provider;
@@ -484,7 +464,7 @@ describe("Base layer test", function () {
     let PacketValue, capturedValue, feeValue, dstChainId, dstAddress, txId, transferHash, payload;
     const {
       Initializer, initializer1, initializer2, Transalor, translator1, translator2,
-      externalTranslator1, externalTranslator2, Config, config1, config2, Demo, demo1, demo2, owner1, owner2,
+      externalTranslator1, externalTranslator2, Demo, demo1, demo2, owner1, owner2,
       currentChainIds, externalFees, systemFees
     } = await loadFixture(deployContractsFixture);
     const newMessage = "New message";
@@ -534,7 +514,7 @@ describe("Base layer test", function () {
     let PacketValue, capturedValue, feeValue, dstChainId, dstAddress, txId, transferHash, payload;
     const {
       Initializer, initializer1, initializer2, Transalor, translator1, translator2,
-      externalTranslator1, externalTranslator2, Config, config1, config2, Demo, demo1, demo2, owner1, owner2,
+      externalTranslator1, externalTranslator2, Demo, demo1, demo2, owner1, owner2,
       currentChainIds, externalFees, systemFees
     } = await loadFixture(deployContractsFixture);
     await expect(demo1.setExternalRelay(externalTranslator1.address)).to.not.reverted;
@@ -587,7 +567,7 @@ describe("Base layer test", function () {
     let PacketValue, capturedValue, feeValue, dstChainId, dstAddress, txId, transferHash, payload;
     const {
       Initializer, initializer1, initializer2, Transalor, translator1, translator2,
-      externalTranslator1, externalTranslator2, Config, config1, config2, Demo, demo1, demo2, owner1, owner2,
+      externalTranslator1, externalTranslator2, Demo, demo1, demo2, owner1, owner2,
       currentChainIds, externalFees, systemFees
     } = await loadFixture(deployContractsFixture);
     await expect(demo1.setExternalRelay(externalTranslator1.address)).to.not.reverted;
@@ -598,8 +578,8 @@ describe("Base layer test", function () {
     const newRelayFee = 10;
     const newSystemFee = 100;
     let manageInitAddress, manageRelayAddress, manageFee, manageSystemFee;
-    await expect(config1.manageTrustedRelay(externalTranslator1.address, externalFees[0], newSystemFee))
-        .to.emit(config1, 'TrustedRelayEvent')
+    await expect(initializer1.manageTrustedRelay(externalTranslator1.address, externalFees[0], newSystemFee))
+        .to.emit(initializer1, 'TrustedRelayEvent')
         .withArgs(
             (value) => {manageInitAddress = value; return true;},
             (value) => {manageRelayAddress = value; return true;},
@@ -612,7 +592,7 @@ describe("Base layer test", function () {
     expect(manageSystemFee).to.equal(newSystemFee);
 
     await expect(externalTranslator1.updateTrustedRelayFee(newRelayFee))
-        .to.emit(config1, 'TrustedRelayEvent')
+        .to.emit(initializer1, 'TrustedRelayEvent')
         .withArgs(
             (value) => {manageInitAddress = value; return true;},
             (value) => {manageRelayAddress = value; return true;},

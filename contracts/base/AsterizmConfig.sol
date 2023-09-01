@@ -2,11 +2,10 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "./interfaces/IConfig.sol";
+import "../interfaces/IConfig.sol";
 
 /// Asterizm config contract
-contract AsterizmConfigV1 is UUPSUpgradeable, OwnableUpgradeable, IConfig {
+abstract contract AsterizmConfig is OwnableUpgradeable, IConfig {
 
     /// Set initializer event
     /// @param _address address  Initializer address
@@ -26,45 +25,19 @@ contract AsterizmConfigV1 is UUPSUpgradeable, OwnableUpgradeable, IConfig {
     /// External relay structure
     /// @param exists bool  Is relay exists flag
     /// @param fee uint  Relay fee
-    struct Repay {
+    /// @param systemFee uint  System fee
+    struct Relay {
         bool exists;
         uint fee;
         uint systemFee;
     }
 
-    mapping(address => Repay) private trustedRelays;
-    address private initializerAddress;
-
-    /// Initializing function for upgradeable contracts (constructor)
-    /// @param _initializerAddress address  Initializer address
-    function initialize(address _initializerAddress) initializer public {
-        __Ownable_init();
-        __UUPSUpgradeable_init();
-
-        _setInitializer(_initializerAddress);
-    }
-
-    /// Upgrade implementation address for UUPS logic
-    /// @param _newImplementation address  New implementation address
-    function _authorizeUpgrade(address _newImplementation) internal onlyOwner override {}
-
-    /// Only initializer modifier
-    modifier onlyInitializer() {
-        require(msg.sender == initializerAddress, "AsterismConfig: only initializer");
-        _;
-    }
+    mapping(address => Relay) private trustedRelays;
 
     /// Only trusted relay modifier
     modifier onlyTrustedRelay() {
         require(trustedRelays[msg.sender].exists, "AsterismConfig: only trusted relay");
         _;
-    }
-
-    /// Set initializer
-    /// @param _initializerAddress address  Initializer address
-    function _setInitializer(address _initializerAddress) public onlyOwner {
-        initializerAddress = _initializerAddress;
-        emit SetInitializerEvent(_initializerAddress);
     }
 
     /// Managing trusted relay
@@ -81,7 +54,7 @@ contract AsterizmConfigV1 is UUPSUpgradeable, OwnableUpgradeable, IConfig {
 
     /// Update trusted relay fee
     /// @param _fee uint  Relay fee
-    function updateTrustedRelayFee(uint _fee) external onlyTrustedRelay {
+    function updateTrustedRelayFee(uint _fee) external override onlyTrustedRelay {
         trustedRelays[msg.sender].fee = _fee;
 
         emit TrustedRelayEvent(msg.sender, msg.sender, _fee, trustedRelays[msg.sender].systemFee);
@@ -97,8 +70,9 @@ contract AsterizmConfigV1 is UUPSUpgradeable, OwnableUpgradeable, IConfig {
     }
 
     /// Return relay data
+    /// @param _relayAddress address  External relay address
     /// @return ConfigDataResponseDto
-    function getRelayData(address _relayAddress) external view returns(ConfigDataResponseDto memory) {
+    function getRelayData(address _relayAddress) public view returns(ConfigDataResponseDto memory) {
         ConfigDataResponseDto memory dto;
         dto.externalRelayExists = trustedRelays[_relayAddress].exists;
         dto.externalRelayFee = trustedRelays[_relayAddress].fee;

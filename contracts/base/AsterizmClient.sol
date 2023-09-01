@@ -312,8 +312,6 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
         return disableHashValidation;
     }
 
-    /** External logic */
-
     /** Sending logic */
 
     /// Initiate transfer event

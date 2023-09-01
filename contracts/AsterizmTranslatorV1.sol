@@ -6,7 +6,6 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/IInitializerReceiver.sol";
 import "./interfaces/ITranslator.sol";
-import "./interfaces/IConfig.sol";
 import "./libs/AddressLib.sol";
 import "./libs/UintLib.sol";
 import "./base/AsterizmEnv.sol";
@@ -90,7 +89,6 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     }
 
     IInitializerReceiver private initializerLib;
-    IConfig private configLib;
     mapping(address => Relayer) private relayers;
     mapping(uint64 => Chain) public chains;
     uint64 public localChainId;
@@ -157,13 +155,6 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
         emit SetInitializerEvent(address(_initializerReceiver));
     }
 
-    /// Set config
-    /// @param _configLib IConfig  Config library
-    function setConfig(IConfig _configLib) public onlyOwner {
-        configLib = _configLib;
-        emit SetConfigEvent(address(_configLib));
-    }
-
     /// Add chain
     /// @param _chainId uint64  Chain ID
     /// @param _chainType uint8  Chain type
@@ -202,7 +193,7 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// Update trusted relay fee
     /// @param _fee uint  Relay fee
     function updateTrustedRelayFee(uint _fee) external onlyOwner {
-        configLib.updateTrustedRelayFee(_fee);
+        initializerLib.updateTrustedRelayFee(_fee);
     }
 
     /** External logic */

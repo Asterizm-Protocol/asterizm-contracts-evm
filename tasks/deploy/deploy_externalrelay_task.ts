@@ -4,14 +4,12 @@ import { task } from 'hardhat/config';
 import { BigNumber } from "ethers";
 import { Chains } from '../base/base_chains';
 
-async function deployBase(hre, initializerAddress, configAddress, isTestnet, gasPrice) {
+async function deployBase(hre, initializerAddress, relayFee, systemFee, isTestnet, gasPrice) {
     const [owner] = await ethers.getSigners();
     const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
     const Translator = await ethers.getContractFactory("AsterizmTranslatorV1");
-    const Config = await ethers.getContractFactory("AsterizmConfigV1");
 
     const initializer = await Initializer.attach(initializerAddress);
-    const config = await Config.attach(configAddress);
 
     const chains = isTestnet == 1 ? Chains.testnet : Chains.mainnet;
 
@@ -48,24 +46,24 @@ async function deployBase(hre, initializerAddress, configAddress, isTestnet, gas
     tx = await translator.setInitializer(initializer.address, gasPrice > 0 ? {gasPrice: gasPrice} : {});
     gasLimit = gasLimit.add(tx.gasLimit);
     console.log("Initializer has been set: %s", initializer.address);
-    tx = await translator.setConfig(config.address);
-    gasLimit = gasLimit.add(tx.gasLimit);
 
-    return {initializer, translator, config, owner, gasLimit};
+    await initializer.manageTrustedRelay(translator.address, relayFee, systemFee);
+
+    return {initializer, translator, owner, gasLimit};
 }
 
 task("deploy:externalRelay", "Deploy external relay contracts")
     .addPositionalParam("initializerAddress", "Initializer contract address")
-    .addPositionalParam("configAddress", "Config contract address")
+    .addPositionalParam("relayFee", "External relay fee", '0')
+    .addPositionalParam("systemFee", "System fee", '0')
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs, hre) => {
-        let {initializer, translator, config, owner, gasLimit} = await deployBase(hre, taskArgs.initializerAddress, taskArgs.configAddress, taskArgs.isTestnet, parseInt(taskArgs.gasPrice));
+        let {initializer, translator, owner, gasLimit} = await deployBase(hre, taskArgs.initializerAddress, taskArgs.relayFee, taskArgs.systemFee, taskArgs.isTestnet, parseInt(taskArgs.gasPrice));
 
         console.log("Deployment was done. Wrap up...\n");
         console.log("Total gas limit: %s", gasLimit);
         console.log("Owner address: %s", owner.address);
         console.log("Initializer address: %s", initializer.address);
-        console.log("Config address: %s", config.address);
         console.log("External relay address: %s\n", translator.address);
     })

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/INonce.sol";
@@ -14,8 +13,9 @@ import "./interfaces/IAsterizmConfigEnv.sol";
 import "./libs/AddressLib.sol";
 import "./libs/UintLib.sol";
 import "./base/AsterizmEnv.sol";
+import "./base/AsterizmConfig.sol";
 
-contract AsterizmInitializerV1 is UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable, IInitializerSender, IInitializerReceiver, AsterizmEnv, IAsterizmConfigEnv {
+contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, IInitializerSender, IInitializerReceiver, AsterizmEnv, AsterizmConfig {
 
     using AddressLib for address;
     using UintLib for uint;
@@ -68,7 +68,6 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, OwnableUpgradeable, Reentranc
     INonce private inboundNonce;
     INonce private outboundNonce;
     ITranslator private translatorLib;
-    IConfig private configLib;
     uint64 private localChainId;
     mapping(uint64 => mapping(uint => bool)) public blockAddresses;
     mapping(bytes32 => bool) private ingoingTransfers;
@@ -98,7 +97,7 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, OwnableUpgradeable, Reentranc
 
     /// Only translator modifier
     modifier onlyTranslatorOrExternalRelay() {
-        require(msg.sender == address(translatorLib) || configLib.getRelayData(msg.sender).externalRelayExists, "AsterizmInitializer: only translator or external relay");
+        require(msg.sender == address(translatorLib) || getRelayData(msg.sender).externalRelayExists, "AsterizmInitializer: only translator or external relay");
         _;
     }
 
@@ -116,13 +115,6 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, OwnableUpgradeable, Reentranc
     function setTransalor(ITranslator _translatorLib) public onlyOwner {
         translatorLib = _translatorLib;
         emit SetTranslatorEvent(address(_translatorLib));
-    }
-
-    /// Set config
-    /// @param _configLib IConfig  Config library
-    function setConfig(IConfig _configLib) public onlyOwner {
-        configLib = _configLib;
-        emit SetConfigEvent(address(_configLib));
     }
 
     /// Set outbound nonce
@@ -191,10 +183,9 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, OwnableUpgradeable, Reentranc
 
         if (
             _dto.relay != address(0) &&
-            address(configLib) != address(0) &&
             _dto.relay != address(translatorLib)
         ) { // External relays logic
-            ConfigDataResponseDto memory configDto = configLib.getRelayData(_dto.relay);
+            ConfigDataResponseDto memory configDto = getRelayData(_dto.relay);
             if (configDto.externalRelayExists) {
                 require(configDto.systemFee + configDto.externalRelayFee <= msg.value, "AsterizmInitializer: fee not enough");
                 ITranslator(_dto.relay).sendMessage{value: msg.value - configDto.systemFee}(dto);
@@ -205,7 +196,7 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, OwnableUpgradeable, Reentranc
         }
 
         translatorLib.sendMessage{value: msg.value}(dto);
-        ingoingTransfers[ _dto.transferHash] = true;
+        ingoingTransfers[_dto.transferHash] = true;
     }
 
     /// Resend failed by fee amount transfer
@@ -214,10 +205,9 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, OwnableUpgradeable, Reentranc
     function resendTransfer(bytes32 _transferHash, address _relay) external payable onlyExistsIngoingTransfer(_transferHash) {
         if (
             _relay != address(0) &&
-            address(configLib) != address(0) &&
             _relay != address(translatorLib)
         ) { // External relays logic
-            ConfigDataResponseDto memory configDto = configLib.getRelayData(_relay);
+            ConfigDataResponseDto memory configDto = getRelayData(_relay);
             if (configDto.externalRelayExists) {
                 ITranslator(_relay).resendMessage{value: msg.value}(_transferHash, msg.sender.toUint());
 
