@@ -1,7 +1,6 @@
 import "@nomicfoundation/hardhat-toolbox";
 import { task } from 'hardhat/config';
 import { BigNumber } from "ethers";
-import { Chains } from '../base/base_chains';
 
 async function deployBase(hre, contractAddress, contractType) {
     let TargetContract;

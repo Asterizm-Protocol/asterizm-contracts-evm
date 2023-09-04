@@ -190,13 +190,13 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
         emit SetLocalChainEvent(_chainId);
     }
 
+    /** External logic */
+
     /// Update trusted relay fee
     /// @param _fee uint  Relay fee
     function updateTrustedRelayFee(uint _fee) external onlyOwner {
         initializerLib.updateTrustedRelayFee(_fee);
     }
-
-    /** External logic */
 
     /// Return local chain id
     /// @return uint64

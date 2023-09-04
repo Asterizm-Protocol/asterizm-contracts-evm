@@ -220,6 +220,12 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
         emit SetExternalRelayEvent(_externalRelay);
     }
 
+    /// Return external relay
+    /// @return address  External relay address
+    function getExternalRelay() external view returns(address) {
+        return externalRelay;
+    }
+
     /// Add trusted address
     /// @param _chainId uint64  Chain ID
     /// @param _trustedAddress address  Trusted address
