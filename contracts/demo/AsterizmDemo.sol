@@ -10,7 +10,7 @@ contract AsterizmDemo is AsterizmClient {
     string public currentChainMessage;
     string public externalChainMessage;
 
-    constructor (IInitializerSender _initializerLib) AsterizmClient(_initializerLib, true, false) {
+    constructor (IInitializerSender _initializerLib) AsterizmClient(_initializerLib, false) {
         currentChainMessage = "Hello from source chain";
         externalChainMessage = "Here is nothing yet";
     }

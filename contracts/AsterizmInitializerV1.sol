@@ -56,17 +56,14 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
     /// @param _srcAddress uint  Source address
     /// @param _dstChainId uint64  Destination chain ID
     /// @param _dstAddress uint  Destination address
-    /// @param _nonce uint  Nonce
     /// @param _transferHash bytes32  Tansfer hash
     /// @param _reason bytes  Error reason
-    event PayloadErrorEvent(uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _nonce, bytes32 _transferHash, bytes _reason);
+    event PayloadErrorEvent(uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress, bytes32 _transferHash, bytes _reason);
 
     /// Sent payload event
     /// @param _transferHash bytes32  Transfer hash
     event SentPayloadEvent(bytes32 _transferHash);
 
-    INonce private inboundNonce;
-    INonce private outboundNonce;
     ITranslator private translatorLib;
     uint64 private localChainId;
     mapping(uint64 => mapping(uint => bool)) public blockAddresses;
@@ -117,20 +114,6 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
         emit SetTranslatorEvent(address(_translatorLib));
     }
 
-    /// Set outbound nonce
-    /// @param _nonce INonce  Set outbound nonce
-    function setOutBoundNonce(INonce _nonce) public onlyOwner {
-        outboundNonce = _nonce;
-        emit SetOutBoundNonceEvent(address(_nonce));
-    }
-
-    /// Set inbound nonce
-    /// @param _nonce INonce  Set inbound nonce
-    function setInBoundNonce(INonce _nonce) public onlyOwner {
-        inboundNonce = _nonce;
-        emit SetInBoundNonceEvent(address(_nonce));
-    }
-
     /// Block address
     /// @param _chainId uint64  Chain id
     /// @param _address uint  Address for blocking
@@ -176,9 +159,7 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
         require(!blockAddresses[_dto.dstChainId][_dto.dstAddress], "AsterizmInitializer: target address is blocked");
 
         TrSendMessageRequestDto memory dto = _buildTrSendMessageRequestDto(
-            msg.sender.toUint(), _dto.dstChainId, _dto.dstAddress,
-            _dto.useForceOrder ? outboundNonce.increaseNonce(_dto.dstChainId, abi.encodePacked(msg.sender, _dto.dstAddress)) : 0,
-            _dto.useForceOrder, _dto.txId, _dto.transferHash
+            msg.sender.toUint(), _dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash
         );
 
         if (
@@ -226,14 +207,14 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
 
         IzAsterizmReceiveRequestDto memory dto = _buildIzAsterizmReceiveRequestDto(
             _dto.srcChainId, _dto.srcAddress, _dto.dstChainId,
-            _dto.dstAddress, _dto.nonce, _dto.txId, _dto.transferHash
+            _dto.dstAddress, _dto.txId, _dto.transferHash
         );
 
         try IClientReceiverContract(_dto.dstAddress.toAddress()).asterizmIzReceive{gas: gasleft()}(dto) {
         } catch Error(string memory _err) {
-            emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.nonce, _dto.transferHash, abi.encode(_err));
+            emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.transferHash, abi.encode(_err));
         } catch (bytes memory reason) {
-            emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.nonce, _dto.transferHash, reason);
+            emit PayloadErrorEvent(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.transferHash, reason);
         }
 
         outgoingTransfers[_dto.transferHash] = true;

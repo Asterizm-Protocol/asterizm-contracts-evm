@@ -70,9 +70,8 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// @param _srcChainId uint64  Source chain ID
     /// @param _srcAddress uint  Source address
     /// @param _dstAddress uint  Destination address
-    /// @param _nonce uint  Nonce
     /// @param _transferHash bytes32  Transfer hash
-    event TransferSendEvent(uint64 indexed _srcChainId, uint indexed _srcAddress, uint indexed _dstAddress, uint _nonce, bytes32 _transferHash);
+    event TransferSendEvent(uint64 indexed _srcChainId, uint indexed _srcAddress, uint indexed _dstAddress, bytes32 _transferHash);
 
     /// Resend feiled transfer event
     /// @param _transferHash bytes32
@@ -222,8 +221,8 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
         }
 
         bytes memory payload = abi.encode(
-            _dto.nonce, localChainId, _dto.srcAddress, _dto.dstChainId,
-            _dto.dstAddress, _dto.forceOrder, _dto.txId, _dto.transferHash
+            localChainId, _dto.srcAddress, _dto.dstChainId,
+            _dto.dstAddress, _dto.txId, _dto.transferHash
         );
         if (_dto.dstChainId == localChainId) {
             TrTransferMessageRequestDto memory dto = _buildTrTarnsferMessageRequestDto(gasleft(), payload);
@@ -249,8 +248,8 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
             msg.value,
             _externalRelayAddress,
             abi.encode(
-                _dto.nonce, localChainId, _dto.srcAddress, _dto.dstChainId,
-                _dto.dstAddress, _dto.forceOrder, _dto.txId, _dto.transferHash
+                localChainId, _dto.srcAddress, _dto.dstChainId,
+                _dto.dstAddress, _dto.txId, _dto.transferHash
             )
         );
     }
@@ -284,11 +283,11 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// @param _dto TrTransferMessageRequestDto  Method DTO
     function _baseTransferMessage(TrTransferMessageRequestDto memory _dto) private {
         (
-            uint nonce, uint64 srcChainId, uint srcAddress, uint64 dstChainId,
-            uint dstAddress, bool forceOrder, uint txId, bytes32 transferHash
+            uint64 srcChainId, uint srcAddress, uint64 dstChainId,
+            uint dstAddress, uint txId, bytes32 transferHash
         ) = abi.decode(
             _dto.payload,
-            (uint, uint64, uint, uint64, uint, bool, uint, bytes32)
+            (uint64, uint, uint64, uint, uint, bytes32)
         );
 
         {
@@ -297,10 +296,10 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
 
             initializerLib.receivePayload(_buildIzReceivePayloadRequestDto(
                     _buildBaseTransferDirectionDto(srcChainId, srcAddress, localChainId, dstAddress),
-                    nonce, _dto.gasLimit, forceOrder, txId, transferHash
+                    _dto.gasLimit, txId, transferHash
                 ));
         }
 
-        emit TransferSendEvent(srcChainId, srcAddress, dstAddress, nonce, transferHash);
+        emit TransferSendEvent(srcChainId, srcAddress, dstAddress, transferHash);
     }
 }

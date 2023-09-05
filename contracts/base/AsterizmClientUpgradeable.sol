@@ -40,10 +40,9 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
     /// Payload receive event (for client server logic)
     /// @param _srcChainId uint64  Source chain ID
     /// @param _srcAddress uint  Source address
-    /// @param _nonce uint  Transaction nonce
     /// @param _txId uint  Transfer ID
     /// @param _transferHash bytes32  Transaction hash
-    event PayloadReceivedEvent(uint64 _srcChainId, uint _srcAddress, uint _nonce, uint _txId, bytes32 _transferHash);
+    event PayloadReceivedEvent(uint64 _srcChainId, uint _srcAddress, uint _txId, bytes32 _transferHash);
 
     /// Add trusted address event
     /// @param _chainId uint64  Chain ID
@@ -58,10 +57,6 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
     /// Set use encryption flag
     /// @param _flag bool  Use encryption flag
     event SetUseEncryptionEvent(bool _flag);
-
-    /// Set use force order flag event
-    /// @param _flag bool  Use force order flag
-    event SetUseForceOrderEvent(bool _flag);
 
     /// Set disable hash validation flag event
     /// @param _flag bool  Use force order flag
@@ -88,23 +83,20 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
     mapping(uint64 => AsterizmChain) private trustedAddresses;
     mapping(bytes32 => AsterizmTransfer) private inboundTransfers;
     mapping(bytes32 => AsterizmTransfer) private outboundTransfers;
-    bool private useForceOrder;
     bool private disableHashValidation;
     uint private txId;
     uint64 private localChainId;
 
     /// Initializing function for upgradeable contracts (constructor)
     /// @param _initializerLib IInitializerSender  Initializer library address
-    /// @param _useForceOrder bool  Use force transfers order (nonce validation) flag
     /// @param _disableHashValidation bool  Disable hash validation flag
-    function __AsterizmClientUpgradeable_init(IInitializerSender _initializerLib, bool _useForceOrder, bool _disableHashValidation) initializer public {
+    function __AsterizmClientUpgradeable_init(IInitializerSender _initializerLib, bool _disableHashValidation) initializer public {
         __Ownable_init();
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
 
         _setInitializer(_initializerLib);
         _setLocalChainId(initializerLib.getLocalChainId());
-        _setUseForceOrder(_useForceOrder);
         _setDisableHashValidation(_disableHashValidation);
         addTrustedAddress(localChainId, address(this).toUint());
     }
@@ -202,13 +194,6 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
     function _setLocalChainId(uint64 _localChainId) private {
         localChainId = _localChainId;
         emit SetLocalChainIdEvent(_localChainId);
-    }
-
-    /// Set use force order flag
-    /// _flag bool  Use force order flag
-    function _setUseForceOrder(bool _flag) private {
-        useForceOrder = _flag;
-        emit SetUseForceOrderEvent(_flag);
     }
 
     /// Set disable hash validation flag
@@ -319,12 +304,6 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
         return trustedAddresses[_chainId];
     }
 
-    /// Return use force order flag
-    /// @return bool
-    function getUseForceOrder() external view returns(bool) {
-        return useForceOrder;
-    }
-
     /// Return disable hash validation flag
     /// @return bool
     function getDisableHashValidation() external view returns(bool) {
@@ -366,7 +345,7 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
         require(address(this).balance >= _dto.feeAmount, "AsterizmClient: contract balance is not enough");
         require(_dto.txId <= _getTxId(), "AsterizmClient: wrong txId param");
         initializerLib.initTransfer{value: _dto.feeAmount} (
-            _buildIzIninTransferRequestDto(_dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash, useForceOrder, externalRelay)
+            _buildIzIninTransferRequestDto(_dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash, externalRelay)
         );
         outboundTransfers[_dto.transferHash].successExecute = true;
     }
@@ -398,18 +377,17 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
         onlyNonExecuted(_dto.transferHash)
     {
         inboundTransfers[_dto.transferHash].successReceive = true;
-        emit PayloadReceivedEvent(_dto.srcChainId, _dto.srcAddress, _dto.nonce, _dto.txId, _dto.transferHash);
+        emit PayloadReceivedEvent(_dto.srcChainId, _dto.srcAddress, _dto.txId, _dto.transferHash);
     }
 
     /// Receive payload from client server
     /// @param _srcChainId uint64  Source chain ID
     /// @param _srcAddress uint  Source address
-    /// @param _nonce uint  Nonce
     /// @param _txId uint  Transaction ID
     /// @param _transferHash bytes32  Transfer hash
     /// @param _payload bytes  Payload
-    function asterizmClReceive(uint64 _srcChainId, uint _srcAddress, uint _nonce, uint _txId, bytes32 _transferHash, bytes calldata _payload) external onlyOwner nonReentrant {
-        ClAsterizmReceiveRequestDto memory dto = _buildClAsterizmReceiveRequestDto(_srcChainId, _srcAddress, localChainId, address(this).toUint(), _nonce, _txId, _transferHash, _payload);
+    function asterizmClReceive(uint64 _srcChainId, uint _srcAddress, uint _txId, bytes32 _transferHash, bytes calldata _payload) external onlyOwner nonReentrant {
+        ClAsterizmReceiveRequestDto memory dto = _buildClAsterizmReceiveRequestDto(_srcChainId, _srcAddress, localChainId, address(this).toUint(), _txId, _transferHash, _payload);
         _asterizmReceiveInternal(dto);
     }
 

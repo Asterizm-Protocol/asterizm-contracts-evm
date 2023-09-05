@@ -34,9 +34,8 @@ contract GasStationUpgradeableV1 is AsterizmClientUpgradeable {
 
     /// Initializing function for upgradeable contracts (constructor)
     /// @param _initializerLib IInitializerSender  Initializer library address
-    /// @param _useForceOrder bool  Use force transfers order (nonce validation) flag
-    function initialize(IInitializerSender _initializerLib, bool _useForceOrder) initializer public {
-        __AsterizmClientUpgradeable_init(_initializerLib, _useForceOrder, true);
+    function initialize(IInitializerSender _initializerLib) initializer public {
+        __AsterizmClientUpgradeable_init(_initializerLib, true);
     }
 
     receive() external payable {}

@@ -57,7 +57,6 @@ interface IAsterizmEnv {
         uint srcAddress;
         uint64 dstChainId;
         uint dstAddress;
-        uint nonce;
         uint txId;
         bytes32 transferHash;
     }
@@ -67,7 +66,6 @@ interface IAsterizmEnv {
     /// @param srcAddress uint  Source address
     /// @param dstChainId uint64  Destination chain ID
     /// @param dstAddress uint  Destination address
-    /// @param nonce uint  Nonce
     /// @param txId uint  Transaction ID
     /// @param transferHash bytes32  Transfer hash
     /// @param payload bytes  Transfer payload
@@ -76,7 +74,6 @@ interface IAsterizmEnv {
         uint srcAddress;
         uint64 dstChainId;
         uint dstAddress;
-        uint nonce;
         uint txId;
         bytes32 transferHash;
         bytes payload;
@@ -86,9 +83,7 @@ interface IAsterizmEnv {
     /// @param srcAddress uint  Source address
     /// @param dstChainId uint64  Destination chain ID
     /// @param dstAddress uint  Destination address
-    /// @param nonce uint  Nonce
     /// @param useEncryption bool  Use encryption flag
-    /// @param forceOrder bool  Force order flag
     /// @param shouldCheckFee bool  Should check fee flag
     /// @param txId uint  Transaction ID
     /// @param transferHash bytes32  Transfer hash
@@ -97,8 +92,6 @@ interface IAsterizmEnv {
         uint srcAddress;
         uint64 dstChainId;
         uint dstAddress;
-        uint nonce;
-        bool forceOrder;
         uint txId;
         bytes32 transferHash;
     }
@@ -121,7 +114,6 @@ interface IAsterizmEnv {
         uint64 dstChainId;
         uint dstAddress;
         bytes32 transferHash;
-        bool useForceOrder;
         uint txId;
         address relay;
     }
@@ -131,9 +123,7 @@ interface IAsterizmEnv {
     /// @param srcAddress uint  Source address
     /// @param dstChainId uint64  Destination chain ID
     /// @param dstAddress uint  Destination address
-    /// @param nonce uint  Nonce
     /// @param gasLimit uint  Gas limit
-    /// @param forceOrder bool  Force order flag
     /// @param txId uint  Transaction ID
     /// @param transferHash bytes32  Transfer hash
     struct IzReceivePayloadRequestDto {
@@ -141,9 +131,7 @@ interface IAsterizmEnv {
         uint srcAddress;
         uint64 dstChainId;
         uint dstAddress;
-        uint nonce;
         uint gasLimit;
-        bool forceOrder;
         uint txId;
         bytes32 transferHash;
     }

@@ -5,7 +5,6 @@ describe("Base layer test", function () {
   async function deployContractsFixture() {
     const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
     const Transalor = await ethers.getContractFactory("AsterizmTranslatorV1");
-    const Nonce = await ethers.getContractFactory("AsterizmNonce");
     const Demo = await ethers.getContractFactory("AsterizmDemo");
     const [owner1, owner2] = await ethers.getSigners();
     const currentChainIds = [1, 2];
@@ -51,13 +50,6 @@ describe("Base layer test", function () {
       kind: 'uups',
     });
     await initializer1.deployed();
-    // Initializer Nonce deployment
-    const outboundInitializer1Nonce = await Nonce.deploy(initializer1.address);
-    await outboundInitializer1Nonce.deployed();
-    const inboundInitializer1Nonce = await Nonce.deploy(initializer1.address);
-    await inboundInitializer1Nonce.deployed();
-    await initializer1.setInBoundNonce(inboundInitializer1Nonce.address);
-    await initializer1.setOutBoundNonce(outboundInitializer1Nonce.address);
     await initializer1.manageTrustedRelay(externalTranslator1.address, externalFees[0], systemFees[0]);
 
     // Initializer2 deployment
@@ -66,13 +58,6 @@ describe("Base layer test", function () {
       kind: 'uups',
     });
     await initializer2.deployed();
-    // Initializer Nonce deployment
-    const outboundInitializer2Nonce = await Nonce.deploy(initializer2.address);
-    await outboundInitializer2Nonce.deployed();
-    const inboundInitializer2Nonce = await Nonce.deploy(initializer2.address);
-    await inboundInitializer2Nonce.deployed();
-    await initializer2.setInBoundNonce(inboundInitializer2Nonce.address);
-    await initializer2.setOutBoundNonce(outboundInitializer2Nonce.address);
     await initializer2.manageTrustedRelay(externalTranslator2.address, externalFees[1], systemFees[1]);
 
     await translator1.setInitializer(initializer1.address);
@@ -364,16 +349,14 @@ describe("Base layer test", function () {
             (value) => {feeValue = value; return true;},
             (value) => {capturedValue = value; return true;},
         );
-    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'uint', 'uint64', 'uint', 'bool', 'uint', 'bytes32'], capturedValue);
-    expect(decodedValue[0]).to.not.null; // nonce
-    expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
-    expect(decodedValue[2]).to.equal(demo1.address); // srcAddress
-    expect(decodedValue[3]).to.equal(currentChainIds[1]); // dstChainId
-    expect(decodedValue[4]).to.equal(demo2.address); // dstAddress
+    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint64', 'uint', 'uint64', 'uint', 'uint', 'bytes32'], capturedValue);
+    expect(decodedValue[0]).to.equal(currentChainIds[0]); // srcChainId
+    expect(decodedValue[1]).to.equal(demo1.address); // srcAddress
+    expect(decodedValue[2]).to.equal(currentChainIds[1]); // dstChainId
+    expect(decodedValue[3]).to.equal(demo2.address); // dstAddress
     expect(feeValue).to.equal(feeAmount); // feeValue
-    expect(decodedValue[5]).to.equal(true); // useForceOrder
-    expect(decodedValue[6]).to.equal(0); // txId
-    expect(decodedValue[7]).to.not.null; // transferHash
+    expect(decodedValue[4]).to.equal(0); // txId
+    expect(decodedValue[5]).to.not.null; // transferHash
     expect(await provider.getBalance(demo1.address)).to.equal(0);
     expect(await provider.getBalance(translator1.address)).to.equal(0);
     expect(await provider.getBalance(owner2.address)).to.equal(owner2BalanceBefore.add(feeAmount));
@@ -413,16 +396,14 @@ describe("Base layer test", function () {
             (value) => {feeValue = value; return true;},
             (value) => {capturedValue = value; return true;},
         );
-    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'uint', 'uint64', 'uint', 'bool', 'uint', 'bytes32'], capturedValue);
-    expect(decodedValue[0]).to.not.null; // nonce
-    expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
-    expect(decodedValue[2]).to.equal(demo1.address); // srcAddress
-    expect(decodedValue[3]).to.equal(currentChainIds[1]); // dstChainId
-    expect(decodedValue[4]).to.equal(demo2.address); // dstAddress
+    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint64', 'uint', 'uint64', 'uint', 'uint', 'bytes32'], capturedValue);
+    expect(decodedValue[0]).to.equal(currentChainIds[0]); // srcChainId
+    expect(decodedValue[1]).to.equal(demo1.address); // srcAddress
+    expect(decodedValue[2]).to.equal(currentChainIds[1]); // dstChainId
+    expect(decodedValue[3]).to.equal(demo2.address); // dstAddress
     expect(feeValue).to.equal(feeAmount); // feeValue
-    expect(decodedValue[5]).to.equal(true); // useForceOrder
-    expect(decodedValue[6]).to.equal(0); // txId
-    expect(decodedValue[7]).to.not.null; // transferHash
+    expect(decodedValue[4]).to.equal(0); // txId
+    expect(decodedValue[5]).to.not.null; // transferHash
     expect(await provider.getBalance(demo1.address)).to.equal(0);
     expect(await provider.getBalance(translator1.address)).to.equal(0);
     expect(await provider.getBalance(owner2.address)).to.equal(owner2BalanceBefore.add(feeAmount));
@@ -490,23 +471,21 @@ describe("Base layer test", function () {
             (value) => {feeValue = value; return true;},
             (value) => {capturedValue = value; return true;},
         );
-    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'uint', 'uint64', 'uint', 'bool', 'uint', 'bytes32'], capturedValue);
-    expect(decodedValue[0]).to.not.null; // nonce
-    expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
-    expect(decodedValue[2]).to.equal(demo1.address); // srcAddress
-    expect(decodedValue[3]).to.equal(currentChainIds[1]); // dstChainId
-    expect(decodedValue[4]).to.equal(demo2.address); // dstAddress
+    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint64', 'uint', 'uint64', 'uint', 'uint', 'bytes32'], capturedValue);
+    expect(decodedValue[0]).to.equal(currentChainIds[0]); // srcChainId
+    expect(decodedValue[1]).to.equal(demo1.address); // srcAddress
+    expect(decodedValue[2]).to.equal(currentChainIds[1]); // dstChainId
+    expect(decodedValue[3]).to.equal(demo2.address); // dstAddress
     expect(feeValue).to.equal(feeAmount); // feeValue
-    expect(decodedValue[5]).to.equal(true); // useForceOrder
-    expect(decodedValue[6]).to.equal(0); // txId
-    expect(decodedValue[7]).to.not.null; // transferHash
+    expect(decodedValue[4]).to.equal(0); // txId
+    expect(decodedValue[5]).to.not.null; // transferHash
     expect(await provider.getBalance(demo1.address)).to.equal(0);
     expect(await provider.getBalance(translator1.address)).to.equal(0);
     await expect(translator2.transferMessage(300000, capturedValue))
         .to.emit(demo2, 'PayloadReceivedEvent');
     let payloadValue = ethers.utils.defaultAbiCoder.decode(['string'], payload.toString());
     expect(payloadValue[0]).to.equal(newMessage);
-    await expect(demo2.asterizmClReceive(currentChainIds[0], demo1.address, decodedValue[0], decodedValue[6], decodedValue[7], payload)).to.not.reverted;
+    await expect(demo2.asterizmClReceive(currentChainIds[0], demo1.address, decodedValue[4], decodedValue[5], payload)).to.not.reverted;
     expect(await demo2.externalChainMessage()).to.equal(newMessage);
   });
 
@@ -543,23 +522,21 @@ describe("Base layer test", function () {
             (value) => {feeValue = value; return true;},
             (value) => {capturedValue = value; return true;},
         );
-    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'uint', 'uint64', 'uint', 'bool', 'uint', 'bytes32'], capturedValue);
-    expect(decodedValue[0]).to.not.null; // nonce
-    expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
-    expect(decodedValue[2]).to.equal(demo1.address); // srcAddress
-    expect(decodedValue[3]).to.equal(currentChainIds[1]); // dstChainId
-    expect(decodedValue[4]).to.equal(demo2.address); // dstAddress
+    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint64', 'uint', 'uint64', 'uint', 'uint', 'bytes32'], capturedValue);
+    expect(decodedValue[0]).to.equal(currentChainIds[0]); // srcChainId
+    expect(decodedValue[1]).to.equal(demo1.address); // srcAddress
+    expect(decodedValue[2]).to.equal(currentChainIds[1]); // dstChainId
+    expect(decodedValue[3]).to.equal(demo2.address); // dstAddress
     expect(feeValue).to.equal(feeAmountWithoutSystemFee); // feeValue
-    expect(decodedValue[5]).to.equal(true); // useForceOrder
-    expect(decodedValue[6]).to.equal(0); // txId
-    expect(decodedValue[7]).to.not.null; // transferHash
+    expect(decodedValue[4]).to.equal(0); // txId
+    expect(decodedValue[5]).to.not.null; // transferHash
     expect(await provider.getBalance(demo1.address)).to.equal(0);
     expect(await provider.getBalance(externalTranslator1.address)).to.equal(0);
     await expect(externalTranslator2.transferMessage(300000, capturedValue))
         .to.emit(demo2, 'PayloadReceivedEvent');
     let payloadValue = ethers.utils.defaultAbiCoder.decode(['string'], payload.toString());
     expect(payloadValue[0]).to.equal(newMessage);
-    await expect(demo2.asterizmClReceive(currentChainIds[0], demo1.address, decodedValue[0], decodedValue[6], decodedValue[7], payload)).to.not.reverted;
+    await expect(demo2.asterizmClReceive(currentChainIds[0], demo1.address, decodedValue[4], decodedValue[5], payload)).to.not.reverted;
     expect(await demo2.externalChainMessage()).to.equal(newMessage);
   });
 
@@ -624,23 +601,21 @@ describe("Base layer test", function () {
             (value) => {feeValue = value; return true;},
             (value) => {capturedValue = value; return true;},
         );
-    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint', 'uint64', 'uint', 'uint64', 'uint', 'bool', 'uint', 'bytes32'], capturedValue);
-    expect(decodedValue[0]).to.not.null; // nonce
-    expect(decodedValue[1]).to.equal(currentChainIds[0]); // srcChainId
-    expect(decodedValue[2]).to.equal(demo1.address); // srcAddress
-    expect(decodedValue[3]).to.equal(currentChainIds[1]); // dstChainId
-    expect(decodedValue[4]).to.equal(demo2.address); // dstAddress
+    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint64', 'uint', 'uint64', 'uint', 'uint', 'bytes32'], capturedValue);
+    expect(decodedValue[0]).to.equal(currentChainIds[0]); // srcChainId
+    expect(decodedValue[1]).to.equal(demo1.address); // srcAddress
+    expect(decodedValue[2]).to.equal(currentChainIds[1]); // dstChainId
+    expect(decodedValue[3]).to.equal(demo2.address); // dstAddress
     expect(feeValue).to.equal(feeAmountWithoutSystemFee); // feeValue
-    expect(decodedValue[5]).to.equal(true); // useForceOrder
-    expect(decodedValue[6]).to.equal(0); // txId
-    expect(decodedValue[7]).to.not.null; // transferHash
+    expect(decodedValue[4]).to.equal(0); // txId
+    expect(decodedValue[5]).to.not.null; // transferHash
     expect(await provider.getBalance(demo1.address)).to.equal(0);
     expect(await provider.getBalance(externalTranslator1.address)).to.equal(0);
     await expect(externalTranslator2.transferMessage(300000, capturedValue))
         .to.emit(demo2, 'PayloadReceivedEvent');
     let payloadValue = ethers.utils.defaultAbiCoder.decode(['string'], payload.toString());
     expect(payloadValue[0]).to.equal(newMessage);
-    await expect(demo2.asterizmClReceive(currentChainIds[0], demo1.address, decodedValue[0], decodedValue[6], decodedValue[7], payload)).to.not.reverted;
+    await expect(demo2.asterizmClReceive(currentChainIds[0], demo1.address, decodedValue[4], decodedValue[5], payload)).to.not.reverted;
     expect(await demo2.externalChainMessage()).to.equal(newMessage);
   });
 });
