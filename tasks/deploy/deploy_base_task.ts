@@ -8,7 +8,6 @@ async function deployBase(hre, isTestnet, gasPrice) {
     const [owner] = await ethers.getSigners();
     const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
     const Transalor = await ethers.getContractFactory("AsterizmTranslatorV1");
-    const Nonce = await ethers.getContractFactory("AsterizmNonce");
 
     const chains = isTestnet == 1 ? Chains.testnet : Chains.mainnet;
 
@@ -59,38 +58,18 @@ async function deployBase(hre, isTestnet, gasPrice) {
     gasLimit = gasLimit.add(tx.gasLimit);
     console.log("Initializer has been set: %s", initializer.address);
 
-    console.log("Deploying Nonce contracts...");
-    // Initializer Nonce deployment
-    const outboundInitializerNonce = await Nonce.deploy(initializer.address, gasPrice > 0 ? {gasPrice: gasPrice} : {});
-    tx = await outboundInitializerNonce.deployed();
-    gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
-    console.log("Initializer outbound nonce has been deployed: %s", outboundInitializerNonce.address);
-    tx = await initializer.setOutBoundNonce(outboundInitializerNonce.address, gasPrice > 0 ? {gasPrice: gasPrice} : {});
-    gasLimit = gasLimit.add(tx.gasLimit);
-    console.log("Initializer outbound nonce has been set",);
-
-    const inboundInitializerNonce = await Nonce.deploy(initializer.address, gasPrice > 0 ? {gasPrice: gasPrice} : {});
-    tx = await inboundInitializerNonce.deployed();
-    gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
-    console.log("Initializer inbound nonce has been deployed: %s", inboundInitializerNonce.address);
-    tx = await initializer.setInBoundNonce(inboundInitializerNonce.address, gasPrice > 0 ? {gasPrice: gasPrice} : {});
-    gasLimit = gasLimit.add(tx.gasLimit);
-    console.log("Initializer inbound nonce has been set");
-
-    return {initializer, inboundInitializerNonce, outboundInitializerNonce, translator, owner, gasLimit};
+    return {initializer, translator, owner, gasLimit};
 }
 
 task("deploy:base", "Deploy base Asterizm contracts")
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs, hre) => {
-        let {initializer, inboundInitializerNonce, outboundInitializerNonce, translator, owner, gasLimit} = await deployBase(hre, taskArgs.isTestnet, parseInt(taskArgs.gasPrice));
+        let {initializer, translator, owner, gasLimit} = await deployBase(hre, taskArgs.isTestnet, parseInt(taskArgs.gasPrice));
 
         console.log("Deployment was done. Wrap up...\n");
         console.log("Total gas limit: %s", gasLimit);
         console.log("Owner address: %s", owner.address);
         console.log("Translator address: %s", translator.address);
         console.log("Initializer address: %s", initializer.address);
-        console.log("Inbound nonce address: %s", inboundInitializerNonce.address);
-        console.log("Outbound nonce address: %s\n", outboundInitializerNonce.address);
-    })
+    });

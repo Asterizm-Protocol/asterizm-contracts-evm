@@ -27,6 +27,10 @@ async function deployBase(hre, isTestnet, initializerAddress) {
 
 task("deploy:gas", "Deploy Asterizm gassender contracts")
     .addPositionalParam("initializerAddress", "Initializer contract address")
+    .addPositionalParam("minUsdAmount", "Min transfer amount in USD", '0')
+    .addPositionalParam("maxUsdAmount", "Max transfer amount in USD", '0')
+    .addPositionalParam("minUsdAmountPerChain", "Min transfer amount in USD per chain", '0')
+    .addPositionalParam("maxUsdAmountPerChain", "Max transfer amount in USD per chain", '0')
     .addPositionalParam("relayAddress", "Config contract address", '0')
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
@@ -35,27 +39,33 @@ task("deploy:gas", "Deploy Asterizm gassender contracts")
 
         let tx;
         const gasPrice = parseInt(taskArgs.gasPrice);
-        const minUsdAmount = 10; // change minUsdAmount here
-        const maxUsdAmount = 200; // change maxUsdAmount here
-        const minUsdAmountPerChain = 5; // change minUsdAmountPerChain here
-        const useForceOrder = false; // change useForceOrder here
         console.log("Deployig gas station contract...");
         const GasStation = await ethers.getContractFactory("GasStationUpgradeableV1");
         // const gasStation = await GasStation.attach('0x...');
         // const gasStation = await GasStation.deploy(initializer.address, useForceOrder, gasPrice > 0 ? {gasPrice: gasPrice} : {});
-        const gasStation = await upgrades.deployProxy(GasStation, [initializer.address, useForceOrder], {
+        const gasStation = await upgrades.deployProxy(GasStation, [initializer.address], {
             initialize: 'initialize',
             kind: 'uups',
         });
         tx = await gasStation.deployed();
         gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
         console.log("Gas station was deployed with address: %s", gasStation.address);
-        tx = await gasStation.setMinUsdAmount(minUsdAmount, gasPrice > 0 ? {gasPrice: gasPrice} : {});
-        gasLimit = gasLimit.add(tx.gasLimit);
-        tx = await gasStation.setMaxUsdAmount(maxUsdAmount, gasPrice > 0 ? {gasPrice: gasPrice} : {});
-        gasLimit = gasLimit.add(tx.gasLimit);
-        tx = await gasStation.setMinUsdAmountPerChain(minUsdAmountPerChain, gasPrice > 0 ? {gasPrice: gasPrice} : {});
-        gasLimit = gasLimit.add(tx.gasLimit);
+        if (taskArgs.minUsdAmount != '0') {
+            tx = await gasStation.setMinUsdAmount(taskArgs.minUsdAmount, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+            gasLimit = gasLimit.add(tx.gasLimit);
+        }
+        if (taskArgs.maxUsdAmount != '0') {
+            tx = await gasStation.setMaxUsdAmount(taskArgs.maxUsdAmount, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+            gasLimit = gasLimit.add(tx.gasLimit);
+        }
+        if (taskArgs.minUsdAmountPerChain != '0') {
+            tx = await gasStation.setMinUsdAmountPerChain(taskArgs.minUsdAmountPerChain, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+            gasLimit = gasLimit.add(tx.gasLimit);
+        }
+        if (taskArgs.maxUsdAmountPerChain != '0') {
+            tx = await gasStation.setMaxUsdAmountPerChain(taskArgs.maxUsdAmountPerChain, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+            gasLimit = gasLimit.add(tx.gasLimit);
+        }
         for (let i = 0; i < currentChain.stableCoins.length; i++) {
             tx = await gasStation.addStableCoin(currentChain.stableCoins[i], gasPrice > 0 ? {gasPrice: gasPrice} : {});
             gasLimit = gasLimit.add(tx.gasLimit);
