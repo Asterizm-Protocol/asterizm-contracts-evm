@@ -61,7 +61,7 @@ task("deploy:externalRelay", "Deploy external relay contracts")
     .setAction(async (taskArgs, hre) => {
         let {initializer, translator, owner, gasLimit} = await deployBase(hre, taskArgs.initializerAddress, taskArgs.relayFee, taskArgs.systemFee, taskArgs.isTestnet, parseInt(taskArgs.gasPrice));
 
-        console.log("Deployment was done. Wrap up...\n");
+        console.log("Deployment was done\n");
         console.log("Total gas limit: %s", gasLimit);
         console.log("Owner address: %s", owner.address);
         console.log("Initializer address: %s", initializer.address);

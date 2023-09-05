@@ -36,5 +36,10 @@ task("demo:deploy", "Deploy AsterizmDemo contract")
         console.log("Total gas limit: %s", gasLimit);
         console.log("Owner address: %s", owner.address);
         console.log("Initializer address: %s", initializer.address);
-        console.log("AsterizmDemo address: %s\n", demo.address);
+        if (taskArgs.relayAddress != '0') {
+            console.log("External relay address: %s", taskArgs.relayAddress);
+            console.log("AsterizmDemo address: %s\n", demo.address);
+        } else {
+            console.log("AsterizmDemo address: %s\n", demo.address);
+        }
     })

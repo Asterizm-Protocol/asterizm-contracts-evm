@@ -67,9 +67,9 @@ task("deploy:base", "Deploy base Asterizm contracts")
     .setAction(async (taskArgs, hre) => {
         let {initializer, translator, owner, gasLimit} = await deployBase(hre, taskArgs.isTestnet, parseInt(taskArgs.gasPrice));
 
-        console.log("Deployment was done. Wrap up...\n");
+        console.log("Deployment was done\n");
         console.log("Total gas limit: %s", gasLimit);
         console.log("Owner address: %s", owner.address);
         console.log("Translator address: %s", translator.address);
-        console.log("Initializer address: %s", initializer.address);
+        console.log("Initializer address: %s\n", initializer.address);
     });

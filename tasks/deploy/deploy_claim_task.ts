@@ -41,7 +41,7 @@ task("deploy:claim", "Deploy Asterizm claim contracts")
         console.log("Claimer balance: ", await token.balanceOf(claimer.address));
         console.log("Deployer balance: ", await token.balanceOf(owner.address));
 
-        console.log("Deployment was done. Wrap up...\n");
+        console.log("Deployment was done\n");
         console.log("Total gas limit: %s", gasLimit);
         console.log("Owner address: %s", owner.address);
         console.log("Translator address: %s", translator.address);
