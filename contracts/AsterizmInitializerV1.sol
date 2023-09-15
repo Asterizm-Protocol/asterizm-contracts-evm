@@ -159,7 +159,7 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
         require(!blockAddresses[_dto.dstChainId][_dto.dstAddress], "AsterizmInitializer: target address is blocked");
 
         TrSendMessageRequestDto memory dto = _buildTrSendMessageRequestDto(
-            msg.sender.toUint(), _dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash
+            msg.sender.toUint(), _dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash, _dto.transferResultNotifyFlag
         );
 
         if (
@@ -197,6 +197,14 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
         }
 
         translatorLib.resendMessage{value: msg.value}(_transferHash, msg.sender.toUint());
+    }
+
+    /// Transfer sending result notification
+    /// @param _targetAddress address  Target client contract address
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _statusCode uint8  Status code
+    function transferSendingResultNotification(address _targetAddress, bytes32 _transferHash, uint8 _statusCode) external onlyTranslatorOrExternalRelay {
+        IClientReceiverContract(_targetAddress).transferSendingResultNotification(_transferHash, _statusCode);
     }
 
     /// Receive payload from translator

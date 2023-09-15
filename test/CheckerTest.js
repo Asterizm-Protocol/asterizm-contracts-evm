@@ -296,14 +296,15 @@ describe("Checker test", function () {
                 (value) => {feeValue = value; return true;},
                 (value) => {capturedValue = value; return true;},
             );
-        let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint64', 'uint', 'uint64', 'uint', 'uint', 'bytes32'], capturedValue);
+        let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint64', 'uint', 'uint64', 'uint', 'uint', 'bool', 'bytes32'], capturedValue);
         expect(decodedValue[0]).to.equal(currentChainIds[0]); // srcChainId
         expect(decodedValue[1]).to.equal(checker1.address); // srcAddress
         expect(decodedValue[2]).to.equal(currentChainIds[1]); // dstChainId
         expect(decodedValue[3]).to.equal(checker2.address); // dstAddress
         expect(feeValue).to.equal(feeAmount); // feeValue
         expect(decodedValue[4]).to.equal(0); // txId
-        expect(decodedValue[5]).to.not.null; // transferHash
+        expect(decodedValue[5]).to.equal(false); // transferResultNotifyFlag
+        expect(decodedValue[6]).to.equal(transferHash); // transferHash
         expect(await provider.getBalance(checker1.address)).to.equal(0);
         expect(await provider.getBalance(translator1.address)).to.equal(0);
         expect(await provider.getBalance(owner2.address)).to.equal(owner2BalanceBefore.add(feeAmount));

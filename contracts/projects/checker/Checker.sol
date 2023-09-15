@@ -10,7 +10,7 @@ contract Checker is AsterizmClient {
 
     uint public morseText;
 
-    constructor (IInitializerSender _initializerLib) AsterizmClient(_initializerLib, false) {
+    constructor (IInitializerSender _initializerLib) AsterizmClient(_initializerLib, false, false) {
         morseText = 10100000010101010010; // -.-. .... . -.-. -.- . .-.
     }
 

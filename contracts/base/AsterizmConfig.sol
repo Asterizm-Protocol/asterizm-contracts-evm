@@ -16,7 +16,7 @@ abstract contract AsterizmConfig is OwnableUpgradeable, IConfig {
     /// @param _relayAddress address  Relay address
     /// @param _fee uint  Relay fee
     /// @param _systemFee uint  System fee
-    event TrustedRelayEvent(address _initializer, address _relayAddress, uint _fee, uint _systemFee);
+    event TrustedRelayEvent(address indexed _initializer, address indexed _relayAddress, uint _fee, uint _systemFee);
 
     /// Remove trusted relay event
     /// @param _relayAddress address  Relay address

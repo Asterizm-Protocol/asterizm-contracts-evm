@@ -83,17 +83,16 @@ interface IAsterizmEnv {
     /// @param srcAddress uint  Source address
     /// @param dstChainId uint64  Destination chain ID
     /// @param dstAddress uint  Destination address
-    /// @param useEncryption bool  Use encryption flag
-    /// @param shouldCheckFee bool  Should check fee flag
     /// @param txId uint  Transaction ID
     /// @param transferHash bytes32  Transfer hash
-    /// @param payload bytes  Payload
+    /// @param transferResultNotifyFlag bool  Transfer result notification flag
     struct TrSendMessageRequestDto {
         uint srcAddress;
         uint64 dstChainId;
         uint dstAddress;
         uint txId;
         bytes32 transferHash;
+        bool transferResultNotifyFlag;
     }
 
     /// Translator transfer message request DTO
@@ -110,12 +109,14 @@ interface IAsterizmEnv {
     /// @param transferHash bytes32  Transfer hash
     /// @param txId uint  Transaction ID
     /// @param relay address  Relay address
+    /// @param transferResultNotifyFlag bool  Transfer result notification flag
     struct IzIninTransferRequestDto {
         uint64 dstChainId;
         uint dstAddress;
         bytes32 transferHash;
         uint txId;
         address relay;
+        bool transferResultNotifyFlag;
     }
 
     /// Initializator receive payload request DTO

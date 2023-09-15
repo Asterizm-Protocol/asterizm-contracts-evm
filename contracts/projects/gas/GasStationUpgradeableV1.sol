@@ -35,7 +35,7 @@ contract GasStationUpgradeableV1 is AsterizmClientUpgradeable {
     /// Initializing function for upgradeable contracts (constructor)
     /// @param _initializerLib IInitializerSender  Initializer library address
     function initialize(IInitializerSender _initializerLib) initializer public {
-        __AsterizmClientUpgradeable_init(_initializerLib, true);
+        __AsterizmClientUpgradeable_init(_initializerLib, true, true);
     }
 
     receive() external payable {}

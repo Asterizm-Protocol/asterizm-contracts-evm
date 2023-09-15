@@ -24,7 +24,7 @@ contract MultichainToken is IMultiChainToken, ERC20, AsterizmClient {
 
     constructor(IInitializerSender _initializerLib, uint _initialSupply)
     ERC20("CrossToken", "CTN")
-    AsterizmClient(_initializerLib, false)
+    AsterizmClient(_initializerLib, true, false)
     {
         _mint(_msgSender(), _initialSupply);
     }

@@ -16,4 +16,9 @@ interface IClientReceiverContract is IAsterizmEnv {
     /// @param _transferHash bytes32  Transfer hash
     /// @param _payload bytes  Payload
     function asterizmClReceive(uint64 _srcChainId, uint _srcAddress, uint _txId, bytes32 _transferHash, bytes calldata _payload) external;
+
+    /// Transfer sending result notification
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _statusCode uint8  Status code
+    function transferSendingResultNotification(bytes32 _transferHash, uint8 _statusCode) external;
 }

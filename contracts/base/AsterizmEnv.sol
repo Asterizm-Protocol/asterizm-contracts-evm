@@ -64,10 +64,11 @@ abstract contract AsterizmEnv is IAsterizmEnv {
     /// @param _dstAddress uint  Destination address
     /// @param _txId uint  Transaction ID
     /// @param _transferHash bytes32  Transfer hash
+    /// @param _transferResultNotifyFlag bool  Transfer result notification flag
     /// @return TrSendMessageRequestDto
     function _buildTrSendMessageRequestDto(
         uint _srcAddress, uint64 _dstChainId, uint _dstAddress,
-        uint _txId, bytes32 _transferHash
+        uint _txId, bytes32 _transferHash, bool _transferResultNotifyFlag
     ) internal pure returns(TrSendMessageRequestDto memory) {
         TrSendMessageRequestDto memory dto;
         dto.srcAddress = _srcAddress;
@@ -75,6 +76,7 @@ abstract contract AsterizmEnv is IAsterizmEnv {
         dto.dstAddress = _dstAddress;
         dto.txId = _txId;
         dto.transferHash = _transferHash;
+        dto.transferResultNotifyFlag = _transferResultNotifyFlag;
 
         return dto;
     }
@@ -97,14 +99,16 @@ abstract contract AsterizmEnv is IAsterizmEnv {
     /// @param _txId uint  Transaction ID
     /// @param _transferHash bytes32  Transfer hash
     /// @param _relay address  External relay
+    /// @param _transferResultNotifyFlag bool  Transfer result notification flag
     /// @return IzIninTransferRequestDto
-    function _buildIzIninTransferRequestDto(uint64 _dstChainId, uint _dstAddress, uint _txId, bytes32 _transferHash, address _relay) internal pure returns(IzIninTransferRequestDto memory) {
+    function _buildIzIninTransferRequestDto(uint64 _dstChainId, uint _dstAddress, uint _txId, bytes32 _transferHash, address _relay, bool _transferResultNotifyFlag) internal pure returns(IzIninTransferRequestDto memory) {
         IzIninTransferRequestDto memory dto;
         dto.dstChainId = _dstChainId;
         dto.dstAddress = _dstAddress;
         dto.txId = _txId;
         dto.transferHash = _transferHash;
         dto.relay = _relay;
+        dto.transferResultNotifyFlag = _transferResultNotifyFlag;
 
         return dto;
     }

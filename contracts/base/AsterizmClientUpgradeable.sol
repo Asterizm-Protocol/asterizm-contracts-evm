@@ -54,9 +54,9 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
     /// @param _address uint  Trusted address
     event RemoveTrustedAddressEvent(uint64 _chainId, uint _address);
 
-    /// Set use encryption flag
-    /// @param _flag bool  Use encryption flag
-    event SetUseEncryptionEvent(bool _flag);
+    /// Set notify transfer sending result event
+    /// @param _flag bool  Notify transfer sending result flag
+    event SetNotifyTransferSendingResultEvent(bool _flag);
 
     /// Set disable hash validation flag event
     /// @param _flag bool  Use force order flag
@@ -66,6 +66,11 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
     /// @param _transferHash bytes32  Transfer hash
     /// @param _feeAmount uint  Additional fee amount
     event ResendAsterizmTransferEvent(bytes32 _transferHash, uint _feeAmount);
+
+    /// Transfer sending result notification event
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _statusCode uint8  Status code
+    event TransferSendingResultNotification(bytes32 indexed _transferHash, uint8 _statusCode);
 
     struct AsterizmTransfer {
         bool successReceive;
@@ -83,20 +88,23 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
     mapping(uint64 => AsterizmChain) private trustedAddresses;
     mapping(bytes32 => AsterizmTransfer) private inboundTransfers;
     mapping(bytes32 => AsterizmTransfer) private outboundTransfers;
+    bool private notifyTransferSendingResult;
     bool private disableHashValidation;
     uint private txId;
     uint64 private localChainId;
 
     /// Initializing function for upgradeable contracts (constructor)
     /// @param _initializerLib IInitializerSender  Initializer library address
+    /// @param _notifyTransferSendingResult bool  Transfer sending result notification flag
     /// @param _disableHashValidation bool  Disable hash validation flag
-    function __AsterizmClientUpgradeable_init(IInitializerSender _initializerLib, bool _disableHashValidation) initializer public {
+    function __AsterizmClientUpgradeable_init(IInitializerSender _initializerLib, bool _notifyTransferSendingResult, bool _disableHashValidation) initializer public {
         __Ownable_init();
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
 
         _setInitializer(_initializerLib);
         _setLocalChainId(initializerLib.getLocalChainId());
+        _setNotifyTransferSendingResult(_notifyTransferSendingResult);
         _setDisableHashValidation(_disableHashValidation);
         addTrustedAddress(localChainId, address(this).toUint());
     }
@@ -194,6 +202,13 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
     function _setLocalChainId(uint64 _localChainId) private {
         localChainId = _localChainId;
         emit SetLocalChainIdEvent(_localChainId);
+    }
+
+    /// Set notify transfer sending result
+    /// _flag bool  Transfer sending result notification flag
+    function _setNotifyTransferSendingResult(bool _flag) private {
+        notifyTransferSendingResult = _flag;
+        emit SetNotifyTransferSendingResultEvent(_flag);
     }
 
     /// Set disable hash validation flag
@@ -310,6 +325,12 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
         return disableHashValidation;
     }
 
+    /// Return notify transfer sending result flag
+    /// @return bool
+    function getNotifyTransferSendingResult() external view returns(bool) {
+        return notifyTransferSendingResult;
+    }
+
     /** Sending logic */
 
     /// Initiate transfer event
@@ -345,7 +366,7 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
         require(address(this).balance >= _dto.feeAmount, "AsterizmClient: contract balance is not enough");
         require(_dto.txId <= _getTxId(), "AsterizmClient: wrong txId param");
         initializerLib.initTransfer{value: _dto.feeAmount} (
-            _buildIzIninTransferRequestDto(_dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash, externalRelay)
+            _buildIzIninTransferRequestDto(_dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash, externalRelay, notifyTransferSendingResult)
         );
         outboundTransfers[_dto.transferHash].successExecute = true;
     }
@@ -359,6 +380,15 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
     {
         initializerLib.resendTransfer{value: msg.value}(_transferHash, externalRelay);
         emit ResendAsterizmTransferEvent(_transferHash, msg.value);
+    }
+
+    /// Transfer sending result notification
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _statusCode uint8  Status code
+    function transferSendingResultNotification(bytes32 _transferHash, uint8 _statusCode) external onlyInitializer onlyExecutedOutboundTransfer(_transferHash) {
+        if (notifyTransferSendingResult) {
+            emit TransferSendingResultNotification(_transferHash, _statusCode);
+        }
     }
 
     /** Receiving logic */

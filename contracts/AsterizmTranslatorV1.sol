@@ -221,8 +221,8 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
         }
 
         bytes memory payload = abi.encode(
-            localChainId, _dto.srcAddress, _dto.dstChainId,
-            _dto.dstAddress, _dto.txId, _dto.transferHash
+            localChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress,
+            _dto.txId, _dto.transferResultNotifyFlag, _dto.transferHash
         );
         if (_dto.dstChainId == localChainId) {
             TrTransferMessageRequestDto memory dto = _buildTrTarnsferMessageRequestDto(gasleft(), payload);
@@ -248,8 +248,8 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
             msg.value,
             _externalRelayAddress,
             abi.encode(
-                localChainId, _dto.srcAddress, _dto.dstChainId,
-                _dto.dstAddress, _dto.txId, _dto.transferHash
+                localChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress,
+                _dto.txId, _dto.transferResultNotifyFlag, _dto.transferHash
             )
         );
     }
@@ -264,6 +264,14 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
         }
 
         emit ResendFailedTransferEvent(_transferHash, _senderAddress, msg.value);
+    }
+
+    /// Transfer sending result notification
+    /// @param _targetAddress address  Target client contract address
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _statusCode uint8  Status code
+    function transferSendingResultNotification(address _targetAddress, bytes32 _transferHash, uint8 _statusCode) external onlyOwner {
+        initializerLib.transferSendingResultNotification(_targetAddress, _transferHash, _statusCode);
     }
 
     /// Initernal transfer message (for transfers in one chain)
@@ -284,10 +292,10 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     function _baseTransferMessage(TrTransferMessageRequestDto memory _dto) private {
         (
             uint64 srcChainId, uint srcAddress, uint64 dstChainId,
-            uint dstAddress, uint txId, bytes32 transferHash
+            uint dstAddress, uint txId, , bytes32 transferHash
         ) = abi.decode(
             _dto.payload,
-            (uint64, uint, uint64, uint, uint, bytes32)
+            (uint64, uint, uint64, uint, uint, bool, bytes32)
         );
 
         {

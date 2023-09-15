@@ -322,20 +322,19 @@ export const Chains = {
             id: 11155111,
             title: "ETH", // Ethereum Sepolia
             networkName: "ethereumSepolia",
-            isCurrent: true,
             chainType: ChainTypes.EVM,
             trustAddresses: {
                 gas: {
-                    address: '0x556d3BB875af7e4f4d20C2f02858C6E6Aa8B127f',
-                    uint: '487700199139922574113057653629334569881086661247',
+                    address: '0xea18A9183257B296E1799Ba4db5F7F83d6615Bc9',
+                    uint: '1336453788467559209049012220230990499447610366921',
                 },
                 multichain: {
                     address: '0x0000000000000000000000000000000000000000',
                     uint: '0',
                 },
                 checker: {
-                    address: '0xFd36e243BB81650c781cb79d8933682C458E6813',
-                    uint: '1445598615683928705817058617104577746672278202387',
+                    address: '0x013c5686B0B06E993c7d8c08AC38AA58E9A79720',
+                    uint: '7054572972023190410624467989617135057327593248',
                 },
             },
             stableCoins: [
@@ -349,16 +348,16 @@ export const Chains = {
             chainType: ChainTypes.EVM,
             trustAddresses: {
                 gas: {
-                    address: '0x307B027A35E5e03f2620b3618bE18d02976922b1',
-                    uint: '276774764469626859704716071527456298868329226929',
+                    address: '0x179EE2b08c875e93028782c168570b864Fad55ee',
+                    uint: '134850052923428101094252508502586091904544101870',
                 },
                 multichain: {
                     address: '0x0000000000000000000000000000000000000000',
                     uint: '0',
                 },
                 checker: {
-                    address: '0xCdA2de8A34F066A8A880B4029F19e510A4a96a91',
-                    uint: '1173975214697860638476110722877999173771209566865',
+                    address: '0xf0717939b69746BA3De234a1cAc7a4e96A73871d',
+                    uint: '1372688329430553070297040708232944173776949708573',
                 },
             },
             stableCoins: [
@@ -372,8 +371,8 @@ export const Chains = {
             chainType: ChainTypes.EVM,
             trustAddresses: {
                 gas: {
-                    address: '0x000087e152cD5bab3c635857eb355A2A4E0E9199',
-                    uint: '11836832196320620793238404379083707312411033',
+                    address: '0x78bb640C2Ec3caf9f05a0544F00D1cD64ab5c33E',
+                    uint: '689257847225128651053828724397969379137714242366',
                 },
                 multichain: {
                     address: '0x0000000000000000000000000000000000000000',
@@ -437,8 +436,8 @@ export const Chains = {
             chainType: ChainTypes.EVM,
             trustAddresses: {
                 gas: {
-                    address: '0xA514927Af6404bCc86c641FAfA65BB5b9b44F13A',
-                    uint: '942442252325422866658814034522812761632263172410',
+                    address: '0x000087e152cD5bab3c635857eb355A2A4E0E9199',
+                    uint: '11836832196320620793238404379083707312411033',
                 },
                 multichain: {
                     address: '0x0000000000000000000000000000000000000000',
@@ -454,12 +453,12 @@ export const Chains = {
         {
             id: 20001,
             title: "EVER", // Everscale Testnet
-            networkName: "everscaleTestnet",
+            networkName: "test",
             chainType: ChainTypes.TVM,
             trustAddresses: {
                 gas: {
-                    address: '0:bbc77c9530eb2911428f0073348fbf4c7c9c77566b5fb91a17133ccb29bbc34e',
-                    uint: '84934965089692497928389587548400175265641450849284970214327737498457626886990',
+                    address: '0:a6851ea1e4d80c473d92faac0bd7fe1f1e4cc4f9528e52a690f031f406a6a607',
+                    uint: '75319134941479642190939950614220685371853771058351582513357675383993231910407',
                 },
                 multichain: {
                     address: '0x0000000000000000000000000000000000000000',
@@ -477,12 +476,12 @@ export const Chains = {
         {
             id: 30001,
             title: "VNM", // Venom Testnet
-            networkName: "venomTestnet",
+            networkName: "venom_test",
             chainType: ChainTypes.TVM,
             trustAddresses: {
                 gas: {
-                    address: '0:da8924290da2c00ad817f4fc7b69c88281ceccd727c58ed5e6aac46119f7610d',
-                    uint: '98846508608689020458447024475214917580102016240576075957701412290997566005517',
+                    address: '0:5e277d5175b2db559bbd33924208d28493ab19ea595d682b049b25ebb3ce2147',
+                    uint: '42587179716797541890447507952233574506093001092876132279957152512929031921991',
                 },
                 multichain: {
                     address: '0x0000000000000000000000000000000000000000',
