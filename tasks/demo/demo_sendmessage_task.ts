@@ -12,7 +12,7 @@ async function deployBase(contractAddress) {
 }
 
 task("demo:sendmessage", "Send crosschain message with AdterizmDemo contract")
-    .addPositionalParam("contractAddress", "Target contract address")
+    .addPositionalParam("contractAddress", "Demo contract address on source chain")
     .addPositionalParam("destinationChainId", "Destination chain ID")
     .addPositionalParam("message", "Transfer message")
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')

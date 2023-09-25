@@ -21,7 +21,7 @@ task("demo:deploy", "Deploy AsterizmDemo contract")
 
         let tx;
         const gasPrice = parseInt(taskArgs.gasPrice);
-        console.log("Deployig checker contract...");
+        console.log("Deployig demo contract...");
         const Demo = await ethers.getContractFactory("AsterizmDemo");
         const demo = await Demo.deploy(initializer.address, gasPrice > 0 ? {gasPrice: gasPrice} : {});
         tx = await demo.deployed();
@@ -32,7 +32,7 @@ task("demo:deploy", "Deploy AsterizmDemo contract")
             console.log("Set external relay successfully. Address: %s", taskArgs.relayAddress);
         }
 
-        console.log("Deployment was done. Wrap up...\n");
+        console.log("Deployment was done\n");
         console.log("Total gas limit: %s", gasLimit);
         console.log("Owner address: %s", owner.address);
         console.log("Initializer address: %s", initializer.address);

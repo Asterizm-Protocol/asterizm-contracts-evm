@@ -2,8 +2,8 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "../../base/AsterizmClientUpgradeable.sol";
 import "./interfaces/IGasStationValidator.sol";
+import "asterizmprotocol/contracts/evm/AsterizmClientUpgradeable.sol";
 
 contract GasStationUpgradeableV1 is AsterizmClientUpgradeable {
 
@@ -35,7 +35,7 @@ contract GasStationUpgradeableV1 is AsterizmClientUpgradeable {
     /// Initializing function for upgradeable contracts (constructor)
     /// @param _initializerLib IInitializerSender  Initializer library address
     function initialize(IInitializerSender _initializerLib) initializer public {
-        __AsterizmClientUpgradeable_init(_initializerLib, true, true);
+        __AsterizmClientUpgradeable_init(_initializerLib, false, true);
     }
 
     receive() external payable {}

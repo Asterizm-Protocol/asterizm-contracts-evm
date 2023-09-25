@@ -1,16 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "asterizmprotocol/contracts/evm/AsterizmClient.sol";
+import "asterizmprotocol/contracts/evm/AsterizmClientUpgradeable.sol";
 
-contract AsterizmDemo is AsterizmClient {
+contract AsterizmDemoUpgradeableV1 is AsterizmClientUpgradeable {
 
     event SetExternalChainMessageEvent(string message);
 
     string public currentChainMessage;
     string public externalChainMessage;
 
-    constructor (IInitializerSender _initializerLib) AsterizmClient(_initializerLib, true, false) {
+    /// Initializing function for upgradeable contracts (constructor)
+    /// @param _initializerLib IInitializerSender  Initializer library address
+    function initialize(IInitializerSender _initializerLib) initializer public {
+        __AsterizmClientUpgradeable_init(_initializerLib, true, true);
         currentChainMessage = "Hello from source chain";
         externalChainMessage = "Here is nothing yet";
     }

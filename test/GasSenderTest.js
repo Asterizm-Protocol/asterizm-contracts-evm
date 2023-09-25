@@ -374,7 +374,7 @@ describe("Gas sender test", function () {
     expect(decodedValue[3]).to.equal(gas_sender2.address); // dstAddress
     expect(feeValue).to.equal(0); // feeValue
     expect(decodedValue[4]).to.equal(0); // txId
-    expect(decodedValue[5]).to.equal(true); // transferResultNotifyFlag
+    expect(decodedValue[5]).to.equal(false); // transferResultNotifyFlag
     expect(decodedValue[6]).to.equal(transferHash); // transferHash
     await expect(translator2.transferMessage(300000, capturedValue))
         .to.emit(gas_sender2, 'PayloadReceivedEvent');
@@ -481,7 +481,7 @@ describe("Gas sender test", function () {
     expect(decodedValue[3]).to.equal(gas_sender2.address); // dstAddress
     expect(feeValue).to.equal(0); // feeValue
     expect(decodedValue[4]).to.equal(0); // txId
-    expect(decodedValue[5]).to.equal(true); // transferResultNotifyFlag
+    expect(decodedValue[5]).to.equal(false); // transferResultNotifyFlag
     expect(decodedValue[6]).to.equal(transferHash); // transferHash
     await expect(translator2.transferMessage(300000, PacketValue))
         .to.emit(gas_sender2, 'PayloadReceivedEvent');
@@ -545,7 +545,7 @@ describe("Gas sender test", function () {
     expect(decodedValue[3]).to.equal(gas_sender2.address); // dstAddress
     expect(feeValue).to.equal(0); // feeValue
     expect(decodedValue[4]).to.equal(1); // txId
-    expect(decodedValue[5]).to.equal(true); // transferResultNotifyFlag
+    expect(decodedValue[5]).to.equal(false); // transferResultNotifyFlag
     expect(decodedValue[6]).to.equal(transferHash); // transferHash
     await expect(translator2.transferMessage(300000, PacketValue))
         .to.emit(gas_sender2, 'PayloadReceivedEvent');
@@ -627,7 +627,7 @@ describe("Gas sender test", function () {
     expect(decodedValue[3]).to.equal(gas_sender2.address); // dstAddress
     expect(feeValue).to.equal(0); // feeValue
     expect(decodedValue[4]).to.equal(0); // txId
-    expect(decodedValue[5]).to.equal(true); // transferResultNotifyFlag
+    expect(decodedValue[5]).to.equal(false); // transferResultNotifyFlag
     expect(decodedValue[6]).to.equal(transferHash); // transferHash
     let psSrcChainId, psSrcAddress, psDstChainId, psDstAddress, psTransferHash, psReason;
     await expect(translator2.transferMessage(300000, PacketValue))
@@ -715,7 +715,7 @@ describe("Gas sender test", function () {
     expect(decodedValue[3]).to.equal(gas_sender2.address); // dstAddress
     expect(feeValue).to.equal(0); // feeValue
     expect(decodedValue[4]).to.equal(txId); // txId
-    expect(decodedValue[5]).to.equal(true); // transferResultNotifyFlag
+    expect(decodedValue[5]).to.equal(false); // transferResultNotifyFlag
     expect(decodedValue[6]).to.equal(transferHash); // transferHash
     await expect(gas_sender3.initAsterizmTransfer(dstChainId, txId, transferHash)).to.be
         .revertedWith("AsterizmClient: outbound transfer executed already");

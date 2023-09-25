@@ -23,7 +23,7 @@ task("upgrade:translator", "Update Asterizm Translator contracts")
         gasLimit = gasLimit.add(translator.deployTransaction.gasLimit);
         console.log("Translator implementation upgrade successfully");
 
-        console.log("Updating was done. Wrap up...\n");
+        console.log("Updating was done\n");
         console.log("Total gas limit: %s", gasLimit);
         console.log("Owner address: %s", owner.address);
         console.log("Translator address: %s\n", translator.address);

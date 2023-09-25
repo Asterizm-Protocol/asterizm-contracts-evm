@@ -23,7 +23,7 @@ task("upgrade:gas", "Update Asterizm GasSender contracts")
         gasLimit = gasLimit.add(gasStation.deployTransaction.gasLimit);
         console.log("GasStation implementation upgrade successfully");
 
-        console.log("Deployment was done. Wrap up...\n");
+        console.log("Deployment was done\n");
         console.log("Total gas limit: %s", gasLimit);
         console.log("Owner address: %s", owner.address);
         console.log("Gas station address: %s\n", gasStation.address);

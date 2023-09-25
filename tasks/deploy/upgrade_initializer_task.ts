@@ -24,7 +24,7 @@ task("upgrade:initializer", "Update Asterizm Initialozer contracts")
         gasLimit = gasLimit.add(initializer.deployTransaction.gasLimit);
         console.log("Initializer implementation upgrade successfully");
 
-        console.log("Updating was done. Wrap up...\n");
+        console.log("Updating was done\n");
         console.log("Total gas limit: %s", gasLimit);
         console.log("Owner address: %s", owner.address);
         console.log("Initializer address: %s\n", initializer.address);
