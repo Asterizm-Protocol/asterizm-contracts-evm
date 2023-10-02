@@ -43,6 +43,14 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     /// @param _transferHash bytes32  Transaction hash
     event PayloadReceivedEvent(uint64 _srcChainId, uint _srcAddress, uint _txId, bytes32 _transferHash);
 
+    /// Add sender event
+    /// @param _sender address  Sender address
+    event AddSenderEvent(address _sender);
+
+    /// Remove sender event
+    /// @param _sender address  Sender address
+    event RemoveSenderEvent(address _sender);
+
     /// Add trusted address event
     /// @param _chainId uint64  Chain ID
     /// @param _address uint  Trusted address
@@ -81,12 +89,16 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
         uint trustedAddress;
         uint8 chainType;
     }
+    struct Sender {
+        bool exists;
+    }
 
     IInitializerSender private initializerLib;
     address private externalRelay;
     mapping(uint64 => AsterizmChain) private trustedAddresses;
     mapping(bytes32 => AsterizmTransfer) private inboundTransfers;
     mapping(bytes32 => AsterizmTransfer) private outboundTransfers;
+    mapping(address => Sender) private senders;
     bool private notifyTransferSendingResult;
     bool private disableHashValidation;
     uint private txId;
@@ -101,6 +113,7 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
         _setLocalChainId(initializerLib.getLocalChainId());
         _setNotifyTransferSendingResult(_notifyTransferSendingResult);
         _setDisableHashValidation(_disableHashValidation);
+        addSender(owner());
         addTrustedAddress(localChainId, address(this).toUint());
     }
 
@@ -113,6 +126,18 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     /// Only owner or initializer modifier
     modifier onlyOwnerOrInitializer {
         require(msg.sender == owner() || msg.sender == address(initializerLib), "AsterizmClient: only owner or initializer");
+        _;
+    }
+
+    /// Only sender modifier
+    modifier onlySender {
+        require(senders[msg.sender].exists, "AsterizmClient: only sender");
+        _;
+    }
+
+    /// Only sender or owner modifier
+    modifier onlySenderOrOwner {
+        require(msg.sender == owner() || senders[msg.sender].exists, "AsterizmClient: only sender or owner");
         _;
     }
 
@@ -230,6 +255,21 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
         return externalRelay;
     }
 
+    /// Add sender
+    /// @param _sender address  Sender address
+    function addSender(address _sender) public onlyOwner {
+        senders[_sender].exists = true;
+        emit AddSenderEvent(_sender);
+    }
+
+    /// Remove sender
+    /// @param _sender address  Sender address
+    function removeSender(address _sender) public onlyOwner {
+        require(senders[_sender].exists, "AsterizmClient: sender not exists");
+        delete senders[_sender];
+        emit RemoveSenderEvent(_sender);
+    }
+
     /// Add trusted address
     /// @param _chainId uint64  Chain ID
     /// @param _trustedAddress address  Trusted address
@@ -341,7 +381,7 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     /// @param _dstChainId uint64  Destination chain ID
     /// @param _transferHash bytes32  Transfer hash
     /// @param _txId uint  Transaction ID
-    function initAsterizmTransfer(uint64 _dstChainId, uint _txId, bytes32 _transferHash) external payable onlyOwner nonReentrant {
+    function initAsterizmTransfer(uint64 _dstChainId, uint _txId, bytes32 _transferHash) external payable onlySender nonReentrant {
         require(trustedAddresses[_dstChainId].exists, "AsterizmClient: trusted address not found");
         ClInitTransferRequestDto memory dto = _buildClInitTransferRequestDto(_dstChainId, trustedAddresses[_dstChainId].trustedAddress, _txId, _transferHash, msg.value);
         _initAsterizmTransferPrivate(dto);
@@ -407,7 +447,7 @@ abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverCon
     /// @param _txId uint  Transaction ID
     /// @param _transferHash bytes32  Transfer hash
     /// @param _payload bytes  Payload
-    function asterizmClReceive(uint64 _srcChainId, uint _srcAddress, uint _txId, bytes32 _transferHash, bytes calldata _payload) external onlyOwner nonReentrant {
+    function asterizmClReceive(uint64 _srcChainId, uint _srcAddress, uint _txId, bytes32 _transferHash, bytes calldata _payload) external onlySender nonReentrant {
         ClAsterizmReceiveRequestDto memory dto = _buildClAsterizmReceiveRequestDto(_srcChainId, _srcAddress, localChainId, address(this).toUint(), _txId, _transferHash, _payload);
         _asterizmReceiveInternal(dto);
     }

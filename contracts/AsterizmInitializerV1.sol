@@ -158,6 +158,7 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
         require(!blockAddresses[localChainId][msg.sender.toUint()], "AsterizmInitializer: sender address is blocked");
         require(!blockAddresses[_dto.dstChainId][_dto.dstAddress], "AsterizmInitializer: target address is blocked");
 
+        ingoingTransfers[_dto.transferHash] = true;
         TrSendMessageRequestDto memory dto = _buildTrSendMessageRequestDto(
             msg.sender.toUint(), _dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash, _dto.transferResultNotifyFlag
         );
@@ -177,7 +178,6 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
         }
 
         translatorLib.sendMessage{value: msg.value}(dto);
-        ingoingTransfers[_dto.transferHash] = true;
     }
 
     /// Resend failed by fee amount transfer

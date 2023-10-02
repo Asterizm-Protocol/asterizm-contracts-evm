@@ -1,10 +1,9 @@
 import "@nomicfoundation/hardhat-toolbox";
-// import { upgrades } from 'hardhat';
 import { task } from 'hardhat/config';
 import { BigNumber } from "ethers";
 import { Chains } from '../base/base_chains';
 
-async function deployBase(hre, initializerAddress, relayFee, systemFee, isTestnet, gasPrice) {
+async function deployBase(hre, initializerAddress, isTestnet, gasPrice) {
     const [owner] = await ethers.getSigners();
     const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
     const Translator = await ethers.getContractFactory("AsterizmTranslatorV1");
@@ -47,19 +46,15 @@ async function deployBase(hre, initializerAddress, relayFee, systemFee, isTestne
     gasLimit = gasLimit.add(tx.gasLimit);
     console.log("Initializer has been set: %s", initializer.address);
 
-    await initializer.manageTrustedRelay(translator.address, relayFee, systemFee);
-
     return {initializer, translator, owner, gasLimit};
 }
 
-task("deploy:externalRelay", "Deploy external relay contracts (internal protocol task, only with Asterizm Protocol pk)")
+task("relay:deploy", "Deploy external relay contracts (for external relays)")
     .addPositionalParam("initializerAddress", "Initializer contract address")
-    .addPositionalParam("relayFee", "External relay fee", '0')
-    .addPositionalParam("systemFee", "System fee", '0')
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs, hre) => {
-        let {initializer, translator, owner, gasLimit} = await deployBase(hre, taskArgs.initializerAddress, taskArgs.relayFee, taskArgs.systemFee, taskArgs.isTestnet, parseInt(taskArgs.gasPrice));
+        let {initializer, translator, owner, gasLimit} = await deployBase(hre, taskArgs.initializerAddress, taskArgs.isTestnet, parseInt(taskArgs.gasPrice));
 
         console.log("Deployment was done\n");
         console.log("Total gas limit: %s", gasLimit);

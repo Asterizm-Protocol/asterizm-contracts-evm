@@ -17,12 +17,16 @@ import './tasks/gas/gas_withdrawtokens_task';
 import './tasks/gas/gas_removestable_task';
 import './tasks/gas/gas_coinsbalance_task';
 import './tasks/gas/gas_updatelimits_task';
-import './tasks/relay_addchain_task';
 import './tasks/deploy/upgrade_gas_task';
 import './tasks/deploy/upgrade_translator_task';
 import './tasks/deploy/upgrade_initializer_task';
 import './tasks/demo/demo_deploy_task';
 import './tasks/demo/demo_sendmessage_task';
+import './tasks/relay/relay_addchain_task';
+import './tasks/relay/relay_deploy_task';
+import './tasks/relay/relay_updatefee_task';
+import './tasks/relay/relay_updatesystemfee_task';
+import './tasks/relay/relay_manageexternalrelay_task';
 
 const config = {
   solidity: {

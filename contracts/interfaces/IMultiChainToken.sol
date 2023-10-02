@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 interface IMultiChainToken {
 
     /// Cross-chain transfer
-    /// @param _dstChainId uint64  Distination chain ID
+    /// @param _dstChainId uint64  Destination chain ID
     /// @param _fromAddress address  Address from
     /// @param _toAddress address  Address to
     /// @param _amount uint  Amount
