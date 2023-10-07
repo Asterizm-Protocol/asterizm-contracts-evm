@@ -270,7 +270,7 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// @param _targetAddress address  Target client contract address
     /// @param _transferHash bytes32  Transfer hash
     /// @param _statusCode uint8  Status code
-    function transferSendingResultNotification(address _targetAddress, bytes32 _transferHash, uint8 _statusCode) external onlyOwner {
+    function transferSendingResultNotification(address _targetAddress, bytes32 _transferHash, uint8 _statusCode) external onlyRelayer {
         initializerLib.transferSendingResultNotification(_targetAddress, _transferHash, _statusCode);
     }
 

@@ -42,7 +42,7 @@ async function deployBase(hre, isTestnet, gasPrice) {
     gasLimit = gasLimit.add(tx.gasLimit);
     console.log("Chains is set");
 
-    console.log("Deploying initialzier...");
+    console.log("Deploying initializer...");
     // const initializer = await Initializer.attach('0x...');
     // const initializer = await Initializer.deploy(translator.address, gasPrice > 0 ? {gasPrice: gasPrice} : {});
     const initializer = await upgrades.deployProxy(Initializer, [translator.address], {

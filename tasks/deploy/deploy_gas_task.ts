@@ -39,7 +39,7 @@ task("deploy:gas", "Deploy Asterizm gassender contracts")
 
         let tx;
         const gasPrice = parseInt(taskArgs.gasPrice);
-        console.log("Deployig gas station contract...");
+        console.log("Deploying gas station contract...");
         const GasStation = await ethers.getContractFactory("GasStationUpgradeableV1");
         // const gasStation = await GasStation.attach('0x...');
         // const gasStation = await GasStation.deploy(initializer.address, useForceOrder, gasPrice > 0 ? {gasPrice: gasPrice} : {});
