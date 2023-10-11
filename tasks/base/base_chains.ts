@@ -8,6 +8,16 @@ export const Chains = {
             title: "ETH", // Ethereum
             networkName: "mainnet",
             chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0xFB069371947CFD755FED38745b1383BBF6292FFd',
+                    uint: '1433103332103289064079310216519917038573007220733',
+                },
+                initializer: {
+                    address: '0x699bB625d7b4A205A5ebe06998D797Bc164d391a',
+                    uint: '602916513755484471797170946931147866939591571738',
+                },
+            },
             trustAddresses: {
                 gas: {
                     address: '0x0000000000000000000000000000000000000000',
@@ -34,6 +44,16 @@ export const Chains = {
             title: "POL", // Polygon
             networkName: "polygon",
             chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x7fd194e54E1eab0e4F5F5809e2FD2026b15468fC',
+                    uint: '729715654287939467228382633079311704592684968188',
+                },
+                initializer: {
+                    address: '0xb26FC884362dD0e8891C68B9E974a7872C59E67e',
+                    uint: '1018693207370155322391001154982574759896625571454',
+                },
+            },
             trustAddresses: {
                 gas: {
                     address: '0xC9ad96EF0037899CFC0505cf7A9c3eE3E54026Ab',
@@ -60,6 +80,16 @@ export const Chains = {
             title: "FTM", // Fantom
             networkName: "opera",
             chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x68e369EDC0d374F86295690CBaA981Ee3709c061',
+                    uint: '598806537018999279328152488019493124736576766049',
+                },
+                initializer: {
+                    address: '0x44CeB2CdD0e9891f26Ce5b96D2A7A3017304C25F',
+                    uint: '392820901949391477580798006932408792960364495455',
+                },
+            },
             trustAddresses: {
                 gas: {
                     address: '0x01561f34D1C2085bafAb6fED29507c91E1Ce2573',
@@ -84,6 +114,16 @@ export const Chains = {
             title: "BSC", // Bsc
             networkName: "bsc",
             chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x5fF1e825A40DCB84D30BFcE2d56e6EC4116db0a3',
+                    uint: '547748825679959398451673919948462113276197449891',
+                },
+                initializer: {
+                    address: '0xF10866C198AA05f56697a5b35d165878c22eC08D',
+                    uint: '1376054133060720892291558133295570193392392388749',
+                },
+            },
             trustAddresses: {
                 gas: {
                     address: '0xf3EC4C24Aee3099aA2C8168822B13E98d05335ec',
@@ -110,6 +150,16 @@ export const Chains = {
             title: "OPT", // Optimism
             networkName: "optimisticEthereum",
             chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x03e3DE45279A26040bEaEa2FE84A59fC49564c25',
+                    uint: '22208603932138414949329570145715098746164235301',
+                },
+                initializer: {
+                    address: '0xc9c54677a96252da797642fBc851523556009Ce0',
+                    uint: '1151906530318469220785391650682441339555725483232',
+                },
+            },
             trustAddresses: {
                 gas: {
                     address: '0x2f526ea87dAc16EB82e07dFa09FaF7973D12d869',
@@ -135,6 +185,16 @@ export const Chains = {
             title: "ARB", // Arbitrum
             networkName: "arbitrumOne",
             chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x2dcD03d9f2a1576318dADCF6765eBf43436Dd616',
+                    uint: '261476572953413880653982392800644391921748137494',
+                },
+                initializer: {
+                    address: '0x2aa10870a044C6Ef116ac6A4856DF69C9223f19D',
+                    uint: '243368767574510829940649975649119716612893831581',
+                },
+            },
             trustAddresses: {
                 gas: {
                     address: '0x78Ac64e3a9bAD5975f19a7a649380532039C6926',
@@ -160,6 +220,16 @@ export const Chains = {
             title: "AVA", // Avalanche
             networkName: "avalanche",
             chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x6FBAD7F84F88fAF9E11CCcA5bCff5cC4B94865Df',
+                    uint: '637864727805595462379623990128736909710963795423',
+                },
+                initializer: {
+                    address: '0x1478477028f87c9EfDaDbaFD3bEC137Fd7E1445c',
+                    uint: '116862127978686052451930518855527426428017656924',
+                },
+            },
             trustAddresses: {
                 gas: {
                     address: '0x4f21a1AfFfE94C3DB0BbA0FA0B0d09082788b18D',
@@ -184,6 +254,16 @@ export const Chains = {
             title: "CEL", // Celo
             networkName: "celo",
             chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x41f895e58e4d9666D62be552F546597Bb6568F47',
+                    uint: '376628042757204253554474909011802762890999926599',
+                },
+                initializer: {
+                    address: '0xe27C3853936810E967824A2ECD43302D28DfE97C',
+                    uint: '1293002113338191020022365870173769932901277755772',
+                },
+            },
             trustAddresses: {
                 gas: {
                     address: '0x7d65a556822BA3D780956e2A9D610E2A2cd8a043',
@@ -209,6 +289,16 @@ export const Chains = {
             title: "BOB", // Boba
             networkName: "boba",
             chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0xD79aca85cF4eAEFbcd91Cf6069b180e311E21A15',
+                    uint: '1230884972702570973100164522279777163546166696469',
+                },
+                initializer: {
+                    address: '0xb90170b51fB7e654d2421a6e574652E3B67Abf8f',
+                    uint: '1056195411556902542312649984440424481259572084623',
+                },
+            },
             trustAddresses: {
                 gas: {
                     address: '0x8A78bd7BF2cC2Cbc6f666C35d37f75aa201E312A',
@@ -232,6 +322,16 @@ export const Chains = {
             title: "AUR", // Aurora
             networkName: "aurora",
             chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x242b5361b9d206aA40d2C505635b01F76f9E64B1',
+                    uint: '206489863367314663842790686297877775651931317425',
+                },
+                initializer: {
+                    address: '0xf9B545b5ca77c8B1349510566494AB6E5945624b',
+                    uint: '1425581209424033797465848868281516673685717869131',
+                },
+            },
             trustAddresses: {
                 gas: {
                     address: '0xD8094a1591E9Fa348d719311d613742f40574a36',
@@ -298,6 +398,109 @@ export const Chains = {
             title: "PZK", // Polygon ZkEVM
             networkName: "polygonZkMainnet",
             chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0xa6b5758d6E42a3f50c960E40E060f4E34B469597',
+                    uint: '951739143101520252189065334214508079412972787095',
+                },
+                initializer: {
+                    address: '0xd3ed349b3bbeD545064f80dDA916275Bdf21be87',
+                    uint: '1209886911917932535352398253503116688823593057927',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0x0efB33411B441f3bB1016386BF655D6c112f048d',
+                    uint: '85527822717544174937881506568487237286011798669',
+                },
+            },
+            stableCoins: [],
+        },
+        {
+            id: 5165,
+            title: "FSX", // Fastex
+            networkName: "fastexMainnet",
+            chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0xac8D042B7C6cC92fCBdFd259324f602d541ded07',
+                    uint: '985091180901367840761599141252388610288339774727',
+                },
+                initializer: {
+                    address: '0xA55BDd1701D370cE9E2fb66EC0f934F3Dd981571',
+                    uint: '944032104643112257033211217745989932066289489265',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0xA67865d45d1ee4C9e71474f913f2E372764336Ba',
+                    uint: '950377427985100543723071020287659345047449712314',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0xd473EDbdCaa43344BD1268304Aee55e2D7cbB2D2',
+                    uint: '1212891339306974807716800428937268510047624475346',
+                },
+            },
+            stableCoins: [],
+        },
+        {
+            id: 8453,
+            title: "BSX", // Base
+            networkName: "baseMainnet",
+            chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0xd473EDbdCaa43344BD1268304Aee55e2D7cbB2D2',
+                    uint: '1212891339306974807716800428937268510047624475346',
+                },
+                initializer: {
+                    address: '0xC1A6233450e4C7E1169A62183eE5eBc099Ca242D',
+                    uint: '1105540209204173940495306640535191601640054072365',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0x582ADEa3c5282e6d7D77E0116E379c332738d1ac',
+                    uint: '503347213786405371901698105080098677544820724140',
+                },
+            },
+            stableCoins: [],
+        },
+        {
+            id: 324,
+            title: "ZSC", // zkSync
+            networkName: "zksyncMainnet",
+            chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                initializer: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+            },
             trustAddresses: {
                 gas: {
                     address: '0x0000000000000000000000000000000000000000',
@@ -314,6 +517,99 @@ export const Chains = {
             },
             stableCoins: [],
         },
+        {
+            id: 59144,
+            title: "LNX", // Linea
+            networkName: "lineaMainnet",
+            chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0xac8D042B7C6cC92fCBdFd259324f602d541ded07',
+                    uint: '985091180901367840761599141252388610288339774727',
+                },
+                initializer: {
+                    address: '0xA55BDd1701D370cE9E2fb66EC0f934F3Dd981571',
+                    uint: '944032104643112257033211217745989932066289489265',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0xd473EDbdCaa43344BD1268304Aee55e2D7cbB2D2',
+                    uint: '1212891339306974807716800428937268510047624475346',
+                },
+            },
+            stableCoins: [],
+        },
+        {
+            id: 5000,
+            title: "MTL", // Mantle
+            networkName: "mantleMainnet",
+            chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0xac8D042B7C6cC92fCBdFd259324f602d541ded07',
+                    uint: '985091180901367840761599141252388610288339774727',
+                },
+                initializer: {
+                    address: '0xA55BDd1701D370cE9E2fb66EC0f934F3Dd981571',
+                    uint: '944032104643112257033211217745989932066289489265',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0xA23C4235d26e94B016A796525D3cd56654044099',
+                    uint: '926200317310922830817339070044806267472496050329',
+                },
+            },
+            stableCoins: [],
+        },
+        {
+            id: 100,
+            title: "GNS", // Gnosis
+            networkName: "gnosisMainnet",
+            chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0xac8D042B7C6cC92fCBdFd259324f602d541ded07',
+                    uint: '985091180901367840761599141252388610288339774727',
+                },
+                initializer: {
+                    address: '0xA55BDd1701D370cE9E2fb66EC0f934F3Dd981571',
+                    uint: '944032104643112257033211217745989932066289489265',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0xA23C4235d26e94B016A796525D3cd56654044099',
+                    uint: '926200317310922830817339070044806267472496050329',
+                },
+            },
+            stableCoins: [],
+        },
     ],
 
     // TESTNET CHAINS
@@ -323,6 +619,16 @@ export const Chains = {
             title: "ETH", // Ethereum Sepolia
             networkName: "ethereumSepolia",
             chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x9e8d434293Dd2E1C89bb385F0E51fA67F7cfdae1',
+                    uint: '905170806041498055648232111631308755981657168609',
+                },
+                initializer: {
+                    address: '0xa84b4464989e76b193d33fD65807F80BBD004A8a',
+                    uint: '960788963254840334253825059726431921324932745866',
+                },
+            },
             trustAddresses: {
                 gas: {
                     address: '0x7Aeb6eA9F31c9d976A2486968879d8d784a4468E',
@@ -346,6 +652,16 @@ export const Chains = {
             title: "POL", // Polygont Mumbai
             networkName: "polygonMumbai",
             chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x6282d1C32557eC3430b72cFb6304fD25d8F8Db8A',
+                    uint: '562398465289004498312139319307586635057510013834',
+                },
+                initializer: {
+                    address: '0x3EeF3BD23e5a843916EE53A2016aad108Fb20649',
+                    uint: '359292517060576020942014088655573524202663315017',
+                },
+            },
             trustAddresses: {
                 gas: {
                     address: '0x897A0Dc3555a76434Ee96df813f583c346b4bc87',
@@ -369,6 +685,16 @@ export const Chains = {
             title: "BSC", // BSC Testnet
             networkName: "bscTestnet",
             chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0xefE8514fa0bEE1e1A8AAC366978b0431425A6e3a',
+                    uint: '1369629650304091807344080129618049073068707049018',
+                },
+                initializer: {
+                    address: '0xE412121479211c3e9c50EC940F50596f293c08F0',
+                    uint: '1302052884149211578999212296436203952550002297072',
+                },
+            },
             trustAddresses: {
                 gas: {
                     address: '0xE6C80c2858f7EA5bB325d41D6e205ea3b13364FF',
@@ -392,6 +718,16 @@ export const Chains = {
             title: "FTM", // Fantom Testnet
             networkName: "operaTestnet",
             chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x20e0400404f874E586589D1631FA5603123F7Bc0',
+                    uint: '187688648144869797247101501478622272540892953536',
+                },
+                initializer: {
+                    address: '0x372824586fEe6388208D55021D6eeaE9f88d636B',
+                    uint: '314889688339176324098060599865391262698455262059',
+                },
+            },
             trustAddresses: {
                 gas: {
                     address: '0xaa7C1D2f415C4647C5E4fC47b83cA123D4F1b647',
@@ -413,6 +749,16 @@ export const Chains = {
             title: "opBNB", // opBNB Testnet
             networkName: "opBnbTestnet",
             chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                initializer: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+            },
             trustAddresses: {
                 gas: {
                     address: '0x0000000000000000000000000000000000000000',
@@ -429,32 +775,52 @@ export const Chains = {
             },
             stableCoins: [],
         },
-        {
-            id: 4918,
-            title: "XVM", // Venidium Testnet
-            networkName: "venidiumTestnet",
-            chainType: ChainTypes.EVM,
-            trustAddresses: {
-                gas: {
-                    address: '0x0000000000000000000000000000000000000000',
-                    uint: '0',
-                },
-                multichain: {
-                    address: '0x0000000000000000000000000000000000000000',
-                    uint: '0',
-                },
-                checker: {
-                    address: '0x0000000000000000000000000000000000000000',
-                    uint: '0',
-                },
-            },
-            stableCoins: [],
-        },
+        // {
+        //     id: 4918,
+        //     title: "XVM", // Venidium Testnet
+        //     networkName: "venidiumTestnet",
+        //     chainType: ChainTypes.EVM,
+        //     contractAddresses: {
+        //         translator: {
+        //             address: '0x0000000000000000000000000000000000000000',
+        //             uint: '0',
+        //         },
+        //         initializer: {
+        //             address: '0x0000000000000000000000000000000000000000',
+        //             uint: '0',
+        //         },
+        //     },
+        //     trustAddresses: {
+        //         gas: {
+        //             address: '0x0000000000000000000000000000000000000000',
+        //             uint: '0',
+        //         },
+        //         multichain: {
+        //             address: '0x0000000000000000000000000000000000000000',
+        //             uint: '0',
+        //         },
+        //         checker: {
+        //             address: '0x0000000000000000000000000000000000000000',
+        //             uint: '0',
+        //         },
+        //     },
+        //     stableCoins: [],
+        // },
         {
             id: 20001,
             title: "EVER",
             networkName: "test",
             chainType: ChainTypes.TVM,
+            contractAddresses: {
+                translator: {
+                    address: '0:433884fcaf57013b026e056bf4158217802eda63edbcafdf6a7af9d229adc052',
+                    uint: '30404822133596216763316421379650136152957876842887568173746545986487744053330',
+                },
+                initializer: {
+                    address: '0:c9799fd36cb2dc59617d56bca3f4856ba0331be793d4f8f5ba02a589339737ef',
+                    uint: '91129774137739921575772133409221292090805317640577677671991266457219918936047',
+                },
+            },
             trustAddresses: {
                 gas: {
                     address: '0:11a7ea3c198a07b9488e3f01709d35dcf7f4bdb99ce5495e72b1d1069e2646dc',
@@ -478,6 +844,16 @@ export const Chains = {
             title: "VNM",
             networkName: "venom_test",
             chainType: ChainTypes.TVM,
+            contractAddresses: {
+                translator: {
+                    address: '0:1a3cc0373b9fdfb25481ff20e612e71d9bead18a04681417023eefbe0d3fa2be',
+                    uint: '11867471511426473120192298010944685840126330516339703058636238409805261152958',
+                },
+                initializer: {
+                    address: '0:67c151d9b5afeded8cd31daee6ce08a39f33d9ee55070b5bb29eefd7085ca3bd',
+                    uint: '46929789798475080937251847701497727383413495687672552711395355579356920193981',
+                },
+            },
             trustAddresses: {
                 gas: {
                     address: '0:f5718ca386cfd431dff84a01ec0801751d0a9e69252b69cbe8ba3a4cd001f8ec',

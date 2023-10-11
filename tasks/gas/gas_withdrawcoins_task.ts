@@ -20,7 +20,7 @@ task("gas:withdrawCoins", "Withdraw coins from gassender contract")
         let {gasContract, gasLimit} = await deployBase(hre, taskArgs.contractAddress);
 
         const gasPrice = parseInt(taskArgs.gasPrice);
-        console.log("Adding contract trusted address...");
+        console.log("Withdrawing coins...");
         let tx = await gasContract.withdrawCoins(taskArgs.targetAddress, taskArgs.amount, gasPrice > 0 ? {gasPrice: gasPrice} : {});
         gasLimit = gasLimit.add(tx.gasLimit);
 

@@ -1,5 +1,11 @@
 import "@nomicfoundation/hardhat-toolbox";
 import "@openzeppelin/hardhat-upgrades";
+import { HardhatUserConfig } from "hardhat/config";
+
+import "@matterlabs/hardhat-zksync-solc";
+import "@matterlabs/hardhat-zksync-deploy";
+import "@matterlabs/hardhat-zksync-upgradable";
+
 require('dotenv').config();
 require("@nomicfoundation/hardhat-chai-matchers");
 
@@ -28,7 +34,7 @@ import './tasks/relay/relay_updatefee_task';
 import './tasks/relay/relay_updatesystemfee_task';
 import './tasks/relay/relay_manageexternalrelay_task';
 
-const config = {
+const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.17",
     settings: {
@@ -41,6 +47,10 @@ const config = {
   defaultNetwork: "localhost",
   gasReporter: {
     enabled: true,
+  },
+  zksolc: {
+    version: "latest",
+    settings: {},
   },
   networks: {
     // hardhat: {
@@ -161,7 +171,37 @@ const config = {
       url: process.env.NETWORK_HOST_POLYGONZK,
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 1101
-    }
+    },
+    fastexMainnet: {
+      url: process.env.NETWORK_HOST_FASTEX,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 5165
+    },
+    baseMainnet: {
+      url: process.env.NETWORK_HOST_BASE,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 8453
+    },
+    zksyncMainnet: {
+      url: process.env.NETWORK_HOST_ZKSYNC,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 324
+    },
+    lineaMainnet: {
+      url: process.env.NETWORK_HOST_LINEA,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 59144
+    },
+    mantleMainnet: {
+      url: process.env.NETWORK_HOST_MANTLE,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 5000
+    },
+    gnosisMainnet: {
+      url: process.env.NETWORK_HOST_GNOSIS,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 100
+    },
   },
   etherscan: {
     apiKey: {
