@@ -1,6 +1,7 @@
 import "@nomicfoundation/hardhat-toolbox";
 import "@openzeppelin/hardhat-upgrades";
 import { HardhatUserConfig } from "hardhat/config";
+const { ApiBaseUrl } = require("@fireblocks/fireblocks-web3-provider");
 
 import "@matterlabs/hardhat-zksync-solc";
 import "@matterlabs/hardhat-zksync-deploy";
@@ -8,6 +9,7 @@ import "@matterlabs/hardhat-zksync-upgradable";
 
 require('dotenv').config();
 require("@nomicfoundation/hardhat-chai-matchers");
+require("@fireblocks/hardhat-fireblocks");
 
 import './tasks/accounts_task';
 import './tasks/deploy/deploy_base_task';
@@ -34,7 +36,7 @@ import './tasks/relay/relay_updatefee_task';
 import './tasks/relay/relay_updatesystemfee_task';
 import './tasks/relay/relay_manageexternalrelay_task';
 
-const config: HardhatUserConfig = {
+const config = {
   solidity: {
     version: "0.8.17",
     settings: {
@@ -81,6 +83,16 @@ const config: HardhatUserConfig = {
       url: process.env.NETWORK_HOST_ETHEREUM_SEPOLIA,
       accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
       chainId: 11155111
+    },
+    ethereumSepoliaFB: {
+      url: process.env.NETWORK_HOST_ETHEREUM_SEPOLIA,
+      chainId: 11155111,
+      fireblocks: {
+        apiBaseUrl: ApiBaseUrl.Sandbox,
+        privateKey: process.env.FIREBLOCKS_API_PRIVATE_KEY_PATH,
+        apiKey: process.env.FIREBLOCKS_API_KEY,
+        vaultAccountIds: process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS,
+      }
     },
     polygon: {
       url: process.env.NETWORK_HOST_POLYGON,
@@ -172,6 +184,11 @@ const config: HardhatUserConfig = {
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 1101
     },
+    polygonZkTestnet: {
+      url: process.env.NETWORK_HOST_POLYGONZK_TESTNET,
+      accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
+      chainId: 1442
+    },
     fastexMainnet: {
       url: process.env.NETWORK_HOST_FASTEX,
       accounts: [process.env.OWNER_PK_ASTERIZM],
@@ -201,6 +218,16 @@ const config: HardhatUserConfig = {
       url: process.env.NETWORK_HOST_GNOSIS,
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 100
+    },
+    patexMainnet: {
+      url: process.env.NETWORK_HOST_PATEX,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 789
+    },
+    asterizmPrivateChain: {
+      url: process.env.NETWORK_HOST_ASTERIZM,
+      accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
+      chainId: 1990991
     },
   },
   etherscan: {

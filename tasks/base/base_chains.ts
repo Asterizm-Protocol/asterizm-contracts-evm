@@ -534,8 +534,8 @@ export const Chains = {
             },
             trustAddresses: {
                 gas: {
-                    address: '0x0000000000000000000000000000000000000000',
-                    uint: '0',
+                    address: '0xA67865d45d1ee4C9e71474f913f2E372764336Ba',
+                    uint: '950377427985100543723071020287659345047449712314',
                 },
                 multichain: {
                     address: '0x0000000000000000000000000000000000000000',
@@ -610,6 +610,37 @@ export const Chains = {
             },
             stableCoins: [],
         },
+        {
+            id: 789,
+            title: "PTX", // Patex
+            networkName: "patexMainnet",
+            chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                initializer: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+            },
+            stableCoins: [],
+        },
     ],
 
     // TESTNET CHAINS
@@ -639,8 +670,8 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
-                    address: '0x013c5686B0B06E993c7d8c08AC38AA58E9A79720',
-                    uint: '7054572972023190410624467989617135057327593248',
+                    address: '0x131CCD21B56AAAd4205B9ab353181C59b33A2A5a',
+                    uint: '109113115000290043170016387629041891766657755738',
                 },
             },
             stableCoins: [
@@ -672,8 +703,8 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
-                    address: '0xf0717939b69746BA3De234a1cAc7a4e96A73871d',
-                    uint: '1372688329430553070297040708232944173776949708573',
+                    address: '0x9eB89ecD85473eC3B6DB3F226Ae7827D3Ea8E747',
+                    uint: '906137712582915965930062706651069662864425412423',
                 },
             },
             stableCoins: [
@@ -745,6 +776,37 @@ export const Chains = {
             stableCoins: [],
         },
         {
+            id: 1442,
+            title: "PZK", // Polygon zkEVM Testnet
+            networkName: "polygonZkTestnet",
+            chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0xa3b0a6158Be7Ae64eF23296933AE5961F75AaB93',
+                    uint: '934504894770587258788085374436794290303259028371',
+                },
+                initializer: {
+                    address: '0xE6149A4963aA79E802E2d31c45B8282E4516bcaa',
+                    uint: '1313527332458578713944991740637369053368083201194',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0xc8e37E456c517D682ca8F343e46BF4DEFFd24D13',
+                    uint: '1146871423096324818780652019202769904412751187219',
+                },
+            },
+            stableCoins: [],
+        },
+        {
             id: 5611,
             title: "opBNB", // opBNB Testnet
             networkName: "opBnbTestnet",
@@ -757,6 +819,37 @@ export const Chains = {
                 initializer: {
                     address: '0x0000000000000000000000000000000000000000',
                     uint: '0',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+            },
+            stableCoins: [],
+        },
+        {
+            id: 5611,
+            title: "azPC", // Asterizm Private Chain
+            networkName: "asterizmPrivateChain",
+            chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x65778E36a83124E3cF0c707d21CB40e71BD325ea',
+                    uint: '579274245075248533840642260503954834129056638442',
+                },
+                initializer: {
+                    address: '0x8b314A606F9C347093B69BBe102855BD9DE4edbd',
+                    uint: '794648932783863238517312334764403844450535927229',
                 },
             },
             trustAddresses: {

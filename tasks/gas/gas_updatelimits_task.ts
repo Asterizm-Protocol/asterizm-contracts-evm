@@ -20,7 +20,7 @@ async function deployBase(hre, isTestnet) {
     return {gasStation, gasLimit};
 }
 
-task("deploy:updateLimits", "Deploy Asterizm gassender contracts")
+task("gas:updateLimits", "Update GasSender limits")
     .addPositionalParam("minUsdAmount", "Minimum transfer amount in USD", '0')
     .addPositionalParam("maxUsdAmount", "Maximum transfer amount in USD", '0')
     .addPositionalParam("minUsdAmountPerChain", "Minimum transfer amount in USD per chain", '0')
