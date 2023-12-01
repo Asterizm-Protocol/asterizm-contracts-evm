@@ -167,12 +167,12 @@ const config = {
     venidiumMainnet: {
       url: process.env.NETWORK_HOST_VENIDIUM,
       accounts: [process.env.OWNER_PK_ASTERIZM],
-      chainId: 4919
+      chainId: 8192
     },
     venidiumTestnet: {
       url: process.env.NETWORK_HOST_VENIDIUM_TESTNET,
       accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
-      chainId: 4918
+      chainId: 8193
     },
     bitgertMainnet: {
       url: process.env.NETWORK_HOST_BITGERT,

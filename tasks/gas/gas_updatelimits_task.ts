@@ -11,11 +11,12 @@ async function deployBase(hre, isTestnet) {
     for (let i = 0; i < chains.length; i++) {
         if (chains[i].networkName == hre.network.name) {
             currentChain = chains[i];
+            break;
         }
     }
 
     let gasLimit = BigNumber.from(0);
-    const gasStation = await GasContract.attach(currentChain.trustAddresses.gas.address);
+    const gasStation = await GasContract.attach(currentChain?.trustAddresses.gas.address);
 
     return {gasStation, gasLimit};
 }

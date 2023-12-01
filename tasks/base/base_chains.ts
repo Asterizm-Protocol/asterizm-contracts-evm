@@ -351,27 +351,37 @@ export const Chains = {
                 '0x4988a896b1227218e4a686fde5eabdcabd91571f',
             ],
         },
-        // {
-        //     id: 4919,
-        //     title: "XVM", // Venidium
-        //     networkName: "venidiumMainnet",
-        //     chainType: ChainTypes.EVM,
-        //     trustAddresses: {
-        //         gas: {
-        //             address: '0x0000000000000000000000000000000000000000',
-        //             uint: '0',
-        //         },
-        //         multichain: {
-        //             address: '0x0000000000000000000000000000000000000000',
-        //             uint: '0',
-        //         },
-        //         checker: {
-        //             address: '0x0000000000000000000000000000000000000000',
-        //             uint: '0',
-        //         },
-        //     },
-        //     stableCoins: [],
-        // },
+        {
+            id: 8192,
+            title: "XVM", // Venidium
+            networkName: "venidiumMainnet",
+            chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0xac8D042B7C6cC92fCBdFd259324f602d541ded07',
+                    uint: '985091180901367840761599141252388610288339774727',
+                },
+                initializer: {
+                    address: '0xA55BDd1701D370cE9E2fb66EC0f934F3Dd981571',
+                    uint: '944032104643112257033211217745989932066289489265',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0xA67865d45d1ee4C9e71474f913f2E372764336Ba',
+                    uint: '950377427985100543723071020287659345047449712314',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0xd473EDbdCaa43344BD1268304Aee55e2D7cbB2D2',
+                    uint: '1212891339306974807716800428937268510047624475346',
+                },
+            },
+            stableCoins: [],
+        },
         // {
         //     id: 32520,
         //     title: "BTG", // BitGert
