@@ -85,7 +85,7 @@ abstract contract AsterizmEnv is IAsterizmEnv {
     /// @param _gasLimit uint  Gas limit
     /// @param _payload bytes  Payload
     /// @return TrTransferMessageRequestDto
-    function _buildTrTarnsferMessageRequestDto(uint _gasLimit, bytes memory _payload) internal pure returns(TrTransferMessageRequestDto memory) {
+    function _buildTrTransferMessageRequestDto(uint _gasLimit, bytes memory _payload) internal pure returns(TrTransferMessageRequestDto memory) {
         TrTransferMessageRequestDto memory dto;
         dto.gasLimit = _gasLimit;
         dto.payload = _payload;
@@ -100,15 +100,20 @@ abstract contract AsterizmEnv is IAsterizmEnv {
     /// @param _transferHash bytes32  Transfer hash
     /// @param _relay address  External relay
     /// @param _transferResultNotifyFlag bool  Transfer result notification flag
+    /// @param _feeToken address  Token address for paying relay fee (Chainlink for example)
     /// @return IzIninTransferRequestDto
-    function _buildIzIninTransferRequestDto(uint64 _dstChainId, uint _dstAddress, uint _txId, bytes32 _transferHash, address _relay, bool _transferResultNotifyFlag) internal pure returns(IzIninTransferRequestDto memory) {
-        IzIninTransferRequestDto memory dto;
+    function _buildIzInitTransferRequestDto(
+        uint64 _dstChainId, uint _dstAddress, uint _txId, bytes32 _transferHash, address _relay,
+        bool _transferResultNotifyFlag, address _feeToken
+    ) internal pure returns(IzInitTransferRequestDto memory) {
+        IzInitTransferRequestDto memory dto;
         dto.dstChainId = _dstChainId;
         dto.dstAddress = _dstAddress;
         dto.txId = _txId;
         dto.transferHash = _transferHash;
         dto.relay = _relay;
         dto.transferResultNotifyFlag = _transferResultNotifyFlag;
+        dto.feeToken = _feeToken;
 
         return dto;
     }

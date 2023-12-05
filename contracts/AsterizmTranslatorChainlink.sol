@@ -1,21 +1,27 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "./interfaces/IInitializerReceiver.sol";
-import "./interfaces/ITranslator.sol";
-import "./libs/AddressLib.sol";
-import "./libs/UintLib.sol";
-import "./base/AsterizmEnv.sol";
-import "./base/AsterizmChainEnv.sol";
+import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {IInitializerReceiver} from "./interfaces/IInitializerReceiver.sol";
+import {ITranslator} from "./interfaces/ITranslator.sol";
+import {AddressLib} from "./libs/AddressLib.sol";
+import {UintLib} from "./libs/UintLib.sol";
+import {AsterizmEnv} from "./base/AsterizmEnv.sol";
+import {AsterizmChainEnv} from "./base/AsterizmChainEnv.sol";
+import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
+import {OwnerIsCreator} from "@chainlink/contracts-ccip/src/v0.8/shared/access/OwnerIsCreator.sol";
+import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
+import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol";
+import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
+import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslator, AsterizmEnv, AsterizmChainEnv {
+contract AsterizmTranslatorChainlink is CCIPReceiver, Ownable, ITranslator, AsterizmEnv, AsterizmChainEnv {
 
+    using SafeERC20 for IERC20;
     using AddressLib for address;
     using UintLib for uint;
-    using SafeMathUpgradeable for uint;
+    using SafeMath for uint;
 
     /// Set initializer event
     /// @param _initializerAddress address
@@ -24,6 +30,14 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// Set config event
     /// @param _configAddress address
     event SetConfigEvent(address _configAddress);
+
+    /// Set base router event
+    /// @param _baseRouterAddress address
+    event SetBaseRouterEvent(address _baseRouterAddress);
+
+    /// Set fee token event
+    /// @param _feeTokenAddress address
+    event SetFeeTokenEvent(address _feeTokenAddress);
 
     /// Add relayer event
     /// @param _relayerAddress address
@@ -36,7 +50,9 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// Add chain event
     /// @param _chainId uint64
     /// @param _chainType uint8
-    event AddChainEvent(uint64 _chainId, uint8 _chainType);
+    /// @param _chainSelector uint64
+    /// @param _relayAddress address
+    event AddChainEvent(uint64 _chainId, uint8 _chainType, uint64 _chainSelector, address _relayAddress);
 
     /// Remove chain event
     /// @param _chainId uint64
@@ -47,9 +63,10 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     event SetLocalChainEvent(uint64 _chainId);
 
     /// Send message event
-    /// @param _feeValue uint  Fee value
+    /// @param _transferHash bytes32  Transfer hash
+    /// @param _messageId bytes32  Chainlink message ID
     /// @param _payload bytes  Transfer payload
-    event SendMessageEvent(uint _feeValue, bytes _payload);
+    event SendMessageEvent(bytes32 _transferHash, bytes32 _messageId, bytes _payload);
 
     /// Success transfer event
     /// @param _transferHash bytes32  Transfer hash
@@ -82,42 +99,44 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     struct Chain {
         bool exists;
         uint8 chainType; // 1 - EVM, 2 - TVM
+        uint64 chainSelector;
+        address relayAddress;
     }
     struct Relayer {
         bool exists;
     }
 
     IInitializerReceiver private initializerLib;
+    IRouterClient private baseRouter;
+    IERC20 private feeToken;
     mapping(address => Relayer) private relayers;
     mapping(uint64 => Chain) public chains;
     uint64 public localChainId;
 
-    /// Initializing function for upgradeable contracts (constructor)
+    /// Constructor
     /// @param _localChainId uint64  Local chain ID
     /// @param _localChainType uint8  Local chain type
-    function initialize(uint64 _localChainId, uint8 _localChainType) initializer public {
-        __Ownable_init();
-        __UUPSUpgradeable_init();
+    /// @param _localChainSelector uint64  Local chain selector
+    /// @param _baseRouter IRouterClient  Base system router (Chainlink)
+    /// @param _feeToken IERC20  Fee token
+    constructor(uint64 _localChainId, uint8 _localChainType, uint64 _localChainSelector, IRouterClient _baseRouter, IERC20 _feeToken) CCIPReceiver(address(_baseRouter)) {
         __AsterizmChainEnv_init();
-
         addRelayer(owner());
-        addChain(_localChainId, _localChainType);
+        addChain(_localChainId, _localChainType, _localChainSelector, address(this));
         _setLocalChainId(_localChainId);
+        setBaseRouter(_baseRouter);
+        setFeeToken(_feeToken);
     }
-
-    /// Upgrade implementation address for UUPS logic
-    /// @param _newImplementation address  New implementation address
-    function _authorizeUpgrade(address _newImplementation) internal onlyOwner override {}
 
     /// Only initializer modifier
     modifier onlyInitializer() {
-        require(msg.sender == address(initializerLib), "Translator: only initializer");
+        require(msg.sender == address(initializerLib), "TranslatorChainlink: only initializer");
         _;
     }
 
     /// Only relayer modifier
     modifier onlyRelayer() {
-        require(relayers[msg.sender].exists, "Translator: only relayer");
+        require(relayers[msg.sender].exists, "TranslatorChainlink: only relayer");
         _;
     }
 
@@ -127,9 +146,9 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// @param _target address  Target address
     /// @param _amount uint  Amount
     function withdraw(address _target, uint _amount) external onlyOwner {
-        require(address(this).balance >= _amount, "Translator: coins balance not enough");
+        require(address(this).balance >= _amount, "TranslatorChainlink: coins balance not enough");
         (bool success, ) = _target.call{value: _amount}("");
-        require(success, "Translator: transfer error");
+        require(success, "TranslatorChainlink: transfer error");
         emit WithdrawEvent(_target, _amount);
     }
 
@@ -157,26 +176,35 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// Add chain
     /// @param _chainId uint64  Chain ID
     /// @param _chainType uint8  Chain type
-    function addChain(uint64 _chainId, uint8 _chainType) public onlyOwner {
-        require(_isChainTypeAwailable(_chainType), "Translator: chain type is unavailable");
+    /// @param _chainSelector uint64  Chain selector
+    /// @param _relayAddress address  Chain relay address
+    function addChain(uint64 _chainId, uint8 _chainType, uint64 _chainSelector, address _relayAddress) public onlyOwner {
+        require(_isChainTypeAwailable(_chainType), "TranslatorChainlink: chain type is unavailable");
         chains[_chainId].exists = true;
         chains[_chainId].chainType = _chainType;
-        emit AddChainEvent(_chainId, _chainType);
+        chains[_chainId].chainSelector = _chainSelector;
+        chains[_chainId].relayAddress = _relayAddress;
+        emit AddChainEvent(_chainId, _chainType, _chainSelector, _relayAddress);
     }
 
     /// Add chains list
     /// @param _chainIds uint64[]  Chain IDs
     /// @param _chainTypes uint8[]  Chain types
-    function addChains(uint64[] calldata _chainIds, uint8[] calldata _chainTypes) public onlyOwner {
+    /// @param _chainSelectors uint64[]  Chain selectors
+    /// @param _relayAddresses address[]  Chain relay addresses
+    function addChains(
+        uint64[] calldata _chainIds, uint8[] calldata _chainTypes,
+        uint64[] calldata _chainSelectors, address[] calldata _relayAddresses
+    ) public onlyOwner {
         for (uint i = 0; i < _chainIds.length; i++) {
-            addChain(_chainIds[i], _chainTypes[i]);
+            addChain(_chainIds[i], _chainTypes[i], _chainSelectors[i], _relayAddresses[i]);
         }
     }
 
     /// Remove chain
     /// @param _chainId uint64  Chain ID
     function removeChainById(uint64 _chainId) public onlyOwner {
-        require(localChainId != _chainId, "Translator: removing local chain");
+        require(localChainId != _chainId, "TranslatorChainlink: removing local chain");
         delete chains[_chainId];
         emit RemoveChainEvent(_chainId);
     }
@@ -184,7 +212,7 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// Set local chain
     /// @param _chainId uint64  Chain ID
     function _setLocalChainId(uint64 _chainId) private onlyOwner {
-        require(chains[_chainId].exists, "Translator: chain is not exists");
+        require(chains[_chainId].exists, "TranslatorChainlink: chain is not exists");
         localChainId = _chainId;
         emit SetLocalChainEvent(_chainId);
     }
@@ -207,24 +235,75 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// @param _chainId  Chain id
     /// @return uint8  Chain type
     function getChainType(uint64 _chainId) external view returns(uint8) {
-        require(chains[_chainId].exists, "Translator: chain not found");
+        require(chains[_chainId].exists, "TranslatorChainlink: chain not found");
         return chains[_chainId].chainType;
+    }
+
+    /// Return base router address
+    /// @return address
+    function getBaseRouter() external view returns(address) {
+        return address(baseRouter);
+    }
+
+    /// Set base router
+    /// @param _baseRouter IRouterClient  Base router
+    function setBaseRouter(IRouterClient _baseRouter) public onlyOwner {
+        baseRouter = _baseRouter;
+        emit SetBaseRouterEvent(address(_baseRouter));
+    }
+
+    /// Return fee token address
+    /// @return address
+    function getFeeToken() external view returns(address) {
+        return address(feeToken);
+    }
+
+    /// Set fee token
+    /// @param _feeToken IERC20  Fee token
+    function setFeeToken(IERC20 _feeToken) public onlyOwner {
+        feeToken = _feeToken;
+        emit SetFeeTokenEvent(address(_feeToken));
+    }
+
+    /// Return fee amount in tokens private
+    /// @param _message Client.EVM2AnyMessage  Method DTO
+    /// @return uint  Token fee amount
+    function getFeeAmountInTokenPrivate(Client.EVM2AnyMessage memory _message) private view returns(uint) {
+        return baseRouter.getFee(chains[localChainId].chainSelector, _message);
+    }
+
+    /// Build base router message
+    /// @param _dto TrSendMessageRequestDto  Method DTO
+    /// @return Client.EVM2AnyMessage  Base router message
+    function buildBaseRouterMessage(TrSendMessageRequestDto calldata _dto) private view returns(Client.EVM2AnyMessage memory) {
+        return Client.EVM2AnyMessage({
+            receiver: abi.encode(chains[_dto.dstChainId].relayAddress),
+            data: abi.encode(
+                localChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress,
+                _dto.txId, _dto.transferResultNotifyFlag, _dto.transferHash
+            ),
+            tokenAmounts: new Client.EVMTokenAmount[](0),
+            extraArgs: Client._argsToBytes(
+                Client.EVMExtraArgsV1({gasLimit: 200_000, strict: false})
+            ),
+            feeToken: address(feeToken)
+        });
     }
 
     /// Return fee amount in tokens
     /// @param _dto TrSendMessageRequestDto  Method DTO
     /// @return uint  Token fee amount
-    function getFeeAmountInTokens(TrSendMessageRequestDto calldata _dto) external pure returns(uint) {
-        return 0;
+    function getFeeAmountInTokens(TrSendMessageRequestDto calldata _dto) external view returns(uint) {
+        return getFeeAmountInTokenPrivate(buildBaseRouterMessage(_dto));
     }
 
     /// Send transfer payload
     /// @param _dto TrSendMessageRequestDto  Method DTO
     function sendMessage(TrSendMessageRequestDto calldata _dto) external payable onlyInitializer {
-        require(chains[_dto.dstChainId].exists, "Translator: wrong chain id");
+        require(chains[_dto.dstChainId].exists, "TranslatorChainlink: wrong chain id");
         if (msg.value > 0) {
             (bool success, ) = owner().call{value: msg.value}("");
-            require(success, "Translator: transfer error");
+            require(success, "TranslatorChainlink: transfer error");
         }
 
         bytes memory payload = abi.encode(
@@ -238,39 +317,31 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
             return;
         }
 
-        emit SendMessageEvent(msg.value, payload);
+        Client.EVM2AnyMessage memory chainlinkMessage = buildBaseRouterMessage(_dto);
+        uint chainlinkFee = getFeeAmountInTokenPrivate(chainlinkMessage);
+        uint feeTokenAllowance = feeToken.allowance(address(initializerLib), address(this));
+        require(feeTokenAllowance >= chainlinkFee, "TranslatorChainlink: fee token allowance is not enough");
+        if (chainlinkFee > 0) {
+            feeToken.transferFrom(address(initializerLib), address(this), chainlinkFee);
+            feeToken.approve(address(baseRouter), chainlinkFee);
+        }
+
+        bytes32 messageId = baseRouter.ccipSend(chains[_dto.dstChainId].chainSelector, chainlinkMessage);
+        emit SendMessageEvent(_dto.transferHash, messageId, payload);
     }
 
-    /// Log external transfer payload (for external relays logic)
+    /// Log external transfer payload (for external relays logic, method NOT SUPPORTED in Chainlink!)
     /// @param _externalRelayAddress address  External relay address
     /// @param _dto TrSendMessageRequestDto  Method DTO
     function logExternalMessage(address _externalRelayAddress, TrSendMessageRequestDto calldata _dto) external payable onlyInitializer {
-        require(chains[_dto.dstChainId].exists, "Translator: wrong chain id");
-        if (msg.value > 0) {
-            (bool success, ) = owner().call{value: msg.value}("");
-            require(success, "Translator: transfer error");
-        }
-
-        emit LogExternalMessageEvent(
-            msg.value,
-            _externalRelayAddress,
-            abi.encode(
-                localChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress,
-                _dto.txId, _dto.transferResultNotifyFlag, _dto.transferHash
-            )
-        );
+        return;
     }
 
-    /// Resend failed by fee amount transfer
+    /// Resend failed by fee amount transfer (method NOT SUPPORTED in Chainlink!)
     /// @param _transferHash bytes32  Transfer hash
     /// @param _senderAddress uint  Sender address
     function resendMessage(bytes32 _transferHash, uint _senderAddress) external payable onlyInitializer {
-        if (msg.value > 0) {
-            (bool success, ) = owner().call{value: msg.value}("");
-            require(success, "Translator: transfer error");
-        }
-
-        emit ResendFailedTransferEvent(_transferHash, _senderAddress, msg.value);
+        return;
     }
 
     /// Transfer sending result notification
@@ -287,11 +358,17 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
         _baseTransferMessage(_dto);
     }
 
-    /// External transfer message
+    /// External transfer message (_ccipReceive() is used instead of this method)
     /// @param _gasLimit uint  Gas limit
     /// @param _payload bytes  Payload
     function transferMessage(uint _gasLimit, bytes calldata _payload) external onlyRelayer {
-        _baseTransferMessage(_buildTrTransferMessageRequestDto(_gasLimit, _payload));
+        return;
+    }
+
+    /// CCIP receiver
+    /// @param _dto Client.Any2EVMMessage  Chainlink message dto
+    function _ccipReceive(Client.Any2EVMMessage memory _dto) internal override {
+        _baseTransferMessage(_buildTrTransferMessageRequestDto(gasleft(), _dto.data));
     }
 
     /// Base transfer message
@@ -306,8 +383,8 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
         );
 
         {
-            require(dstChainId == localChainId, "Translator: wrong chain id");
-            require(dstAddress.toAddress().isContract(), "Translator: destination address is non-contract");
+            require(dstChainId == localChainId, "TranslatorChainlink: wrong chain id");
+            require(dstAddress.toAddress().isContract(), "TranslatorChainlink: destination address is non-contract");
 
             initializerLib.receivePayload(_buildIzReceivePayloadRequestDto(
                 _buildBaseTransferDirectionDto(srcChainId, srcAddress, localChainId, dstAddress),

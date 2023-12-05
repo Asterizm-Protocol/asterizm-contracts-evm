@@ -103,20 +103,22 @@ interface IAsterizmEnv {
         bytes payload;
     }
 
-    /// Initializator initizte transfer request DTO
+    /// Initializator initiate transfer request DTO
     /// @param dstChainId uint64  Destination chain ID
     /// @param dstAddress uint  Destination address
     /// @param transferHash bytes32  Transfer hash
     /// @param txId uint  Transaction ID
     /// @param relay address  Relay address
     /// @param transferResultNotifyFlag bool  Transfer result notification flag
-    struct IzIninTransferRequestDto {
+    /// @param feeToken address  Token address for paying relay fee (Chainlink for example)
+    struct IzInitTransferRequestDto {
         uint64 dstChainId;
         uint dstAddress;
         bytes32 transferHash;
         uint txId;
         address relay;
         bool transferResultNotifyFlag;
+        address feeToken;
     }
 
     /// Initializator receive payload request DTO

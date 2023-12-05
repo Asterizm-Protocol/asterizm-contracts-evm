@@ -28,4 +28,9 @@ interface ITranslator is IAsterizmEnv {
     /// @param _chainId  Chain id
     /// @return uint8  Chain type
     function getChainType(uint64 _chainId) external view returns(uint8);
+
+    /// Return fee amount in tokens
+    /// @param _dto TrSendMessageRequestDto  Method DTO
+    /// @return uint  Token fee amount
+    function getFeeAmountInTokens(TrSendMessageRequestDto calldata _dto) external view returns(uint);
 }

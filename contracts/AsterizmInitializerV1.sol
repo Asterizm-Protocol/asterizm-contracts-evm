@@ -3,6 +3,7 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/INonce.sol";
 import "./interfaces/ITranslator.sol";
 import "./interfaces/IConfig.sol";
@@ -17,6 +18,7 @@ import "./base/AsterizmConfig.sol";
 
 contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, IInitializerSender, IInitializerReceiver, AsterizmEnv, AsterizmConfig {
 
+    using SafeERC20 for IERC20;
     using AddressLib for address;
     using UintLib for uint;
 
@@ -151,10 +153,25 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
         return translatorLib.getChainType(_chainId);
     }
 
+    /// Return fee amount in tokens
+    /// @param _relayAddress  Translator address
+    /// @param _dto IzInitTransferV2RequestDto  Method DTO
+    /// @return uint  Token fee amount
+    function getFeeAmountInTokens(address _relayAddress, IzInitTransferRequestDto calldata _dto) external view returns(uint) {
+        TrSendMessageRequestDto memory dto = _buildTrSendMessageRequestDto(
+            msg.sender.toUint(), _dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash, _dto.transferResultNotifyFlag
+        );
+        if (_relayAddress == address(0)) {
+            return translatorLib.getFeeAmountInTokens(dto);
+        }
+
+        return ITranslator(_relayAddress).getFeeAmountInTokens(dto);
+    }
+
     /// Initiate asterizm transfer
     /// Only clients can call this method
-    /// @param _dto IzIninTransferV2RequestDto  Method DTO
-    function initTransfer(IzIninTransferRequestDto calldata _dto) external payable {
+    /// @param _dto IzInitTransferV2RequestDto  Method DTO
+    function initTransfer(IzInitTransferRequestDto calldata _dto) external payable {
         require(!blockAddresses[localChainId][msg.sender.toUint()], "AsterizmInitializer: sender address is blocked");
         require(!blockAddresses[_dto.dstChainId][_dto.dstAddress], "AsterizmInitializer: target address is blocked");
 
@@ -163,10 +180,18 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
             msg.sender.toUint(), _dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash, _dto.transferResultNotifyFlag
         );
 
-        if (
-            _dto.relay != address(0) &&
-            _dto.relay != address(translatorLib)
-        ) { // External relays logic
+        address relayAddress = _dto.relay == address(0) ? address(translatorLib) : _dto.relay;
+
+        if (_dto.feeToken != address(0)) { // Token fee logic
+            IERC20 feeToken = IERC20(_dto.feeToken);
+            uint feeTokenAmount = feeToken.allowance(msg.sender, address(this));
+            if (feeTokenAmount > 0) {
+                feeToken.transferFrom(msg.sender, address(this), feeTokenAmount);
+                feeToken.approve(relayAddress, feeTokenAmount);
+            }
+        }
+
+        if (relayAddress != address(translatorLib)) { // External relays logic
             ConfigDataResponseDto memory configDto = getRelayData(_dto.relay);
             if (configDto.externalRelayExists) {
                 require(configDto.systemFee + configDto.externalRelayFee <= msg.value, "AsterizmInitializer: fee not enough");

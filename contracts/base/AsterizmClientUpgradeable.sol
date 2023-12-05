@@ -4,6 +4,7 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../interfaces/IInitializerSender.sol";
 import "../interfaces/IClientReceiverContract.sol";
 import "./AsterizmEnv.sol";
@@ -13,6 +14,7 @@ import "../libs/AsterizmHashLib.sol";
 
 abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable, IClientReceiverContract, AsterizmEnv {
 
+    using SafeERC20 for IERC20;
     using AddressLib for address;
     using UintLib for uint;
     using AsterizmHashLib for bytes;
@@ -24,6 +26,10 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
     /// Set external relay event
     /// @param _externalRelayAddress address  External relay address
     event SetExternalRelayEvent(address _externalRelayAddress);
+
+    /// Set fee token event
+    /// @param _feeTokenAddress address  Fee token address
+    event SetFeeTokenEvent(address _feeTokenAddress);
 
     /// Set local chain id event
     /// @param _localChainId uint64
@@ -96,6 +102,7 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
 
     IInitializerSender private initializerLib;
     address private externalRelay;
+    IERC20 private feeToken;
     mapping(uint64 => AsterizmChain) private trustedAddresses;
     mapping(bytes32 => AsterizmTransfer) private inboundTransfers;
     mapping(bytes32 => AsterizmTransfer) private outboundTransfers;
@@ -264,6 +271,19 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
         return externalRelay;
     }
 
+    /// Set external relay address (one-time initiation)
+    /// _feeToken IERC20  External relay address
+    function setFeeToken(IERC20 _feeToken) public onlyOwner {
+        feeToken = _feeToken;
+        emit SetFeeTokenEvent(address(_feeToken));
+    }
+
+    /// Return fee token
+    /// @return address  Fee token address
+    function getFeeToken() external view returns(address) {
+        return address(feeToken);
+    }
+
     /// Add sender
     /// @param _sender address  Sender address
     function addSender(address _sender) public onlyOwner {
@@ -405,9 +425,21 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
     {
         require(address(this).balance >= _dto.feeAmount, "AsterizmClient: contract balance is not enough");
         require(_dto.txId <= _getTxId(), "AsterizmClient: wrong txId param");
-        initializerLib.initTransfer{value: _dto.feeAmount} (
-            _buildIzIninTransferRequestDto(_dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash, externalRelay, notifyTransferSendingResult)
+
+        IzInitTransferRequestDto memory initDto = _buildIzInitTransferRequestDto(
+            _dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash,
+            externalRelay, notifyTransferSendingResult, address(feeToken)
         );
+
+        if (address(feeToken) != address(0)) {
+            uint feeAmountInToken = initializerLib.getFeeAmountInTokens(externalRelay, initDto);
+            if (feeAmountInToken > 0) {
+                require(feeToken.balanceOf(address(this)) >= feeAmountInToken, "AsterizmClient: fee token balance is not enough");
+                feeToken.approve(address(initializerLib), feeAmountInToken);
+            }
+        }
+
+        initializerLib.initTransfer{value: _dto.feeAmount} (initDto);
         outboundTransfers[_dto.transferHash].successExecute = true;
     }
 

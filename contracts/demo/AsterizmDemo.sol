@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "asterizmprotocol/contracts/evm/AsterizmClient.sol";
+//import "asterizmprotocol/contracts/evm/AsterizmClient.sol";
+import "../base/AsterizmClient.sol";
 
 contract AsterizmDemo is AsterizmClient {
 

@@ -38,6 +38,10 @@ export const Chains = {
                 // '0x6B175474E89094C44Da98b954EedeAC495271d0F',
                 '0x4Fabb145d64652a948d72533023f6E7A623C7C53',
             ],
+            chainlink: {
+                chainSelector: '5009297550715157269',
+                feeToken: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
+            },
         },
         {
             id: 137,
@@ -74,6 +78,10 @@ export const Chains = {
                 '0xdAb529f40E671A1D4bF91361c21bf9f0C9712ab7',
                 // '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
             ],
+            chainlink: {
+                chainSelector: '4051577828743386545',
+                feeToken: '0xb0897686c545045aFc77CF20eC7A532E3120E0F1',
+            },
         },
         {
             id: 250,
@@ -108,6 +116,10 @@ export const Chains = {
                 // '0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E',
                 // '0x04068DA6C83AFCFA0e13ba15A6696662335D5B75',
             ],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+            },
         },
         {
             id: 56,
@@ -144,6 +156,10 @@ export const Chains = {
                 // '0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3',
                 '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
             ],
+            chainlink: {
+                chainSelector: '11344663589394136015',
+                feeToken: '0x404460C6A5EdE2D891e8297795264fDe62ADBB75',
+            },
         },
         {
             id: 10,
@@ -179,6 +195,10 @@ export const Chains = {
                 '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
                 // '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
             ],
+            chainlink: {
+                chainSelector: '3734403246176062136',
+                feeToken: '0x350a791Bfc2C21F9Ed5d10980Dad2e2638ffa7f6',
+            },
         },
         {
             id: 42161,
@@ -214,6 +234,10 @@ export const Chains = {
                 '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
                 // '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
             ],
+            chainlink: {
+                chainSelector: '4949039107694359620',
+                feeToken: '0xf97f4df75117a78c1A5a0DBb814Af92458539FB4',
+            },
         },
         {
             id: 43114,
@@ -248,6 +272,10 @@ export const Chains = {
                 '0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7',
                 '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E',
             ],
+            chainlink: {
+                chainSelector: '6433500567565415381',
+                feeToken: '0x5947BB275c521040051D82396192181b413227A3',
+            },
         },
         {
             id: 42220,
@@ -283,6 +311,10 @@ export const Chains = {
                 '0xef4229c8c3250C675F21BCefa42f58EfbfF6002a',
                 '0x765DE816845861e75A25fCA122bb6898B8B1282a',
             ],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+            },
         },
         {
             id: 288,
@@ -316,6 +348,10 @@ export const Chains = {
             stableCoins: [
                 '0x5DE1677344D3Cb0D7D465c10b72A8f60699C062d',
             ],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+            },
         },
         {
             id: 1313161554,
@@ -350,10 +386,14 @@ export const Chains = {
                 '0xB12BFcA5A55806AaF64E99521918A4bf0fC40802',
                 '0x4988a896b1227218e4a686fde5eabdcabd91571f',
             ],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+            },
         },
         {
             id: 8192,
-            title: "XVM", // Venidium
+            title: "XVM", // Venidium (Torus)
             networkName: "venidiumMainnet",
             chainType: ChainTypes.EVM,
             contractAddresses: {
@@ -381,6 +421,10 @@ export const Chains = {
                 },
             },
             stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+            },
         },
         // {
         //     id: 32520,
@@ -433,10 +477,14 @@ export const Chains = {
                 },
             },
             stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+            },
         },
         {
             id: 5165,
-            title: "FSX", // Fastex
+            title: "FSX", // Fastex (Bahamut)
             networkName: "fastexMainnet",
             chainType: ChainTypes.EVM,
             contractAddresses: {
@@ -464,6 +512,10 @@ export const Chains = {
                 },
             },
             stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+            },
         },
         {
             id: 8453,
@@ -495,6 +547,10 @@ export const Chains = {
                 },
             },
             stableCoins: [],
+            chainlink: {
+                chainSelector: '15971525489660198786',
+                feeToken: '0x88Fb150BDc53A65fe94Dea0c9BA0a6dAf8C6e196',
+            },
         },
         {
             id: 324,
@@ -526,6 +582,10 @@ export const Chains = {
                 },
             },
             stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+            },
         },
         {
             id: 59144,
@@ -557,6 +617,10 @@ export const Chains = {
                 },
             },
             stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+            },
         },
         {
             id: 5000,
@@ -588,6 +652,10 @@ export const Chains = {
                 },
             },
             stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+            },
         },
         {
             id: 100,
@@ -619,6 +687,10 @@ export const Chains = {
                 },
             },
             stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+            },
         },
         {
             id: 789,
@@ -650,6 +722,10 @@ export const Chains = {
                 },
             },
             stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+            },
         },
     ],
 
@@ -687,6 +763,10 @@ export const Chains = {
             stableCoins: [
                 '0xc8e37E456c517D682ca8F343e46BF4DEFFd24D13',
             ],
+            chainlink: {
+                chainSelector: '16015286601757825753',
+                feeToken: '0x779877A7B0D9E8603169DdbD7836e478b4624789',
+            },
         },
         {
             id: 80001,
@@ -720,6 +800,10 @@ export const Chains = {
             stableCoins: [
                 '0x7f4F94A70e5E7236c7a14D04fd749FF5b7023bE8',
             ],
+            chainlink: {
+                chainSelector: '12532609583862916517',
+                feeToken: '0x326C977E6efc84E512bB9C30f76E30c160eD06FB',
+            },
         },
         {
             id: 97,
@@ -753,6 +837,10 @@ export const Chains = {
             stableCoins: [
                 '0xA514927Af6404bCc86c641FAfA65BB5b9b44F13A',
             ],
+            chainlink: {
+                chainSelector: '13264668187771770619',
+                feeToken: '0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06',
+            },
         },
         {
             id: 4002,
@@ -784,6 +872,10 @@ export const Chains = {
                 },
             },
             stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+            },
         },
         {
             id: 1442,
@@ -815,6 +907,10 @@ export const Chains = {
                 },
             },
             stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+            },
         },
         {
             id: 5611,
@@ -846,6 +942,10 @@ export const Chains = {
                 },
             },
             stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+            },
         },
         {
             id: 5611,
@@ -877,6 +977,10 @@ export const Chains = {
                 },
             },
             stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+            },
         },
         // {
         //     id: 4918,
@@ -941,6 +1045,10 @@ export const Chains = {
             stableCoins: [
                 '0:8c6dcaa30727458527e99a479dae92a92a51c24e235e5b531659e201204d79ee',
             ],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+            },
         },
         {
             id: 30001,
@@ -975,6 +1083,10 @@ export const Chains = {
                 // '0:d5756401c0e2ad938bb980e72846f22f02b15d83c2c9190f93c0c2ff44771336',
                 '0:4a2219d92ed7971c16093c04dc2f442925fcfb4f1c7f18fc4b6b18cf100b27aa',
             ],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+            },
         },
     ],
 };

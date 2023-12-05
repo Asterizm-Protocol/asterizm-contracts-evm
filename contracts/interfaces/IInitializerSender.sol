@@ -7,8 +7,8 @@ import "./IAsterizmEnv.sol";
 interface IInitializerSender is IAsterizmEnv {
 
     /// Initiate asterizm transfer
-    /// @param _dto IzIninTransferRequestDto  Method DTO
-    function initTransfer(IzIninTransferRequestDto calldata _dto) external payable;
+    /// @param _dto IzInitTransferRequestDto  Method DTO
+    function initTransfer(IzInitTransferRequestDto calldata _dto) external payable;
 
     /// Validate income transfer by hash
     /// @param _transferHash bytes32
@@ -27,4 +27,10 @@ interface IInitializerSender is IAsterizmEnv {
     /// @param _transferHash bytes32  Transfer hash
     /// @param _relay address  Relay address
     function resendTransfer(bytes32 _transferHash, address _relay) external payable;
+
+    /// Return fee amount in tokens
+    /// @param _relayAddress  Relay address
+    /// @param _dto IzInitTransferV2RequestDto  Method DTO
+    /// @return uint  Token fee amount
+    function getFeeAmountInTokens(address _relayAddress, IzInitTransferRequestDto calldata _dto) external view returns(uint);
 }
