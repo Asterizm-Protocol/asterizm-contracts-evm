@@ -35,6 +35,8 @@ import './tasks/relay/relay_deploy_task';
 import './tasks/relay/relay_updatefee_task';
 import './tasks/relay/relay_updatesystemfee_task';
 import './tasks/relay/relay_manageexternalrelay_task';
+import './tasks/chainlink/chainlink_deploy_relay_task';
+import './tasks/chainlink/chainlink_chainrelay_task';
 
 const config = {
   solidity: {

@@ -23,7 +23,7 @@ async function deployBase(hre, initializerAddress, isTestnet, gasPrice) {
         }
     }
     if (!currentChain) {
-        currentChain = chains[0];
+        throw new Error('Chain not supported!');
     }
 
 

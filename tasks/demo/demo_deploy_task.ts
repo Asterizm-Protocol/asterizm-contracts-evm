@@ -21,7 +21,7 @@ task("demo:deploy", "Deploy AsterizmDemo contract")
 
         let tx;
         const gasPrice = parseInt(taskArgs.gasPrice);
-        console.log("Deployig demo contract...");
+        console.log("Deploying demo contract...");
         const Demo = await ethers.getContractFactory("AsterizmDemo");
         const demo = await Demo.deploy(initializer.address, gasPrice > 0 ? {gasPrice: gasPrice} : {});
         tx = await demo.deployed();

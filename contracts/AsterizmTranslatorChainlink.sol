@@ -3,18 +3,18 @@ pragma solidity ^0.8.17;
 
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
+import {OwnerIsCreator} from "@chainlink/contracts-ccip/src/v0.8/shared/access/OwnerIsCreator.sol";
+import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
+import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol";
+import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
 import {IInitializerReceiver} from "./interfaces/IInitializerReceiver.sol";
 import {ITranslator} from "./interfaces/ITranslator.sol";
 import {AddressLib} from "./libs/AddressLib.sol";
 import {UintLib} from "./libs/UintLib.sol";
 import {AsterizmEnv} from "./base/AsterizmEnv.sol";
 import {AsterizmChainEnv} from "./base/AsterizmChainEnv.sol";
-import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
-import {OwnerIsCreator} from "@chainlink/contracts-ccip/src/v0.8/shared/access/OwnerIsCreator.sol";
-import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
-import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol";
-import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
-import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract AsterizmTranslatorChainlink is CCIPReceiver, Ownable, ITranslator, AsterizmEnv, AsterizmChainEnv {
 
@@ -51,8 +51,12 @@ contract AsterizmTranslatorChainlink is CCIPReceiver, Ownable, ITranslator, Aste
     /// @param _chainId uint64
     /// @param _chainType uint8
     /// @param _chainSelector uint64
+    event AddChainEvent(uint64 _chainId, uint8 _chainType, uint64 _chainSelector);
+
+    /// Add chain relay event
+    /// @param _chainId uint64
     /// @param _relayAddress address
-    event AddChainEvent(uint64 _chainId, uint8 _chainType, uint64 _chainSelector, address _relayAddress);
+    event AddChainRelayEvent(uint64 _chainId, address _relayAddress);
 
     /// Remove chain event
     /// @param _chainId uint64
@@ -122,7 +126,8 @@ contract AsterizmTranslatorChainlink is CCIPReceiver, Ownable, ITranslator, Aste
     constructor(uint64 _localChainId, uint8 _localChainType, uint64 _localChainSelector, IRouterClient _baseRouter, IERC20 _feeToken) CCIPReceiver(address(_baseRouter)) {
         __AsterizmChainEnv_init();
         addRelayer(owner());
-        addChain(_localChainId, _localChainType, _localChainSelector, address(this));
+        addChain(_localChainId, _localChainType, _localChainSelector);
+        addChainRelay(_localChainId, address(this));
         _setLocalChainId(_localChainId);
         setBaseRouter(_baseRouter);
         setFeeToken(_feeToken);
@@ -177,27 +182,41 @@ contract AsterizmTranslatorChainlink is CCIPReceiver, Ownable, ITranslator, Aste
     /// @param _chainId uint64  Chain ID
     /// @param _chainType uint8  Chain type
     /// @param _chainSelector uint64  Chain selector
-    /// @param _relayAddress address  Chain relay address
-    function addChain(uint64 _chainId, uint8 _chainType, uint64 _chainSelector, address _relayAddress) public onlyOwner {
+    function addChain(uint64 _chainId, uint8 _chainType, uint64 _chainSelector) public onlyOwner {
         require(_isChainTypeAwailable(_chainType), "TranslatorChainlink: chain type is unavailable");
         chains[_chainId].exists = true;
         chains[_chainId].chainType = _chainType;
         chains[_chainId].chainSelector = _chainSelector;
-        chains[_chainId].relayAddress = _relayAddress;
-        emit AddChainEvent(_chainId, _chainType, _chainSelector, _relayAddress);
+        emit AddChainEvent(_chainId, _chainType, _chainSelector);
     }
 
     /// Add chains list
     /// @param _chainIds uint64[]  Chain IDs
     /// @param _chainTypes uint8[]  Chain types
     /// @param _chainSelectors uint64[]  Chain selectors
-    /// @param _relayAddresses address[]  Chain relay addresses
     function addChains(
-        uint64[] calldata _chainIds, uint8[] calldata _chainTypes,
-        uint64[] calldata _chainSelectors, address[] calldata _relayAddresses
+        uint64[] calldata _chainIds, uint8[] calldata _chainTypes, uint64[] calldata _chainSelectors
     ) public onlyOwner {
         for (uint i = 0; i < _chainIds.length; i++) {
-            addChain(_chainIds[i], _chainTypes[i], _chainSelectors[i], _relayAddresses[i]);
+            addChain(_chainIds[i], _chainTypes[i], _chainSelectors[i]);
+        }
+    }
+
+    /// Add chain relay
+    /// @param _chainId uint64  Chain ID
+    /// @param _relayAddress address  Chain relay
+    function addChainRelay(uint64 _chainId, address _relayAddress) public onlyOwner {
+        require(chains[_chainId].exists, "TranslatorChainlink: chain is not exists");
+        chains[_chainId].relayAddress = _relayAddress;
+        emit AddChainRelayEvent(_chainId, _relayAddress);
+    }
+
+    /// Add chain relays list
+    /// @param _chainIds uint64[]  Chain IDs
+    /// @param _relayAddresses address[]  Chain relays
+    function addChainRelays(uint64[] calldata _chainIds, address[] calldata _relayAddresses) public onlyOwner {
+        for (uint i = 0; i < _chainIds.length; i++) {
+            addChainRelay(_chainIds[i], _relayAddresses[i]);
         }
     }
 

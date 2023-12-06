@@ -64,26 +64,18 @@ describe("Base layer test", function () {
     const chainlinkRouter2 = await ChainlinkRouter.deploy(chainlinkToken2.address, CHAINLINK_BASE_FEE);
     await chainlinkRouter2.deployed();
 
-    // const translatorChainlink1 = await upgrades.deployProxy(TransalorChainlink, [currentChainIds[0], chainTypes.EVM, chainSelectors[0], chainlinkRouter1.address, chainlinkToken1.address], {
-    //   initialize: 'initialize',
-    //   kind: 'uups',
-    // });
-    // await translatorChainlink1.deployed();
     const translatorChainlink1 = await TransalorChainlink.deploy(currentChainIds[0], chainTypes.EVM, chainSelectors[0], chainlinkRouter1.address, chainlinkToken1.address);
     await translatorChainlink1.deployed();
     await translatorChainlink1.addRelayer(owner1.address);
 
-    // const translatorChainlink2 = await upgrades.deployProxy(TransalorChainlink, [currentChainIds[1], chainTypes.EVM, chainSelectors[1], chainlinkRouter1.address, chainlinkToken1.address], {
-    //   initialize: 'initialize',
-    //   kind: 'uups',
-    // });
-    // await translatorChainlink2.deployed();
     const translatorChainlink2 = await TransalorChainlink.deploy(currentChainIds[1], chainTypes.EVM, chainSelectors[1], chainlinkRouter2.address, chainlinkToken2.address);
     await translatorChainlink2.deployed();
     await translatorChainlink2.addRelayer(owner1.address);
 
-    await translatorChainlink1.addChains(currentChainIds, [chainTypes.EVM, chainTypes.EVM], chainSelectors, [translatorChainlink1.address, translatorChainlink2.address]);
-    await translatorChainlink2.addChains(currentChainIds, [chainTypes.EVM, chainTypes.EVM], chainSelectors, [translatorChainlink1.address, translatorChainlink2.address]);
+    await translatorChainlink1.addChains(currentChainIds, [chainTypes.EVM, chainTypes.EVM], chainSelectors);
+    await translatorChainlink1.addChainRelays(currentChainIds, [translatorChainlink1.address, translatorChainlink2.address]);
+    await translatorChainlink2.addChains(currentChainIds, [chainTypes.EVM, chainTypes.EVM], chainSelectors);
+    await translatorChainlink2.addChainRelays(currentChainIds, [translatorChainlink1.address, translatorChainlink2.address]);
 
 
     // Initializer1 deployment

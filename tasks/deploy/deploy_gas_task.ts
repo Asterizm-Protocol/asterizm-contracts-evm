@@ -3,7 +3,7 @@ import { task } from 'hardhat/config';
 import { BigNumber } from "ethers";
 import { Chains } from '../base/base_chains';
 
-async function deployBase(hre, isTestnet, initializerAddress) {
+async function deployBase(hre, isTestnet) {
     const [owner] = await ethers.getSigners();
     const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
 
@@ -16,17 +16,16 @@ async function deployBase(hre, isTestnet, initializerAddress) {
         }
     }
     if (!currentChain) {
-        currentChain = chains[0];
+        throw new Error('Chain not supported!');
     }
 
     let gasLimit = BigNumber.from(0);
-    const initializer = await Initializer.attach(initializerAddress);
+    const initializer = await Initializer.attach(currentChain?.contractAddresses.initializer.address);
 
     return {initializer, owner, currentChain, gasLimit};
 }
 
 task("deploy:gas", "Deploy Asterizm gassender contracts")
-    .addPositionalParam("initializerAddress", "Initializer contract address")
     .addPositionalParam("minUsdAmount", "Min transfer amount in USD", '0')
     .addPositionalParam("maxUsdAmount", "Max transfer amount in USD", '0')
     .addPositionalParam("minUsdAmountPerChain", "Min transfer amount in USD per chain", '0')
@@ -35,7 +34,7 @@ task("deploy:gas", "Deploy Asterizm gassender contracts")
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs, hre) => {
-        let {initializer, owner, currentChain, gasLimit} = await deployBase(hre, taskArgs.isTestnet, taskArgs.initializerAddress);
+        let {initializer, owner, currentChain, gasLimit} = await deployBase(hre, taskArgs.isTestnet);
 
         let tx;
         const gasPrice = parseInt(taskArgs.gasPrice);

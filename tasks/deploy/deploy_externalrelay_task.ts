@@ -1,15 +1,12 @@
 import "@nomicfoundation/hardhat-toolbox";
-// import { upgrades } from 'hardhat';
 import { task } from 'hardhat/config';
 import { BigNumber } from "ethers";
 import { Chains } from '../base/base_chains';
 
-async function deployBase(hre, initializerAddress, relayFee, systemFee, isTestnet, gasPrice) {
+async function deployBase(hre, relayFee, systemFee, isTestnet, gasPrice) {
     const [owner] = await ethers.getSigners();
     const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
     const Translator = await ethers.getContractFactory("AsterizmTranslatorV1");
-
-    const initializer = await Initializer.attach(initializerAddress);
 
     const chains = isTestnet == 1 ? Chains.testnet : Chains.mainnet;
 
@@ -24,10 +21,10 @@ async function deployBase(hre, initializerAddress, relayFee, systemFee, isTestne
         }
     }
     if (!currentChain) {
-        currentChain = chains[0];
+        throw new Error('Chain not supported!');
     }
 
-
+    const initializer = await Initializer.attach(currentChain?.contractAddresses.initializer.address);
     let gasLimit = BigNumber.from(0);
     let tx;
     console.log("Deploying translator...");
@@ -53,13 +50,12 @@ async function deployBase(hre, initializerAddress, relayFee, systemFee, isTestne
 }
 
 task("deploy:externalRelay", "Deploy external relay contracts (internal protocol task, only with Asterizm Protocol pk)")
-    .addPositionalParam("initializerAddress", "Initializer contract address")
     .addPositionalParam("relayFee", "External relay fee", '0')
     .addPositionalParam("systemFee", "System fee", '0')
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs, hre) => {
-        let {initializer, translator, owner, gasLimit} = await deployBase(hre, taskArgs.initializerAddress, taskArgs.relayFee, taskArgs.systemFee, taskArgs.isTestnet, parseInt(taskArgs.gasPrice));
+        let {initializer, translator, owner, gasLimit} = await deployBase(hre, taskArgs.relayFee, taskArgs.systemFee, taskArgs.isTestnet, parseInt(taskArgs.gasPrice));
 
         console.log("Deployment was done\n");
         console.log("Total gas limit: %s", gasLimit);

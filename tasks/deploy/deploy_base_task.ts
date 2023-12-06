@@ -1,5 +1,4 @@
 import "@nomicfoundation/hardhat-toolbox";
-// import { upgrades } from 'hardhat';
 import { task } from 'hardhat/config';
 import { BigNumber } from "ethers";
 import { Chains } from '../base/base_chains';
@@ -22,7 +21,7 @@ async function deployBase(hre, isTestnet, gasPrice) {
         }
     }
     if (!currentChain) {
-        currentChain = chains[0];
+        throw new Error('Chain not supported!');
     }
 
 
@@ -53,7 +52,7 @@ async function deployBase(hre, isTestnet, gasPrice) {
     gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
     console.log("Initializer was deployed with address: %s", initializer.address);
 
-    console.log("Setting endpoint for translator contract...");
+    console.log("Setting initializer for translator contract...");
     tx = await translator.setInitializer(initializer.address, gasPrice > 0 ? {gasPrice: gasPrice} : {});
     gasLimit = gasLimit.add(tx.gasLimit);
     console.log("Initializer has been set: %s", initializer.address);
