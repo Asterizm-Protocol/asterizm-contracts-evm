@@ -2,7 +2,6 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/IInitializerReceiver.sol";
 import "./interfaces/ITranslator.sol";
@@ -10,8 +9,9 @@ import "./libs/AddressLib.sol";
 import "./libs/UintLib.sol";
 import "./base/AsterizmEnv.sol";
 import "./base/AsterizmChainEnv.sol";
+import "./base/AsterizmWithdrawalUpgradeable.sol";
 
-contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslator, AsterizmEnv, AsterizmChainEnv {
+contract AsterizmTranslatorV1 is UUPSUpgradeable, ITranslator, AsterizmEnv, AsterizmChainEnv, AsterizmWithdrawalUpgradeable {
 
     using AddressLib for address;
     using UintLib for uint;

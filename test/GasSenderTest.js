@@ -731,7 +731,7 @@ describe("Gas sender test", function () {
     });
     expect(await(ethers.provider.getBalance(gas_sender1.address))).to.equal(balance);
     await expect(gas_sender1.withdrawCoins(user1.address, wrongValue)).to.be.revertedWith(
-        "GasStation: coins balance not enough"
+        "AsterizmWithdrawal: coins balance not enough"
     );
     await gas_sender1.withdrawCoins(user1.address, balance);
     expect(await(ethers.provider.getBalance(gas_sender1.address))).to.equal(0);

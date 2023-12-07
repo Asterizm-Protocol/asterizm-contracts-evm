@@ -826,17 +826,57 @@ describe("Base layer test", function () {
         translatorChainlink2.address,
         {gasLimit: 30000000}
     )).to.emit(chainlinkDemo2, 'PayloadReceivedEvent')
-      .withArgs(
-          (value) => {chainlinkSrcChainId = value; return true;},
-          (value) => {chainlinkSrcAddress = value; return true;},
-          (value) => {chainlinkTsId = value; return true;},
-          (value) => {chainlinkTransferhash = value; return true;},
-      );
+        .withArgs(
+            (value) => {chainlinkSrcChainId = value; return true;},
+            (value) => {chainlinkSrcAddress = value; return true;},
+            (value) => {chainlinkTsId = value; return true;},
+            (value) => {chainlinkTransferhash = value; return true;},
+        );
     expect(chainlinkSrcChainId).to.equal(currentChainIds[0]);
     expect(chainlinkSrcAddress).to.equal(chainlinkDemo1.address);
     expect(chainlinkTsId).to.equal(decodedValue[4]);
     expect(chainlinkTransferhash).to.equal(decodedValue[6]);
     let payloadValue = ethers.utils.defaultAbiCoder.decode(['string'], payload.toString());
     expect(payloadValue[0]).to.equal(newMessage);
+  });
+
+  it("Should withdraw successfully from all base contracts", async function () {
+    let PacketValue, capturedValue, feeValue, dstChainId, dstAddress, txId, transferHash, payload;
+    const {
+      Initializer, initializer1, initializer2, Transalor, translator1, translator2,
+      externalTranslator1, externalTranslator2, translatorChainlink1, translatorChainlink2,
+      ChainlinkToken, chainlinkToken1, chainlinkToken2, ChainlinkRouter, chainlinkRouter1, chainlinkRouter2,
+      Demo, demo1, demo2, chainlinkDemo1, chainlinkDemo2, owner1, owner2, currentChainIds,
+      externalFees, systemFees, chainSelectors
+    } = await loadFixture(deployContractsFixture);
+    const provider = ethers.provider;
+      const coinAmount = 1000;
+      const tokenAmount = 1000;
+      const withdrawCoinAmount = 500;
+      const withdrawTokenAmount = 500;
+    expect(await owner1.sendTransaction({ to: translator1.address, value: coinAmount })).not.to.be.reverted;
+    expect(await owner1.sendTransaction({ to: initializer1.address, value: coinAmount })).not.to.be.reverted;
+    expect(await owner1.sendTransaction({ to: demo1.address, value: coinAmount })).not.to.be.reverted;
+    await chainlinkToken1.transfer(translator1.address, tokenAmount);
+    await chainlinkToken1.transfer(initializer1.address, tokenAmount);
+    await chainlinkToken1.transfer(demo1.address, tokenAmount);
+    expect(await provider.getBalance(translator1.address)).to.equal(coinAmount);
+    expect(await provider.getBalance(initializer1.address)).to.equal(coinAmount);
+    expect(await provider.getBalance(demo1.address)).to.equal(coinAmount);
+    expect(await chainlinkToken1.balanceOf(translator1.address)).to.equal(tokenAmount);
+    expect(await chainlinkToken1.balanceOf(initializer1.address)).to.equal(tokenAmount);
+    expect(await chainlinkToken1.balanceOf(demo1.address)).to.equal(tokenAmount);
+    expect(await translator1.withdrawCoins(owner1.address, withdrawCoinAmount)).not.to.be.reverted;
+    expect(await provider.getBalance(translator1.address)).to.equal(coinAmount - withdrawCoinAmount);
+    expect(await initializer1.withdrawCoins(owner1.address, withdrawCoinAmount)).not.to.be.reverted;
+    expect(await provider.getBalance(initializer1.address)).to.equal(coinAmount - withdrawCoinAmount);
+    expect(await demo1.withdrawCoins(owner1.address, withdrawCoinAmount)).not.to.be.reverted;
+    expect(await provider.getBalance(demo1.address)).to.equal(coinAmount - withdrawCoinAmount);
+    expect(await translator1.withdrawTokens(chainlinkToken1.address, owner1.address, withdrawTokenAmount)).not.to.be.reverted;
+    expect(await chainlinkToken1.balanceOf(translator1.address)).to.equal(tokenAmount - withdrawTokenAmount);
+    expect(await initializer1.withdrawTokens(chainlinkToken1.address, owner1.address, withdrawTokenAmount)).not.to.be.reverted;
+    expect(await chainlinkToken1.balanceOf(initializer1.address)).to.equal(tokenAmount - withdrawTokenAmount);
+    expect(await demo1.withdrawTokens(chainlinkToken1.address, owner1.address, withdrawTokenAmount)).not.to.be.reverted;
+    expect(await chainlinkToken1.balanceOf(demo1.address)).to.equal(tokenAmount - withdrawTokenAmount);
   });
 });

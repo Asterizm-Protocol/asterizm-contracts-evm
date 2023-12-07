@@ -19,7 +19,6 @@ contract GasStationUpgradeableV1 is AsterizmClientUpgradeable {
     event SetMaxUsdAmountEvent(uint _amount);
     event SetMinUsdAmountPerChainEvent(uint _amount);
     event SetMaxUsdAmountPerChainEvent(uint _amount);
-    event WithdrawCoinsEvent(address _target, uint _amount);
 
     struct StableCoin {
         bool exists;
@@ -38,18 +37,6 @@ contract GasStationUpgradeableV1 is AsterizmClientUpgradeable {
         __AsterizmClientUpgradeable_init(_initializerLib, false, true);
     }
 
-    receive() external payable {}
-    fallback() external payable {}
-
-    /// Withdraw coins
-    /// @param _target address  Target address
-    /// @param _amount uint  Amount
-    function withdrawCoins(address _target, uint _amount) external onlyOwner {
-        require(address(this).balance >= _amount, "GasStation: coins balance not enough");
-        (bool success, ) = _target.call{value: _amount}("");
-        require(success, "GasStation: transfer error");
-        emit WithdrawCoinsEvent(_target, _amount);
-    }
 
     /// Add stable coin
     /// @param _tokenAddress address  Token address

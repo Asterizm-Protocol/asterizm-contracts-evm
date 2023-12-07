@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/INonce.sol";
 import "./interfaces/ITranslator.sol";
 import "./interfaces/IConfig.sol";
@@ -15,10 +13,10 @@ import "./libs/AddressLib.sol";
 import "./libs/UintLib.sol";
 import "./base/AsterizmEnv.sol";
 import "./base/AsterizmConfig.sol";
+import "./base/AsterizmWithdrawalUpgradeable.sol";
 
-contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, IInitializerSender, IInitializerReceiver, AsterizmEnv, AsterizmConfig {
+contract AsterizmInitializerV1 is UUPSUpgradeable, IInitializerSender, IInitializerReceiver, AsterizmEnv, AsterizmConfig, AsterizmWithdrawalUpgradeable {
 
-    using SafeERC20 for IERC20;
     using AddressLib for address;
     using UintLib for uint;
 

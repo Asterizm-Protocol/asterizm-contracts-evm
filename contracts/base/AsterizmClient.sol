@@ -2,18 +2,16 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../interfaces/IInitializerSender.sol";
 import "../interfaces/IClientReceiverContract.sol";
 import "./AsterizmEnv.sol";
+import "./AsterizmWithdrawal.sol";
 import "../libs/AddressLib.sol";
 import "../libs/UintLib.sol";
 import "../libs/AsterizmHashLib.sol";
 
-abstract contract AsterizmClient is Ownable, ReentrancyGuard, IClientReceiverContract, AsterizmEnv {
+abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, AsterizmWithdrawal {
 
-    using SafeERC20 for IERC20;
     using AddressLib for address;
     using UintLib for uint;
     using AsterizmHashLib for bytes;

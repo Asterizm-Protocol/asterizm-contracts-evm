@@ -2,7 +2,6 @@
 pragma solidity ^0.8.17;
 
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
 import {OwnerIsCreator} from "@chainlink/contracts-ccip/src/v0.8/shared/access/OwnerIsCreator.sol";
@@ -15,8 +14,9 @@ import {AddressLib} from "./libs/AddressLib.sol";
 import {UintLib} from "./libs/UintLib.sol";
 import {AsterizmEnv} from "./base/AsterizmEnv.sol";
 import {AsterizmChainEnv} from "./base/AsterizmChainEnv.sol";
+import {AsterizmWithdrawal} from "./base/AsterizmWithdrawal.sol";
 
-contract AsterizmTranslatorChainlink is CCIPReceiver, Ownable, ITranslator, AsterizmEnv, AsterizmChainEnv {
+contract AsterizmTranslatorChainlink is CCIPReceiver, ITranslator, AsterizmEnv, AsterizmChainEnv, AsterizmWithdrawal {
 
     using SafeERC20 for IERC20;
     using AddressLib for address;
