@@ -3,7 +3,7 @@ import { task } from 'hardhat/config';
 import { BigNumber } from "ethers";
 import { Chains } from '../base/base_chains';
 
-async function deployBase(hre, systemFee, isTestnet, gasPrice) {
+async function deployBase(hre, isTestnet, gasPrice) {
     const [owner] = await ethers.getSigners();
     const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
     const TranslatorChainlink = await ethers.getContractFactory("AsterizmTranslatorChainlink");
@@ -48,24 +48,30 @@ async function deployBase(hre, systemFee, isTestnet, gasPrice) {
 
     const initializer = await Initializer.attach(currentChain?.contractAddresses.initializer.address);
 
-    console.log("Setting initializer for translator contract...");
-    tx = await translatorChainlink.setInitializer(initializer.address, gasPrice > 0 ? {gasPrice: gasPrice} : {});
-    gasLimit = gasLimit.add(tx.gasLimit);
-    console.log("Initializer has been set. Tx: %s", tx.hash);
-
-    tx = await initializer.manageTrustedRelay(translatorChainlink.address, 0, systemFee); // mb we should set relayFee
-    gasLimit = gasLimit.add(tx.gasLimit);
-    console.log("Trusted relay set successfully");
-
     return {initializer, translatorChainlink, owner, gasLimit};
 }
 
 task("chainlink:deploy", "Deploy Chainlink translator")
     .addPositionalParam("systemFee", "System Chainlink relay system fee")
+    .addPositionalParam("baseGasLimit", "Chainlink relay base gas limit", '200000')
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs, hre) => {
-        let {initializer, translatorChainlink, owner, gasLimit} = await deployBase(hre, taskArgs.systemFee, taskArgs.isTestnet, parseInt(taskArgs.gasPrice));
+        const gasPrice = parseInt(taskArgs.gasPrice);
+        let {initializer, translatorChainlink, owner, gasLimit} = await deployBase(hre, taskArgs.isTestnet, gasPrice);
+
+        let tx;
+        console.log("Setting initializer for translator contract...");
+        tx = await translatorChainlink.setInitializer(initializer.address, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+        gasLimit = gasLimit.add(tx.gasLimit);
+        console.log("Initializer has been set. Tx: %s", tx.hash);
+
+        tx = await initializer.manageTrustedRelay(translatorChainlink.address, 0, taskArgs.systemFee); // mb we should set relayFee
+        gasLimit = gasLimit.add(tx.gasLimit);
+        console.log("Trusted relay set successfully");
+
+        tx = await translatorChainlink.setBaseGasLimit(taskArgs.baseGasLimit, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+        gasLimit = gasLimit.add(tx.gasLimit);
 
         console.log("Deployment was done\n");
         console.log("Total gas limit: %s", gasLimit);

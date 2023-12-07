@@ -39,6 +39,10 @@ contract AsterizmTranslatorChainlink is CCIPReceiver, Ownable, ITranslator, Aste
     /// @param _feeTokenAddress address
     event SetFeeTokenEvent(address _feeTokenAddress);
 
+    /// Set base gas limit event
+    /// @param _baseGasLimitAmount uint
+    event SetBaseGasLimitEvent(uint _baseGasLimitAmount);
+
     /// Add relayer event
     /// @param _relayerAddress address
     event AddRelayerEvent(address _relayerAddress);
@@ -116,6 +120,7 @@ contract AsterizmTranslatorChainlink is CCIPReceiver, Ownable, ITranslator, Aste
     mapping(address => Relayer) private relayers;
     mapping(uint64 => Chain) public chains;
     uint64 public localChainId;
+    uint public baseGasLimit;
 
     /// Constructor
     /// @param _localChainId uint64  Local chain ID
@@ -284,17 +289,31 @@ contract AsterizmTranslatorChainlink is CCIPReceiver, Ownable, ITranslator, Aste
         emit SetFeeTokenEvent(address(_feeToken));
     }
 
+    /// Return base gas limit
+    /// @return uint
+    function getBaseGasLimit() external view returns(uint) {
+        return baseGasLimit;
+    }
+
+    /// Set base gas limit
+    /// @param _baseGasLimit uint  Base gas limit
+    function setBaseGasLimit(uint _baseGasLimit) public onlyOwner {
+        baseGasLimit = _baseGasLimit;
+        emit SetBaseGasLimitEvent(_baseGasLimit);
+    }
+
     /// Return fee amount in tokens private
     /// @param _message Client.EVM2AnyMessage  Method DTO
+    /// @param _dstChainId uint64  Method DTO
     /// @return uint  Token fee amount
-    function getFeeAmountInTokenPrivate(Client.EVM2AnyMessage memory _message) private view returns(uint) {
-        return baseRouter.getFee(chains[localChainId].chainSelector, _message);
+    function getFeeAmountInTokenPrivate(Client.EVM2AnyMessage memory _message, uint64 _dstChainId) private view returns(uint) {
+        return baseRouter.getFee(chains[_dstChainId].chainSelector, _message);
     }
 
     /// Build base router message
     /// @param _dto TrSendMessageRequestDto  Method DTO
     /// @return Client.EVM2AnyMessage  Base router message
-    function buildBaseRouterMessage(TrSendMessageRequestDto calldata _dto) private view returns(Client.EVM2AnyMessage memory) {
+    function buildBaseRouterMessage(TrSendMessageRequestDto memory _dto, uint _gasLimitValue) private view returns(Client.EVM2AnyMessage memory) {
         return Client.EVM2AnyMessage({
             receiver: abi.encode(chains[_dto.dstChainId].relayAddress),
             data: abi.encode(
@@ -303,7 +322,7 @@ contract AsterizmTranslatorChainlink is CCIPReceiver, Ownable, ITranslator, Aste
             ),
             tokenAmounts: new Client.EVMTokenAmount[](0),
             extraArgs: Client._argsToBytes(
-                Client.EVMExtraArgsV1({gasLimit: 200_000, strict: false})
+                Client.EVMExtraArgsV1({gasLimit: _gasLimitValue, strict: false})
             ),
             feeToken: address(feeToken)
         });
@@ -312,8 +331,8 @@ contract AsterizmTranslatorChainlink is CCIPReceiver, Ownable, ITranslator, Aste
     /// Return fee amount in tokens
     /// @param _dto TrSendMessageRequestDto  Method DTO
     /// @return uint  Token fee amount
-    function getFeeAmountInTokens(TrSendMessageRequestDto calldata _dto) external view returns(uint) {
-        return getFeeAmountInTokenPrivate(buildBaseRouterMessage(_dto));
+    function getFeeAmountInTokens(TrSendMessageRequestDto memory _dto) external view returns(uint) {
+        return getFeeAmountInTokenPrivate(buildBaseRouterMessage(_dto, baseGasLimit), _dto.dstChainId);
     }
 
     /// Send transfer payload
@@ -336,8 +355,8 @@ contract AsterizmTranslatorChainlink is CCIPReceiver, Ownable, ITranslator, Aste
             return;
         }
 
-        Client.EVM2AnyMessage memory chainlinkMessage = buildBaseRouterMessage(_dto);
-        uint chainlinkFee = getFeeAmountInTokenPrivate(chainlinkMessage);
+        Client.EVM2AnyMessage memory chainlinkMessage = buildBaseRouterMessage(_dto, baseGasLimit);
+        uint chainlinkFee = getFeeAmountInTokenPrivate(chainlinkMessage, _dto.dstChainId);
         uint feeTokenAllowance = feeToken.allowance(address(initializerLib), address(this));
         require(feeTokenAllowance >= chainlinkFee, "TranslatorChainlink: fee token allowance is not enough");
         if (chainlinkFee > 0) {

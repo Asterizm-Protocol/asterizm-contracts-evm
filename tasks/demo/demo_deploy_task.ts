@@ -15,6 +15,7 @@ async function deployBase(hre, initializerAddress) {
 task("demo:deploy", "Deploy AsterizmDemo contract")
     .addPositionalParam("initializerAddress", "Initializer contract address")
     .addPositionalParam("relayAddress", "Config contract address", '0')
+    .addPositionalParam("feeTokenAddress", "Chainlink fee token address", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs, hre) => {
         let {initializer, owner, gasLimit} = await deployBase(hre, taskArgs.initializerAddress);
@@ -28,6 +29,11 @@ task("demo:deploy", "Deploy AsterizmDemo contract")
         gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
         if (taskArgs.relayAddress != '0') {
             tx = await demo.setExternalRelay(taskArgs.relayAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+            gasLimit = gasLimit.add(tx.gasLimit);
+            console.log("Set external relay successfully. Address: %s", taskArgs.relayAddress);
+        }
+        if (taskArgs.feeTokenAddress != '0') {
+            tx = await demo.setFeeToken(taskArgs.feeTokenAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
             gasLimit = gasLimit.add(tx.gasLimit);
             console.log("Set external relay successfully. Address: %s", taskArgs.relayAddress);
         }
