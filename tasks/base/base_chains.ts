@@ -805,7 +805,7 @@ export const Chains = {
                 chainSelector: '16015286601757825753',
                 feeToken: '0x779877A7B0D9E8603169DdbD7836e478b4624789',
                 baseRouter: '0xd0daae2231e9cb96b94c8512223533293c3693bf',
-                asterizmRouter: '0x0000000000000000000000000000000000000000',
+                asterizmRouter: '0x1eA7D9e47aeDE996A67B86C82f78E3FE7BCC472c',
             },
         },
         {
@@ -844,7 +844,7 @@ export const Chains = {
                 chainSelector: '12532609583862916517',
                 feeToken: '0x326C977E6efc84E512bB9C30f76E30c160eD06FB',
                 baseRouter: '0x70499c328e1e2a3c41108bd3730f6670a44595d1',
-                asterizmRouter: '0x0000000000000000000000000000000000000000',
+                asterizmRouter: '0xdAC5b01fa72e8f5520E4630637e045e415b78CA1',
             },
         },
         {
@@ -883,7 +883,7 @@ export const Chains = {
                 chainSelector: '13264668187771770619',
                 feeToken: '0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06',
                 baseRouter: '0x9527e2d01a3064ef6b50c1da1c0cc523803bcff2',
-                asterizmRouter: '0x0000000000000000000000000000000000000000',
+                asterizmRouter: '0xFb2458C4C033781a0003fDFF15Fb84907d5ba47e',
             },
         },
         {

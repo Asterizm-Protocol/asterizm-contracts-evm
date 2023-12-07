@@ -102,7 +102,6 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
 
     IInitializerSender private initializerLib;
     address private externalRelay;
-    IERC20 private feeToken;
     mapping(uint64 => AsterizmChain) private trustedAddresses;
     mapping(bytes32 => AsterizmTransfer) private inboundTransfers;
     mapping(bytes32 => AsterizmTransfer) private outboundTransfers;
@@ -111,6 +110,7 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, OwnableUpgradeab
     bool private disableHashValidation;
     uint private txId;
     uint64 private localChainId;
+    IERC20 private feeToken;
 
     /// Initializing function for upgradeable contracts (constructor)
     /// @param _initializerLib IInitializerSender  Initializer library address

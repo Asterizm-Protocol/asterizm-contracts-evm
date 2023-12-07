@@ -70,6 +70,6 @@ task("chainlink:deploy", "Deploy Chainlink translator")
         console.log("Deployment was done\n");
         console.log("Total gas limit: %s", gasLimit);
         console.log("Owner address: %s", owner.address);
-        console.log("Initializer address: %s\n", initializer.address);
-        console.log("Chainlink translator address: %s", translatorChainlink.address);
+        console.log("Initializer address: %s", initializer.address);
+        console.log("Chainlink translator address: %s\n", translatorChainlink.address);
     });
