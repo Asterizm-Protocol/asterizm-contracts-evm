@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "../interfaces/IInitializerSender.sol";
 import "../interfaces/IClientReceiverContract.sol";
@@ -11,7 +10,7 @@ import "../libs/AddressLib.sol";
 import "../libs/UintLib.sol";
 import "../libs/AsterizmHashLib.sol";
 
-abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, ReentrancyGuardUpgradeable, IClientReceiverContract, AsterizmEnv, AsterizmWithdrawalUpgradeable {
+abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, IClientReceiverContract, AsterizmEnv, AsterizmWithdrawalUpgradeable {
 
     using AddressLib for address;
     using UintLib for uint;

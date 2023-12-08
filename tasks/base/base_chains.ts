@@ -797,6 +797,10 @@ export const Chains = {
                     address: '0x131CCD21B56AAAd4205B9ab353181C59b33A2A5a',
                     uint: '109113115000290043170016387629041891766657755738',
                 },
+                demo: {
+                    address: '0x1d01A1746056CDCd1D65260000237468762E23Be',
+                    uint: '165597097777936052324499905607670083562245071806',
+                },
             },
             stableCoins: [
                 '0xc8e37E456c517D682ca8F343e46BF4DEFFd24D13',
@@ -835,6 +839,10 @@ export const Chains = {
                 checker: {
                     address: '0x9eB89ecD85473eC3B6DB3F226Ae7827D3Ea8E747',
                     uint: '906137712582915965930062706651069662864425412423',
+                },
+                demo: {
+                    address: '0xe7A74ABb5c7537100fEB4870F958Fac3af7dC5eE',
+                    uint: '1322507602573320699786003569561590698947261613550',
                 },
             },
             stableCoins: [
