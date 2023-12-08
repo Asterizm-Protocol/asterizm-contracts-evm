@@ -241,7 +241,8 @@ const config = {
       optimisticEthereum: process.env.OPTIMISMSCAN_API_KEY,
       arbitrumOne: process.env.ARBIRTUMSCAN_API_KEY,
       opera: process.env.FANTOMSCAN_API_KEY,
-      moonbeam: process.env.MOONSCAN_API_KEY
+      moonbeam: process.env.MOONSCAN_API_KEY,
+      ethereumSepolia: process.env.ETHERSCAN_API_KEY,
     },
     customChains: [
       {
@@ -250,6 +251,14 @@ const config = {
         urls: {
           apiURL: "https://api.avascan.info/v2/network/mainnet/evm/43114/etherscan",
           browserURL: "https://avascan.info/blockchain/c"
+        }
+      },
+      {
+        network: "ethereumSepolia",
+        chainId: 11155111,
+        urls: {
+          apiURL: "https://sepolia.etherscan.io/api",
+          browserURL: "https://sepolia.etherscan.io/"
         }
       },
     ],
