@@ -28,8 +28,8 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
-                    address: '0xd3ed349b3bbeD545064f80dDA916275Bdf21be87',
-                    uint: '1209886911917932535352398253503116688823593057927',
+                    address: '0x4C9BFC8BA437e3fB7B746859827e162BBfDb51Ea',
+                    uint: '437361913901971447688660164742358754819898561002',
                 },
             },
             stableCoins: [
@@ -70,8 +70,8 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
-                    address: '0xFF93e83a0B1725B3cA7C4d8Abed90E43f5396487',
-                    uint: '1459091085905718225547953382814662180900133495943',
+                    address: '0xAC398e29d353f0680a9A6B4e16ffAaa7a00d227e',
+                    uint: '983229939235098941171860054683297091967400092286',
                 },
             },
             stableCoins: [
@@ -112,8 +112,8 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
-                    address: '0x83A133d715835F0c3836FafdbAE133bc6D081949',
-                    uint: '751472726870773722371676941724394417188403419465',
+                    address: '0x59E8070De88cc1E4085293eFD08aAd4fBa2eF6E0',
+                    uint: '513274566008164863673458270168230392643082712800',
                 },
             },
             stableCoins: [
@@ -152,8 +152,8 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
-                    address: '0x46C0e212C78decdAEf598aaf4F0C3e233b3fe650',
-                    uint: '403930790802743117744862134669261699953618576976',
+                    address: '0x398a579193f5cc814DC9FE87A2a470683DC059Ee',
+                    uint: '328497605080848121519146905820503632519326882286',
                 },
             },
             stableCoins: [
@@ -194,8 +194,8 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
-                    address: '0x27046396bB1d9531f0812A3fb556A3c414aae955',
-                    uint: '222748518450305384199166528213995787368285268309',
+                    address: '0xDd03057d1c234eCF4d32A4d1f896657ca5E90d98',
+                    uint: '1261754340721791363367587229269420822021374807448',
                 },
             },
             stableCoins: [
@@ -235,8 +235,8 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
-                    address: '0x1123a041fBD50710cE099A915778f1F47a52673D',
-                    uint: '97847329604799104703545931460126109337520334653',
+                    address: '0x7ab494c6986bf5D001cDc0503089459Be7b3747A',
+                    uint: '700523968373073701777778808306040484793228162170',
                 },
             },
             stableCoins: [
@@ -276,8 +276,8 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
-                    address: '0x3487e27b663BFB273B7B90BF0E087342792572b1',
-                    uint: '299897850051885693553236772100908794596724929201',
+                    address: '0x58352Ef44fDFD0290575C7FB402B58F3c0e8BD26',
+                    uint: '503577217628241506697052540985991439591500463398',
                 },
             },
             stableCoins: [
@@ -316,8 +316,8 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
-                    address: '0x1C4d33D17248a74ea681284641B03AdeC9797188',
-                    uint: '161573412960860801196170176843110610065440731528',
+                    address: '0x8851e1575A3269AD83Bd537CC80FeDb9BE7e533D',
+                    uint: '778248735181916001811134858112216580824953148221',
                 },
             },
             stableCoins: [
@@ -396,8 +396,8 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
-                    address: '0xa602619820CF6946B91297214dC8E06d3fCBEF51',
-                    uint: '947745571105421811566647101951516272540892524369',
+                    address: '0x180Ca0EEf9Ce8c53A67b3d3f3fBb56208B6e4700',
+                    uint: '137297406727157155150219371293073471982218921728',
                 },
             },
             stableCoins: [
@@ -436,8 +436,8 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
-                    address: '0xd473EDbdCaa43344BD1268304Aee55e2D7cbB2D2',
-                    uint: '1212891339306974807716800428937268510047624475346',
+                    address: '0xA252037CB23BB9CF53aBD06ADa08fC8265E2A188',
+                    uint: '926685469748525504936754509004107247204681556360',
                 },
             },
             stableCoins: [],
@@ -494,8 +494,8 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
-                    address: '0x0efB33411B441f3bB1016386BF655D6c112f048d',
-                    uint: '85527822717544174937881506568487237286011798669',
+                    address: '0xEc28269d5B9C936fC812688c0D1Cd4D7bE1142f3',
+                    uint: '1348217215535337102418210529111040129153962689267',
                 },
             },
             stableCoins: [],
@@ -531,8 +531,8 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
-                    address: '0xd473EDbdCaa43344BD1268304Aee55e2D7cbB2D2',
-                    uint: '1212891339306974807716800428937268510047624475346',
+                    address: '0x2e7763513E51A4365e5Ef159D505705D974c17EE',
+                    uint: '265276015898536769535909174652399582360478947310',
                 },
             },
             stableCoins: [],
@@ -568,8 +568,8 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
-                    address: '0x582ADEa3c5282e6d7D77E0116E379c332738d1ac',
-                    uint: '503347213786405371901698105080098677544820724140',
+                    address: '0x73c40DAFBE3F0088a8330a3aC82BADD2d874bF91',
+                    uint: '660906076965665316198297056036513466477213695889',
                 },
             },
             stableCoins: [],
@@ -642,8 +642,8 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
-                    address: '0xd473EDbdCaa43344BD1268304Aee55e2D7cbB2D2',
-                    uint: '1212891339306974807716800428937268510047624475346',
+                    address: '0x1199cb4f02257fdafDF86FaF881FFeA741637e6f',
+                    uint: '100482567798584755528521049825039929363013009007',
                 },
             },
             stableCoins: [],
@@ -679,8 +679,8 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
-                    address: '0xA23C4235d26e94B016A796525D3cd56654044099',
-                    uint: '926200317310922830817339070044806267472496050329',
+                    address: '0x3e23e7505506c49B37160F629900Ab5c26da46D2',
+                    uint: '354758104146685733677026025917250033014409938642',
                 },
             },
             stableCoins: [],
@@ -716,8 +716,8 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
-                    address: '0xA23C4235d26e94B016A796525D3cd56654044099',
-                    uint: '926200317310922830817339070044806267472496050329',
+                    address: '0x3C11820C18cdBD8044B0EeD85349Ce9588ebCC60',
+                    uint: '342929887631334660223436754676854769928041647200',
                 },
             },
             stableCoins: [],

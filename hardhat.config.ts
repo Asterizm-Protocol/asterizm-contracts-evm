@@ -243,6 +243,13 @@ const config = {
       opera: process.env.FANTOMSCAN_API_KEY,
       moonbeam: process.env.MOONSCAN_API_KEY,
       ethereumSepolia: process.env.ETHERSCAN_API_KEY,
+      celo: process.env.CELOSCAN_API_KEY,
+      polygonZkMainnet: process.env.POLYGONZKSCAN_API_KEY,
+      fastexMainnet: process.env.FASTEXSCAN_API_KEY,
+      baseMainnet: process.env.BASESCAN_API_KEY,
+      lineaMainnet: process.env.LINEASCAN_API_KEY,
+      mantleMainnet: process.env.MANTLESCAN_API_KEY,
+      gnosisMainnet: process.env.GNOSISSCAN_API_KEY,
     },
     customChains: [
       {
@@ -259,6 +266,62 @@ const config = {
         urls: {
           apiURL: "https://sepolia.etherscan.io/api",
           browserURL: "https://sepolia.etherscan.io/"
+        }
+      },
+      {
+        network: "celo",
+        chainId: 42220,
+        urls: {
+          apiURL: "https://api.celoscan.io/api",
+          browserURL: "https://celoscan.io/"
+        }
+      },
+      {
+        network: "polygonZkMainnet",
+        chainId: 1101,
+        urls: {
+          apiURL: "https://api-zkevm.polygonscan.com/api",
+          browserURL: "https://zkevm.polygonscan.com/"
+        }
+      },
+      {
+        network: "fastexMainnet",
+        chainId: 5165,
+        urls: {
+          apiURL: "https://www.ftnscan.com/api",
+          browserURL: "https://www.ftnscan.com/"
+        }
+      },
+      {
+        network: "baseMainnet",
+        chainId: 8453,
+        urls: {
+          apiURL: "https://api.basescan.org/api",
+          browserURL: "https://basescan.org/"
+        }
+      },
+      {
+        network: "lineaMainnet",
+        chainId: 59144,
+        urls: {
+          apiURL: "https://api.lineascan.build/api",
+          browserURL: "https://lineascan.build/"
+        }
+      },
+      {
+        network: "mantleMainnet",
+        chainId: 5000,
+        urls: {
+          apiURL: "https://explorer.mantle.xyz/api",
+          browserURL: "https://explorer.mantle.xyz/"
+        }
+      },
+      {
+        network: "gnosisMainnet",
+        chainId: 100,
+        urls: {
+          apiURL: "https://api.gnosisscan.io/api",
+          browserURL: "https://gnosisscan.io/"
         }
       },
     ],
