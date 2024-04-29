@@ -765,6 +765,44 @@ export const Chains = {
                 asterizmRouter: '0x0000000000000000000000000000000000000000',
             },
         },
+        {
+            id: 1,
+            title: "VNM", // Venom
+            networkName: "venom",
+            chainType: ChainTypes.TVM,
+            giverId: process.env.MAINNET_VENOM_GIVER_ID || '0',
+            contractAddresses: {
+                translator: {
+                    address: '0:d19920b4e82f9719bdef9ec9f6ac9367c56c79a18f039e872b6a729581084e24',
+                    uint: '94803938687939294512490590504432464859765011389351923733771084920776741637668',
+                },
+                initializer: {
+                    address: '0:9ad0a923e48963230aa40188743e9b5d0b7ce8682c79065b76bdcb89c581ab46',
+                    uint: '70024850234095389043942856028574521398675775440245331637751724674411042810694',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+            },
+            stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+                baseRouter: '0x0000000000000000000000000000000000000000',
+                asterizmRouter: '0x0000000000000000000000000000000000000000',
+            },
+        },
     ],
 
     // TESTNET CHAINS
