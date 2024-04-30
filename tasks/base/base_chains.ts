@@ -766,7 +766,7 @@ export const Chains = {
             },
         },
         {
-            id: 1,
+            id: 1000,
             title: "VNM", // Venom
             networkName: "venom",
             chainType: ChainTypes.TVM,
@@ -779,6 +779,44 @@ export const Chains = {
                 initializer: {
                     address: '0:9ad0a923e48963230aa40188743e9b5d0b7ce8682c79065b76bdcb89c581ab46',
                     uint: '70024850234095389043942856028574521398675775440245331637751724674411042810694',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+            },
+            stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+                baseRouter: '0x0000000000000000000000000000000000000000',
+                asterizmRouter: '0x0000000000000000000000000000000000000000',
+            },
+        },
+        {
+            id: 2000,
+            title: "EVER", // Everscale
+            networkName: "main",
+            chainType: ChainTypes.TVM,
+            giverId: process.env.MAINNET_EVER_GIVER_ID || '0',
+            contractAddresses: {
+                translator: {
+                    address: '0:cfc2b08eb78371e3faa4e0e9c84c7b0da4a4a8c32e8e5b87e6dab1881b597f15',
+                    uint: '93972746542298833492479804489318718361231249092571931605279958937118703189781',
+                },
+                initializer: {
+                    address: '0:62686a6a7b90eff9265e42eff7c0454b5060b668365e52b26276f20470d11e67',
+                    uint: '44511145711777200210019510093255476547013536417057352300291724495480266235495',
                 },
             },
             trustAddresses: {
