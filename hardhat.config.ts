@@ -231,6 +231,11 @@ const config = {
       accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
       chainId: 1990991
     },
+    areonMainnet: {
+      url: process.env.NETWORK_HOST_AREON,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 463
+    },
   },
   etherscan: {
     apiKey: {
