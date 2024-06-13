@@ -236,6 +236,11 @@ const config = {
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 463
     },
+    xdcMainnet: {
+      url: process.env.NETWORK_HOST_XDC,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 50
+    },
   },
   etherscan: {
     apiKey: {
@@ -255,6 +260,7 @@ const config = {
       lineaMainnet: process.env.LINEASCAN_API_KEY,
       mantleMainnet: process.env.MANTLESCAN_API_KEY,
       gnosisMainnet: process.env.GNOSISSCAN_API_KEY,
+      xdcMainnet: process.env.GNOSISSCAN_API_KEY,
     },
     customChains: [
       {
