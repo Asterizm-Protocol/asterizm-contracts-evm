@@ -1302,5 +1302,42 @@ export const Chains = {
                 asterizmRouter: '0x0000000000000000000000000000000000000000',
             },
         },
+        {
+            id: 51,
+            title: "XDC", // XDC testnet
+            networkName: "xdcTestnet",
+            chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x83d13986BD486673246C3e4d90B2f94015A57a52',
+                    uint: '752543657974151170156389962503478499403417090642',
+                },
+                initializer: {
+                    address: '0x368249858eCBf9B7af5e5B18731f5d1769071BBB',
+                    uint: '311191003144533610836569876219409758032482474939',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0xcc11A3F6e5804D9366d4bab1bA0957c778bD4074',
+                    uint: '1165027513233566821464575078488279740472125898868',
+                },
+            },
+            stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+                baseRouter: '0x0000000000000000000000000000000000000000',
+                asterizmRouter: '0x0000000000000000000000000000000000000000',
+            },
+        },
     ],
 };

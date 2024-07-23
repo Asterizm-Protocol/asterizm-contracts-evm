@@ -241,6 +241,11 @@ const config = {
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 50
     },
+    xdcTestnet: {
+      url: process.env.NETWORK_HOST_XDC_TESTNET,
+      accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
+      chainId: 51
+    },
   },
   etherscan: {
     apiKey: {
