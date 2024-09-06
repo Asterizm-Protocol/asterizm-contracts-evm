@@ -493,7 +493,6 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, IClientReceiverC
     /// Receive non-encoded payload for internal usage
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function _asterizmReceiveInternal(ClAsterizmReceiveRequestDto memory _dto) private
-        onlyOwnerOrInitializer
         onlyReceivedTransfer(_dto.transferHash)
         onlyTrustedAddress(_dto.srcChainId, _dto.srcAddress)
         onlyTrustedTransfer(_dto.transferHash)
