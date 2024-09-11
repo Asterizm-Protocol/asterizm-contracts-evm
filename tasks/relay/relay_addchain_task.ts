@@ -14,6 +14,9 @@ async function deployBase(hre, isTestnet) {
             break;
         }
     }
+    if (!currentChain) {
+        throw new Error('Chain not supported!');
+    }
 
     let gasLimit = BigNumber.from(0);
     const translatorContract = await TranslatorContract.attach(currentChain?.contractAddresses.translator.address);

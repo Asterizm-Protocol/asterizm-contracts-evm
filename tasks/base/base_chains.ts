@@ -940,8 +940,8 @@ export const Chains = {
                     uint: '701747189344486605282819314024598581164781094542',
                 },
                 multichain: {
-                    address: '0xd31eb9A1629248999B7b062a98518B5c147E6299',
-                    uint: '1205282245689168399655948744287384771744229122713',
+                    address: '0x9bc77613eDd5cC8A620F015783c0C89D6c539Ea1',
+                    uint: '889341703803444782275524239678040252755588914849',
                 },
                 checker: {
                     address: '0x131CCD21B56AAAd4205B9ab353181C59b33A2A5a',
@@ -1360,8 +1360,8 @@ export const Chains = {
                     uint: '0',
                 },
                 multichain: {
-                    address: 'EQAbTYXB12ZlKyb17GiHYsGhIswFgj9KucyxakV28yJ0gNZZ',
-                    uint: '12349417293954223631079518177396259105410478207869757726192451313177869841536',
+                    address: 'EQC3Z-KVt6_jiREi_Kjgw_Vja0OLb-r-eaF60SyzLMahuc1g',
+                    uint: '82956800369460856566174632957770929749457176919168498373121963061566857716153',
                 },
                 checker: {
                     address: '0x0000000000000000000000000000000000000000',

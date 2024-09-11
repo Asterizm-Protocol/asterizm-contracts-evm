@@ -7,7 +7,7 @@ interface IMultiChainToken {
     /// Cross-chain transfer
     /// @param _dstChainId uint64  Destination chain ID
     /// @param _fromAddress address  Address from
-    /// @param _toAddress address  Address to
+    /// @param _toAddress uint  Address to in uint format
     /// @param _amount uint  Amount
-    function crossChainTransfer(uint64 _dstChainId, address _fromAddress, address _toAddress, uint _amount) external payable;
+    function crossChainTransfer(uint64 _dstChainId, address _fromAddress, uint _toAddress, uint _amount) external payable;
 }
