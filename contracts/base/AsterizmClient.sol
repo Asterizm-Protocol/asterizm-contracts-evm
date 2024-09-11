@@ -434,7 +434,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
     /// Resend failed by fee amount transfer
     /// @param _transferHash bytes32  Transfer hash
     function resendAsterizmTransfer(bytes32 _transferHash) external payable
-        onlyOwner
+        onlySender
         onlyExistsOutboundTransfer(_transferHash)
         onlyExecutedOutboundTransfer(_transferHash)
     {

@@ -940,8 +940,8 @@ export const Chains = {
                     uint: '701747189344486605282819314024598581164781094542',
                 },
                 multichain: {
-                    address: '0x0000000000000000000000000000000000000000',
-                    uint: '0',
+                    address: '0xd31eb9A1629248999B7b062a98518B5c147E6299',
+                    uint: '1205282245689168399655948744287384771744229122713',
                 },
                 checker: {
                     address: '0x131CCD21B56AAAd4205B9ab353181C59b33A2A5a',
@@ -1329,6 +1329,43 @@ export const Chains = {
                 checker: {
                     address: '0xcc11A3F6e5804D9366d4bab1bA0957c778bD4074',
                     uint: '1165027513233566821464575078488279740472125898868',
+                },
+            },
+            stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+                baseRouter: '0x0000000000000000000000000000000000000000',
+                asterizmRouter: '0x0000000000000000000000000000000000000000',
+            },
+        },
+        {
+            id: 40001,
+            title: "TON", // Ton testnet
+            networkName: "tonTestnet",
+            chainType: ChainTypes.TON,
+            contractAddresses: {
+                translator: {
+                    address: 'EQDIwbxNE9vu8wiQ2IyDO49HmC9iG2HTYD91W1qlKDjSP9hr',
+                    uint: '90804870806476004739881921205513112618921191123935732807134167735293267464767',
+                },
+                initializer: {
+                    address: 'EQCvYJFYeJH27ANH-vtbJ8-lnHHrDEDdzB2b3v1wwle8CE48',
+                    uint: '79325368958683455530642312087680413228497002260828543716100925530151293795336',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: 'EQAbTYXB12ZlKyb17GiHYsGhIswFgj9KucyxakV28yJ0gNZZ',
+                    uint: '12349417293954223631079518177396259105410478207869757726192451313177869841536',
+                },
+                checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
                 },
             },
             stableCoins: [],

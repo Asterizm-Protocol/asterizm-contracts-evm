@@ -92,6 +92,9 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// @param _amount uint  Amount
     event WithdrawTokensEvent(address _tokenAddress, address _targetAddress, uint _amount);
 
+    /// Update chain types list event
+    event UpdateChainTypesEvent();
+
     struct Chain {
         bool exists;
         uint8 chainType; // 1 - EVM, 2 - TVM
@@ -223,6 +226,12 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
         require(_token.balanceOf(address(this)) >= _amount, "AsterizmWithdrawal: coins balance not enough");
         _token.safeTransfer(_target, _amount);
         emit WithdrawTokensEvent(address(_token), _target, _amount);
+    }
+
+    /// Update chain types list
+    function updateChainTypes() external onlyOwner {
+        internalUpdateChainTypesList();
+        emit UpdateChainTypesEvent();
     }
 
     /** External logic */

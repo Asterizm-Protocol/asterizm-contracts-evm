@@ -7,6 +7,8 @@ abstract contract AsterizmChainEnv is Initializable {
 
     uint8 constant private CHAIN_TYPE_EVM = 1;
     uint8 constant private CHAIN_TYPE_TVM = 2;
+    uint8 constant private CHAIN_TYPE_TON = 3;
+    uint8 constant private CHAIN_TYPE_SOL = 4;
 
     struct ChainType {
         bool exists;
@@ -16,8 +18,15 @@ abstract contract AsterizmChainEnv is Initializable {
 
     /// Contract initializer (constructor)
     function __AsterizmChainEnv_init() initializer public {
+        internalUpdateChainTypesList();
+    }
+
+    /// Internal update chain types list
+    function internalUpdateChainTypesList() internal {
         chainTypes[CHAIN_TYPE_EVM].exists = true;
         chainTypes[CHAIN_TYPE_TVM].exists = true;
+        chainTypes[CHAIN_TYPE_TON].exists = true;
+        chainTypes[CHAIN_TYPE_SOL].exists = true;
     }
 
     /// Check is chain type awailable
