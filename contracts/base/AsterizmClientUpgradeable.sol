@@ -108,6 +108,7 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, IClientReceiverC
     uint private txId;
     uint64 private localChainId;
     IERC20 private feeToken;
+    uint8 constant private CHAIN_TYPE_SOL = 4;
 
     /// Initializing function for upgradeable contracts (constructor)
     /// @param _initializerLib IInitializerSender  Initializer library address
@@ -336,7 +337,12 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, IClientReceiverC
     function _buildTransferHash(uint64 _srcChainId, uint _srcAddress, uint64 _dstChainId, uint _dstAddress, uint _txId, bytes memory _payload) internal view returns(bytes32) {
         bytes memory encodeData = abi.encodePacked(_srcChainId, _srcAddress, _dstChainId, _dstAddress, _txId, _buildPackedPayload(_payload));
 
-        return _getChainType(_srcChainId) == _getChainType(_dstChainId) ? encodeData.buildSimpleHash() : encodeData.buildCrosschainHash();
+        uint8 srcChainType = _getChainType(_srcChainId);
+        uint8 dstChainType = _getChainType(_dstChainId);
+
+        return srcChainType == dstChainType || srcChainType == CHAIN_TYPE_SOL || dstChainType == CHAIN_TYPE_SOL ?
+        encodeData.buildSimpleHash() :
+        encodeData.buildCrosschainHash();
     }
 
     /// Check is transfer hash valid

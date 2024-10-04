@@ -39,6 +39,7 @@ import './tasks/relay/relay_updatechaintypes_task';
 import './tasks/chainlink/chainlink_deploy_relay_task';
 import './tasks/chainlink/chainlink_chainrelay_task';
 import './tasks/token/token_deploy_task';
+import './tasks/token/token_deploy_upgrade_task';
 import './tasks/token/token_send_task';
 
 const config = {

@@ -140,7 +140,10 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
         _;
     }
 
+
+    /*******************/
     /** Internal logic */
+    /*******************/
 
     /// Withdraw coins
     /// @param _target address  Target address
@@ -234,7 +237,10 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
         emit UpdateChainTypesEvent();
     }
 
+
+    /*******************/
     /** External logic */
+    /*******************/
 
     /// Update trusted relay fee
     /// @param _fee uint  Relay fee
