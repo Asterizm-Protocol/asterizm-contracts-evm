@@ -21,6 +21,9 @@ abstract contract AsterizmWithdrawalUpgradeable is OwnableUpgradeable, Reentranc
     /// @param _amount uint  Amount
     event WithdrawTokensEvent(address _tokenAddress, address _targetAddress, uint _amount);
 
+    bool public coinWithdrawalIsDisable;
+    bool public tokenWithdrawalIsDisable;
+
     receive() external payable {}
     fallback() external payable {}
 
@@ -28,6 +31,7 @@ abstract contract AsterizmWithdrawalUpgradeable is OwnableUpgradeable, Reentranc
     /// @param _target address  Target address
     /// @param _amount uint  Amount
     function withdrawCoins(address _target, uint _amount) external onlyOwner nonReentrant {
+        require(!coinWithdrawalIsDisable, "AsterizmWithdrawal: coins withdrawal is disabled");
         require(address(this).balance >= _amount, "AsterizmWithdrawal: coins balance not enough");
         (bool success, ) = _target.call{value: _amount}("");
         require(success, "AsterizmWithdrawal: transfer error");
@@ -39,6 +43,7 @@ abstract contract AsterizmWithdrawalUpgradeable is OwnableUpgradeable, Reentranc
     /// @param _target address  Target address
     /// @param _amount uint  Amount
     function withdrawTokens(IERC20 _token, address _target, uint _amount) external onlyOwner nonReentrant {
+        require(!tokenWithdrawalIsDisable, "AsterizmWithdrawal: tokens withdrawal is disabled");
         require(_token.balanceOf(address(this)) >= _amount, "AsterizmWithdrawal: coins balance not enough");
         _token.safeTransfer(_target, _amount);
         emit WithdrawTokensEvent(address(_token), _target, _amount);

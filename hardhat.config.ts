@@ -41,6 +41,10 @@ import './tasks/chainlink/chainlink_chainrelay_task';
 import './tasks/token/token_deploy_task';
 import './tasks/token/token_deploy_upgrade_task';
 import './tasks/token/token_send_task';
+import './tasks/venidium/deploy_nativedstmultichain_task';
+import './tasks/venidium/deploy_nativesrcmultichain_task';
+import './tasks/venidium/deploy_stabledstmultichain_task';
+import './tasks/venidium/deploy_stablesrcmultichain_task';
 
 const config = {
   solidity: {
