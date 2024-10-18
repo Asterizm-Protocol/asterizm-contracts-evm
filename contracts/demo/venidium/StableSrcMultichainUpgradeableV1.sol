@@ -5,8 +5,10 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../../interfaces/IMultiChainToken.sol";
 import "../../base/AsterizmClientUpgradeable.sol";
+import "./FeeLogic.sol";
+import "hardhat/console.sol";
 
-contract StableSrcMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable, AsterizmClientUpgradeable {
+contract StableSrcMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable, FeeLogic, AsterizmClientUpgradeable {
 
     using SafeERC20 for IERC20;
     using UintLib for uint;
@@ -19,12 +21,16 @@ contract StableSrcMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
     /// @param _initialSupply uint  Initial supply
     /// @param _decimals uint8  Decimals
     /// @param _tokenAddress IERC20  Expectation token address
-    function initialize(IInitializerSender _initializerLib, uint _initialSupply, uint8 _decimals, IERC20 _tokenAddress) initializer public {
+    /// @param _feeBaseAddress address  Base fee address
+    /// @param _feeProviderAddress address  Base fee address
+    function initialize(IInitializerSender _initializerLib, uint _initialSupply, uint8 _decimals, IERC20 _tokenAddress, address _feeBaseAddress, address _feeProviderAddress) initializer public {
         __AsterizmClientUpgradeable_init(_initializerLib, true, false);
         __ERC20_init("UnknownTokenSS", "UTSS");
         _mint(_msgSender(), _initialSupply);
         tokenAddress = _tokenAddress;
         customDecimals = _decimals;
+        feeBaseAddress = _feeBaseAddress;
+        feeProviderAddress = _feeProviderAddress;
         tokenWithdrawalIsDisable = true;
     }
 
@@ -42,7 +48,8 @@ contract StableSrcMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
     function crossChainTransfer(uint64 _dstChainId, address _from, uint _to, uint _amount) public payable {
         require(_amount > 0, "StableSrcMultichain: amount too small");
         tokenAddress.safeTransferFrom(_from, address(this), _amount);
-        _initAsterizmTransferEvent(_dstChainId, abi.encode(_to, _amount, _getTxId()));
+        uint amount = execFeeLogic(address(tokenAddress), _amount, true);
+        _initAsterizmTransferEvent(_dstChainId, abi.encode(_to, amount, _getTxId()));
     }
 
     /// Receive non-encoded payload

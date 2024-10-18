@@ -5,8 +5,9 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../../interfaces/IMultiChainToken.sol";
 import "../../base/AsterizmClientUpgradeable.sol";
+import "./FeeLogic.sol";
 
-contract StableDstMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable, AsterizmClientUpgradeable {
+contract StableDstMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable, FeeLogic, AsterizmClientUpgradeable {
 
     using SafeERC20 for IERC20;
     using UintLib for uint;
@@ -17,11 +18,15 @@ contract StableDstMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
     /// @param _initializerLib IInitializerSender  Initializer library address
     /// @param _initialSupply uint  Initial supply
     /// @param _decimals uint8  Decimals
-    function initialize(IInitializerSender _initializerLib, uint _initialSupply, uint8 _decimals) initializer public {
+    /// @param _feeBaseAddress address  Base fee address
+    /// @param _feeProviderAddress address  Base fee address
+    function initialize(IInitializerSender _initializerLib, uint _initialSupply, uint8 _decimals, address _feeBaseAddress, address _feeProviderAddress) initializer public {
         __AsterizmClientUpgradeable_init(_initializerLib, true, false);
         __ERC20_init("UnknownTokenSD", "UTSD");
         _mint(_msgSender(), _initialSupply);
         customDecimals = _decimals;
+        feeBaseAddress = _feeBaseAddress;
+        feeProviderAddress = _feeProviderAddress;
         tokenWithdrawalIsDisable = true;
     }
 
@@ -69,6 +74,6 @@ contract StableDstMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
 
         _burn(_from, _amount);
 
-        return _amount;
+        return execFeeLogic(address(this), _amount, false);
     }
 }
