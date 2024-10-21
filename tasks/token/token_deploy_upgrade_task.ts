@@ -17,6 +17,7 @@ task("token:deploy-upgrade", "Deploy Multichain token contract (upgradeable)")
     .addPositionalParam("initSupply", "Initial token supply", '0')
     .addPositionalParam("relayAddress", "Config contract address", '0')
     .addPositionalParam("feeTokenAddress", "Chainlink fee token address", '0')
+    .addPositionalParam("refundFee", "Refund fee in native coins", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs, hre) => {
         let {initializer, owner, gasLimit} = await deployBase(hre, taskArgs.initializerAddress);
@@ -39,7 +40,13 @@ task("token:deploy-upgrade", "Deploy Multichain token contract (upgradeable)")
         if (taskArgs.feeTokenAddress != '0') {
             tx = await token.setFeeToken(taskArgs.feeTokenAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
             gasLimit = gasLimit.add(tx.gasLimit);
-            console.log("Set external relay successfully. Address: %s", taskArgs.relayAddress);
+            console.log("Set fee token successfully. Address: %s", taskArgs.feeTokenAddress);
+        }
+
+        if (taskArgs.refundFee != '0') {
+            tx = await token.setRefundFee(taskArgs.refundFee, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+            gasLimit = gasLimit.add(tx.gasLimit);
+            console.log("Set refund fee successfully. Hash: %s", tx.hash);
         }
 
         console.log("Deployment was done\n");
