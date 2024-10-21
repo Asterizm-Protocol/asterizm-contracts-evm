@@ -387,4 +387,55 @@ describe("Crosschain token", function () {
     expect(requestStatus).to.equal(false);
     expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(beforeProcessOwnerTokenBalance);
   });
+  it("Should refund tokens successfully with refundFee", async function () {
+    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, user, currentChainIds } = await loadFixture(deployContractsFixture);
+    let feeValue, packetValue, dstChainId, dstAddress, txId, transferHash, payload;
+    let value = 100;
+    const refundFee = 1000000;
+    expect(await tokenUpgrade1.setRefundFee(refundFee)).not.to.be.reverted;
+    const startOwnerTokenBalance = await tokenUpgrade1.balanceOf(owner.address);
+    await expect(tokenUpgrade1.crossChainTransfer(currentChainIds[1], owner.address, user.address, value))
+        .to.emit(tokenUpgrade1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(tokenUpgrade2.address);
+    expect(txId).to.equal(0);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(startOwnerTokenBalance.sub(value));
+
+    let refundTransferHash, refundUserAddress, refundAmount, refundTokenAddress;
+    await expect(tokenUpgrade1.addRefundRequest(transferHash))
+        .to.be.revertedWith("AsterizmRefund: small value");
+    await expect(tokenUpgrade1.addRefundRequest(transferHash, {value: refundFee}))
+        .to.emit(tokenUpgrade1, 'AddRefundRequestEvent')
+        .withArgs(
+            (value) => {refundTransferHash = value; return true;},
+            (value) => {refundUserAddress = value; return true;},
+            (value) => {refundAmount = value; return true;},
+            (value) => {refundTokenAddress = value; return true;},
+        );
+    expect(refundTransferHash).to.equal(transferHash);
+    expect(refundUserAddress).to.equal(owner.address);
+    expect(refundAmount).to.equal(value);
+    expect(refundTokenAddress).to.equal(tokenUpgrade1.address);
+
+    const beforeProcessOwnerTokenBalance = await tokenUpgrade1.balanceOf(owner.address);
+    let requestTransferHash, requestStatus;
+    await expect(tokenUpgrade1.processRefundRequest(transferHash, true))
+        .to.emit(tokenUpgrade1, 'ProcessRefundRequestEvent')
+        .withArgs(
+            (value) => {requestTransferHash = value; return true;},
+            (value) => {requestStatus = value; return true;},
+        );
+    expect(refundTransferHash).to.equal(transferHash);
+    expect(requestStatus).to.equal(true);
+    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(beforeProcessOwnerTokenBalance.add(value));
+  });
 });

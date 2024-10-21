@@ -9,6 +9,10 @@ abstract contract AsterizmRefundUpgradeable is AsterizmSenderUpgradeable {
 
     using SafeERC20 for IERC20;
 
+    /// Set refund fee event
+    /// @param _fee uint  Refund fee
+    event SetRefundFeeEvent(uint _fee);
+
     /// Add transfer hash event
     /// @param _transferHash bytes32  Transfer hash
     /// @param _userAddress address  User address
@@ -53,6 +57,14 @@ abstract contract AsterizmRefundUpgradeable is AsterizmSenderUpgradeable {
     mapping(bytes32 => RefundTransfer) private refundTransfers;
     mapping(bytes32 => RefundRequest) private refundRequests;
     bool internal refundLogicIsAvailable;
+    uint public refundFee;
+
+    /// Set refund fee
+    /// @param _fee uint  Refund fee
+    function setRefundFee(uint _fee) external onlySenderOrOwner {
+        refundFee = _fee;
+        emit SetRefundFeeEvent(_fee);
+    }
 
     /// Add refund transfer
     /// @param _transferHash bytes32  Transfer hash
@@ -67,12 +79,18 @@ abstract contract AsterizmRefundUpgradeable is AsterizmSenderUpgradeable {
 
     /// Add refund request
     /// @param _transferHash bytes32  Transfer hash
-    function addRefundRequest(bytes32 _transferHash) external {
+    function addRefundRequest(bytes32 _transferHash) external payable {
         require(refundLogicIsAvailable, "AsterizmRefund: refund logic is disabled");
+        require(msg.value >= refundFee, "AsterizmRefund: small value");
         require(refundTransfers[_transferHash].exists, "AsterizmRefund: refund transfer not exists");
         require(!refundRequests[_transferHash].exists, "AsterizmRefund: refund request exists already");
         require(!refundRequests[_transferHash].successProcessed && !refundRequests[_transferHash].rejectProcessed , "AsterizmRefund: refund request processed already");
         refundRequests[_transferHash].exists = true;
+        if (msg.value > 0) {
+            (bool success, ) = owner().call{value: msg.value}("");
+            require(success, "AsterizmRefund: coins transfer error");
+        }
+
         emit AddRefundRequestEvent(
             _transferHash,
             refundTransfers[_transferHash].userAddress,
