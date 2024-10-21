@@ -28,6 +28,7 @@ contract NativeDstMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
         feeBaseAddress = _feeBaseAddress;
         feeProviderAddress = _feeProviderAddress;
         coinWithdrawalIsDisable = true;
+        refundLogicIsAvailable = true;
     }
 
     /// Token decimals
@@ -45,7 +46,8 @@ contract NativeDstMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
         require(_amount > 0, "NativeDstMultichain: amount too small");
         require(msg.value >= _amount, "NativeDstMultichain: amount too big");
         uint amount = execFeeLogic(address(0), _amount, true);
-        _initAsterizmTransferEvent(_dstChainId, abi.encode(_to, amount, _getTxId()));
+        bytes32 transferHash = _initAsterizmTransferEvent(_dstChainId, abi.encode(_to, amount, _getTxId()));
+        _addRefundTransfer(transferHash, _from, amount, address(0));
     }
 
     /// Receive non-encoded payload

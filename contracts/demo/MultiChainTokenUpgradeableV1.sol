@@ -30,6 +30,7 @@ contract MultiChainTokenUpgradeableV1 is IMultiChainToken, ERC20Upgradeable, Ast
         __AsterizmClientUpgradeable_init(_initializerLib, true, false);
         __ERC20_init("UnknownToken5", "UKWN");
         _mint(_msgSender(), _initialSupply);
+        refundLogicIsAvailable = true;
     }
 
     /// Token decimals
@@ -46,7 +47,8 @@ contract MultiChainTokenUpgradeableV1 is IMultiChainToken, ERC20Upgradeable, Ast
     function crossChainTransfer(uint64 _dstChainId, address _from, uint _to, uint _amount) public payable {
         uint amount = _debitFrom(_from, _amount); // amount returned should not have dust
         require(amount > 0, "MultichainToken: amount too small");
-        _initAsterizmTransferEvent(_dstChainId, abi.encode(_to, amount, _getTxId()));
+        bytes32 transferHash = _initAsterizmTransferEvent(_dstChainId, abi.encode(_to, amount, _getTxId()));
+        _addRefundTransfer(transferHash, _from, amount, address(this));
     }
 
     /// Receive non-encoded payload
@@ -77,5 +79,13 @@ contract MultiChainTokenUpgradeableV1 is IMultiChainToken, ERC20Upgradeable, Ast
         _burn(_from, _amount);
 
         return _amount;
+    }
+
+    /// Refund tokens
+    /// @param _targetAddress address  Target address
+    /// @param _amount uint  Coins amount
+    /// @param _tokenAddress address  Token address
+    function _refundTokens(address _targetAddress, uint _amount, address _tokenAddress) internal override onlySenderOrOwner {
+        _mint(_targetAddress, _amount);
     }
 }

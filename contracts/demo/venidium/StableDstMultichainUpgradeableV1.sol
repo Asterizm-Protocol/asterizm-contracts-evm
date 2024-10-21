@@ -28,6 +28,7 @@ contract StableDstMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
         feeBaseAddress = _feeBaseAddress;
         feeProviderAddress = _feeProviderAddress;
         tokenWithdrawalIsDisable = true;
+        refundLogicIsAvailable = true;
     }
 
     /// Token decimals
@@ -44,7 +45,8 @@ contract StableDstMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
     function crossChainTransfer(uint64 _dstChainId, address _from, uint _to, uint _amount) public payable {
         uint amount = _debitFrom(_from, _amount); // amount returned should not have dust
         require(amount > 0, "StableDstMultichain: amount too small");
-        _initAsterizmTransferEvent(_dstChainId, abi.encode(_to, amount, _getTxId()));
+        bytes32 transferHash = _initAsterizmTransferEvent(_dstChainId, abi.encode(_to, amount, _getTxId()));
+        _addRefundTransfer(transferHash, _from, amount, address(this));
     }
 
     /// Receive non-encoded payload
@@ -75,5 +77,13 @@ contract StableDstMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
         _burn(_from, _amount);
 
         return execFeeLogic(address(this), _amount, false);
+    }
+
+    /// Refund tokens
+    /// @param _targetAddress address  Target address
+    /// @param _amount uint  Coins amount
+    /// @param _tokenAddress address  Token address
+    function _refundTokens(address _targetAddress, uint _amount, address _tokenAddress) internal override onlySenderOrOwner {
+        _mint(_targetAddress, _amount);
     }
 }

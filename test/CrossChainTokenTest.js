@@ -12,7 +12,7 @@ describe("Crosschain token", function () {
     const Token = await ethers.getContractFactory("MultichainToken");
     const TokenUpgrade = await ethers.getContractFactory("MultiChainTokenUpgradeableV1");
     const Gas = await ethers.getContractFactory("GasStationUpgradeableV1");
-    const [owner] = await ethers.getSigners();
+    const [owner, user] = await ethers.getSigners();
     const currentChainIds = [1, 2];
     const chainTypes = {EVM: 1, TVM: 2};
 
@@ -82,21 +82,21 @@ describe("Crosschain token", function () {
     await gas_sender2.addTrustedAddresses(currentChainIds, [gas_sender1.address, gas_sender2.address]);
 
     // Fixtures can return anything you consider useful for your tests
-    return { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, currentChainIds};
+    return { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, user, currentChainIds};
   }
 
   it("Should successfuly deploy contracts", async function () {
-    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner } = await loadFixture(deployContractsFixture);
+    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, user, currentChainIds } = await loadFixture(deployContractsFixture);
   });
   it("Check address balances", async function () {
-    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner } = await loadFixture(deployContractsFixture);
+    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, user, currentChainIds } = await loadFixture(deployContractsFixture);
     let balance = await(token1.balanceOf(owner.address));
     expect(await token1.balanceOf(owner.address)).to.equal(
       TOKEN_AMOUNT.toString()
     );
   });
   it("Check address balances", async function () {
-    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner } = await loadFixture(deployContractsFixture);
+    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, user, currentChainIds } = await loadFixture(deployContractsFixture);
     let balance = await(token1.balanceOf(owner.address));
     expect(await token1.balanceOf(owner.address)).to.equal(
       TOKEN_AMOUNT.toString()
@@ -104,7 +104,7 @@ describe("Crosschain token", function () {
   });
   it("Should emit event from Translator", async function () {
     let dstChainId, dstAddress, txId, transferHash, payload;
-    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, currentChainIds } = await loadFixture(deployContractsFixture);
+    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, user, currentChainIds } = await loadFixture(deployContractsFixture);
     await expect(token1.crossChainTransfer(currentChainIds[1], owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", 100))
         .to.emit(token1, 'InitiateTransferEvent')
         .withArgs(
@@ -125,7 +125,7 @@ describe("Crosschain token", function () {
   it("Should burn token", async function () {
     let dstChainId, dstAddress, txId, transferHash, payload;
     let value = 100;
-    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, currentChainIds } = await loadFixture(deployContractsFixture);
+    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, user, currentChainIds } = await loadFixture(deployContractsFixture);
     await expect(token1.crossChainTransfer(currentChainIds[1], owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", value))
         .to.emit(token1, 'InitiateTransferEvent')
         .withArgs(
@@ -151,10 +151,9 @@ describe("Crosschain token", function () {
   });
   it("Should burn and then mint token", async function () {
     let feeValue, packetValue, dstChainId, dstAddress, txId, transferHash, payload;
-    let addressTo = '0x89F5C7d4580065fd9135Eff13493AaA5ad10A168';
     let value = 100;
-    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, currentChainIds } = await loadFixture(deployContractsFixture);
-    await expect(token1.crossChainTransfer(currentChainIds[1], owner.address, addressTo, value))
+    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, user, currentChainIds } = await loadFixture(deployContractsFixture);
+    await expect(token1.crossChainTransfer(currentChainIds[1], owner.address, user.address, value))
         .to.emit(token1, 'InitiateTransferEvent')
         .withArgs(
             (value) => {dstChainId = value; return true;},
@@ -192,7 +191,7 @@ describe("Crosschain token", function () {
     expect(await token1.balanceOf(owner.address)).to.equal(
       (TOKEN_AMOUNT.sub(value))
     );
-    expect(await token2.balanceOf(addressTo)).to.equal(
+    expect(await token2.balanceOf(user.address)).to.equal(
         value
     );
     expect(await token1.totalSupply()).to.equal(TOKEN_AMOUNT.sub(value));
@@ -201,7 +200,7 @@ describe("Crosschain token", function () {
 
   it("Should emit event from Translator (upgradeable tokens)", async function () {
     let dstChainId, dstAddress, txId, transferHash, payload;
-    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, currentChainIds } = await loadFixture(deployContractsFixture);
+    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, user, currentChainIds } = await loadFixture(deployContractsFixture);
     await expect(tokenUpgrade1.crossChainTransfer(currentChainIds[1], owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", 100))
         .to.emit(tokenUpgrade1, 'InitiateTransferEvent')
         .withArgs(
@@ -222,7 +221,7 @@ describe("Crosschain token", function () {
   it("Should burn token (upgradeable tokens)", async function () {
     let dstChainId, dstAddress, txId, transferHash, payload;
     let value = 100;
-    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, currentChainIds } = await loadFixture(deployContractsFixture);
+    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, user, currentChainIds } = await loadFixture(deployContractsFixture);
     await expect(tokenUpgrade1.crossChainTransfer(currentChainIds[1], owner.address, "0x89F5C7d4580065fd9135Eff13493AaA5ad10A168", value))
         .to.emit(tokenUpgrade1, 'InitiateTransferEvent')
         .withArgs(
@@ -248,10 +247,9 @@ describe("Crosschain token", function () {
   });
   it("Should burn and then mint token", async function () {
     let feeValue, packetValue, dstChainId, dstAddress, txId, transferHash, payload;
-    let addressTo = '0x89F5C7d4580065fd9135Eff13493AaA5ad10A168';
     let value = 100;
-    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, currentChainIds } = await loadFixture(deployContractsFixture);
-    await expect(tokenUpgrade1.crossChainTransfer(currentChainIds[1], owner.address, addressTo, value))
+    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, user, currentChainIds } = await loadFixture(deployContractsFixture);
+    await expect(tokenUpgrade1.crossChainTransfer(currentChainIds[1], owner.address, user.address, value))
         .to.emit(tokenUpgrade1, 'InitiateTransferEvent')
         .withArgs(
             (value) => {dstChainId = value; return true;},
@@ -289,10 +287,104 @@ describe("Crosschain token", function () {
     expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(
         (TOKEN_AMOUNT.sub(value))
     );
-    expect(await tokenUpgrade2.balanceOf(addressTo)).to.equal(
+    expect(await tokenUpgrade2.balanceOf(user.address)).to.equal(
         value
     );
     expect(await tokenUpgrade1.totalSupply()).to.equal(TOKEN_AMOUNT.sub(value));
     expect(await tokenUpgrade2.totalSupply()).to.equal(TOKEN_AMOUNT.add(value));
+  });
+  it("Should refund tokens successfully", async function () {
+    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, user, currentChainIds } = await loadFixture(deployContractsFixture);
+    let feeValue, packetValue, dstChainId, dstAddress, txId, transferHash, payload;
+    let value = 100;
+    const startOwnerTokenBalance = await tokenUpgrade1.balanceOf(owner.address);
+    await expect(tokenUpgrade1.crossChainTransfer(currentChainIds[1], owner.address, user.address, value))
+        .to.emit(tokenUpgrade1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(tokenUpgrade2.address);
+    expect(txId).to.equal(0);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(startOwnerTokenBalance.sub(value));
+
+    let refundTransferHash, refundUserAddress, refundAmount, refundTokenAddress;
+    await expect(tokenUpgrade1.addRefundRequest(transferHash))
+        .to.emit(tokenUpgrade1, 'AddRefundRequestEvent')
+        .withArgs(
+            (value) => {refundTransferHash = value; return true;},
+            (value) => {refundUserAddress = value; return true;},
+            (value) => {refundAmount = value; return true;},
+            (value) => {refundTokenAddress = value; return true;},
+        );
+    expect(refundTransferHash).to.equal(transferHash);
+    expect(refundUserAddress).to.equal(owner.address);
+    expect(refundAmount).to.equal(value);
+    expect(refundTokenAddress).to.equal(tokenUpgrade1.address);
+
+    const beforeProcessOwnerTokenBalance = await tokenUpgrade1.balanceOf(owner.address);
+    let requestTransferHash, requestStatus;
+    await expect(tokenUpgrade1.processRefundRequest(transferHash, true))
+        .to.emit(tokenUpgrade1, 'ProcessRefundRequestEvent')
+        .withArgs(
+            (value) => {requestTransferHash = value; return true;},
+            (value) => {requestStatus = value; return true;},
+        );
+    expect(refundTransferHash).to.equal(transferHash);
+    expect(requestStatus).to.equal(true);
+    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(beforeProcessOwnerTokenBalance.add(value));
+  });
+  it("Should not refund tokens with rejected request", async function () {
+    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, user, currentChainIds } = await loadFixture(deployContractsFixture);
+    let feeValue, packetValue, dstChainId, dstAddress, txId, transferHash, payload;
+    let value = 100;
+    const startOwnerTokenBalance = await tokenUpgrade1.balanceOf(owner.address);
+    await expect(tokenUpgrade1.crossChainTransfer(currentChainIds[1], owner.address, user.address, value))
+        .to.emit(tokenUpgrade1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(tokenUpgrade2.address);
+    expect(txId).to.equal(0);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(startOwnerTokenBalance.sub(value));
+
+    let refundTransferHash, refundUserAddress, refundAmount, refundTokenAddress;
+    await expect(tokenUpgrade1.addRefundRequest(transferHash))
+        .to.emit(tokenUpgrade1, 'AddRefundRequestEvent')
+        .withArgs(
+            (value) => {refundTransferHash = value; return true;},
+            (value) => {refundUserAddress = value; return true;},
+            (value) => {refundAmount = value; return true;},
+            (value) => {refundTokenAddress = value; return true;},
+        );
+    expect(refundTransferHash).to.equal(transferHash);
+    expect(refundUserAddress).to.equal(owner.address);
+    expect(refundAmount).to.equal(value);
+    expect(refundTokenAddress).to.equal(tokenUpgrade1.address);
+
+    const beforeProcessOwnerTokenBalance = await tokenUpgrade1.balanceOf(owner.address);
+    let requestTransferHash, requestStatus;
+    await expect(tokenUpgrade1.processRefundRequest(transferHash, false))
+        .to.emit(tokenUpgrade1, 'ProcessRefundRequestEvent')
+        .withArgs(
+            (value) => {requestTransferHash = value; return true;},
+            (value) => {requestStatus = value; return true;},
+        );
+    expect(refundTransferHash).to.equal(transferHash);
+    expect(requestStatus).to.equal(false);
+    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(beforeProcessOwnerTokenBalance);
   });
 });

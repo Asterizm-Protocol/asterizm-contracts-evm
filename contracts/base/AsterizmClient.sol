@@ -8,8 +8,9 @@ import "./AsterizmWithdrawal.sol";
 import "../libs/AddressLib.sol";
 import "../libs/UintLib.sol";
 import "../libs/AsterizmHashLib.sol";
+import "./AsterizmRefund.sol";
 
-abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, AsterizmWithdrawal {
+abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, AsterizmWithdrawal, AsterizmRefund {
 
     using AddressLib for address;
     using UintLib for uint;
@@ -45,14 +46,6 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
     /// @param _txId uint  Transfer ID
     /// @param _transferHash bytes32  Transaction hash
     event PayloadReceivedEvent(uint64 _srcChainId, uint _srcAddress, uint _txId, bytes32 _transferHash);
-
-    /// Add sender event
-    /// @param _sender address  Sender address
-    event AddSenderEvent(address _sender);
-
-    /// Remove sender event
-    /// @param _sender address  Sender address
-    event RemoveSenderEvent(address _sender);
 
     /// Add trusted address event
     /// @param _chainId uint64  Chain ID
@@ -92,16 +85,12 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
         uint trustedAddress;
         uint8 chainType;
     }
-    struct Sender {
-        bool exists;
-    }
 
     IInitializerSender private initializerLib;
     address private externalRelay;
     mapping(uint64 => AsterizmChain) private trustedAddresses;
     mapping(bytes32 => AsterizmTransfer) private inboundTransfers;
     mapping(bytes32 => AsterizmTransfer) private outboundTransfers;
-    mapping(address => Sender) private senders;
     bool private notifyTransferSendingResult;
     bool private disableHashValidation;
     uint private txId;
@@ -131,18 +120,6 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
     /// Only owner or initializer modifier
     modifier onlyOwnerOrInitializer {
         require(msg.sender == owner() || msg.sender == address(initializerLib), "AsterizmClient: only owner or initializer");
-        _;
-    }
-
-    /// Only sender modifier
-    modifier onlySender {
-        require(senders[msg.sender].exists, "AsterizmClient: only sender");
-        _;
-    }
-
-    /// Only sender or owner modifier
-    modifier onlySenderOrOwner {
-        require(msg.sender == owner() || senders[msg.sender].exists, "AsterizmClient: only sender or owner");
         _;
     }
 
@@ -273,21 +250,6 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
         return address(feeToken);
     }
 
-    /// Add sender
-    /// @param _sender address  Sender address
-    function addSender(address _sender) public onlyOwner {
-        senders[_sender].exists = true;
-        emit AddSenderEvent(_sender);
-    }
-
-    /// Remove sender
-    /// @param _sender address  Sender address
-    function removeSender(address _sender) public onlyOwner {
-        require(senders[_sender].exists, "AsterizmClient: sender not exists");
-        delete senders[_sender];
-        emit RemoveSenderEvent(_sender);
-    }
-
     /// Add trusted address
     /// @param _chainId uint64  Chain ID
     /// @param _trustedAddress address  Trusted address
@@ -391,12 +353,14 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
     /// Generate event for client server
     /// @param _dstChainId uint64  Destination chain ID
     /// @param _payload bytes  Payload
-    function _initAsterizmTransferEvent(uint64 _dstChainId, bytes memory _payload) internal {
+    function _initAsterizmTransferEvent(uint64 _dstChainId, bytes memory _payload) internal returns(bytes32) {
         require(trustedAddresses[_dstChainId].exists, "AsterizmClient: trusted address not found");
         uint id = txId++;
         bytes32 transferHash = _buildTransferHash(_getLocalChainId(), address(this).toUint(), _dstChainId, trustedAddresses[_dstChainId].trustedAddress, id, _payload);
         outboundTransfers[transferHash].successReceive = true;
         emit InitiateTransferEvent(_dstChainId, trustedAddresses[_dstChainId].trustedAddress, id, transferHash, _payload);
+
+        return transferHash;
     }
 
     /// External initiation transfer
