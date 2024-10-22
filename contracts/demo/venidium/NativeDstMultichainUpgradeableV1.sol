@@ -43,8 +43,8 @@ contract NativeDstMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
     /// @param _from address  From address
     /// @param _to uint  To address in uint format
     function crossChainTransfer(uint64 _dstChainId, address _from, uint _to, uint _amount) public payable {
-        require(_amount > 0, "NativeDstMultichain: amount too small");
-        require(msg.value >= _amount, "NativeDstMultichain: amount too big");
+        require(_amount > 0, "NDM: amount too small");
+        require(msg.value >= _amount, "NDM: amount too big");
         uint amount = execFeeLogic(address(0), _amount, true);
         bytes32 transferHash = _initAsterizmTransferEvent(_dstChainId, abi.encode(_to, amount, _getTxId()));
         _addRefundTransfer(transferHash, _from, amount, address(0));
@@ -54,9 +54,9 @@ contract NativeDstMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal override {
         (uint dstAddressUint, uint amount, ) = abi.decode(_dto.payload, (uint, uint, uint));
-        require(address(this).balance >= amount, "NativeDstMultichain: insufficient native coins funds");
+        require(address(this).balance >= amount, "NDM: insufficient native coins funds");
         (bool success, ) = dstAddressUint.toAddress().call{value: amount}("");
-        require(success, "NativeDstMultichain: transfer error");
+        require(success, "NDM: transfer error");
     }
 
     /// Build packed payload (abi.encodePacked() result)

@@ -412,7 +412,7 @@ describe("Crosschain token", function () {
 
     let refundTransferHash, refundUserAddress, refundAmount, refundTokenAddress;
     await expect(tokenUpgrade1.addRefundRequest(transferHash))
-        .to.be.revertedWith("AsterizmRefund: small value");
+        .to.be.revertedWith("AR: small value");
     await expect(tokenUpgrade1.addRefundRequest(transferHash, {value: refundFee}))
         .to.emit(tokenUpgrade1, 'AddRefundRequestEvent')
         .withArgs(
@@ -437,5 +437,90 @@ describe("Crosschain token", function () {
     expect(refundTransferHash).to.equal(transferHash);
     expect(requestStatus).to.equal(true);
     expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(beforeProcessOwnerTokenBalance.add(value));
+  });
+  it("Should reject refunded transfer in src chain", async function () {
+    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, user, currentChainIds } = await loadFixture(deployContractsFixture);
+    let feeValue, packetValue, dstChainId, dstAddress, txId, transferHash, payload;
+    let value = 100;
+    const refundFee = 1000000;
+    expect(await tokenUpgrade1.setRefundFee(refundFee)).not.to.be.reverted;
+    const startOwnerTokenBalance = await tokenUpgrade1.balanceOf(owner.address);
+    await expect(tokenUpgrade1.crossChainTransfer(currentChainIds[1], owner.address, user.address, value))
+        .to.emit(tokenUpgrade1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(tokenUpgrade2.address);
+    expect(txId).to.equal(0);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(startOwnerTokenBalance.sub(value));
+
+    let refundTransferHash, refundUserAddress, refundAmount, refundTokenAddress;
+    await expect(tokenUpgrade1.addRefundRequest(transferHash))
+        .to.be.revertedWith("AR: small value");
+    await expect(tokenUpgrade1.addRefundRequest(transferHash, {value: refundFee}))
+        .to.emit(tokenUpgrade1, 'AddRefundRequestEvent')
+        .withArgs(
+            (value) => {refundTransferHash = value; return true;},
+            (value) => {refundUserAddress = value; return true;},
+            (value) => {refundAmount = value; return true;},
+            (value) => {refundTokenAddress = value; return true;},
+        );
+    expect(refundTransferHash).to.equal(transferHash);
+    expect(refundUserAddress).to.equal(owner.address);
+    expect(refundAmount).to.equal(value);
+    expect(refundTokenAddress).to.equal(tokenUpgrade1.address);
+
+    await expect(tokenUpgrade1.initAsterizmTransfer(dstChainId, txId, transferHash))
+        .to.be.revertedWith("AR: transfer was refunded");
+  });
+  it("Should reject refunded transfer in dst chain", async function () {
+    let feeValue, packetValue, dstChainId, dstAddress, txId, transferHash, payload;
+    let value = 100;
+    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, user, currentChainIds } = await loadFixture(deployContractsFixture);
+    await expect(tokenUpgrade1.crossChainTransfer(currentChainIds[1], owner.address, user.address, value))
+        .to.emit(tokenUpgrade1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(tokenUpgrade2.address);
+    expect(txId).to.equal(0);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    await expect(tokenUpgrade1.initAsterizmTransfer(dstChainId, txId, transferHash))
+        .to.emit(translator1, 'SendMessageEvent')
+        .withArgs(
+            (value) => {feeValue = value; return true;},
+            (value) => {packetValue = value; return true;},
+        );
+    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint64', 'uint', 'uint64', 'uint', 'uint', 'bool', 'bytes32'], packetValue);
+    expect(decodedValue[0]).to.equal(currentChainIds[0]); // srcChainId
+    expect(decodedValue[1]).to.equal(tokenUpgrade1.address); // srcAddress
+    expect(decodedValue[2]).to.equal(currentChainIds[1]); // dstChainId
+    expect(decodedValue[3]).to.equal(tokenUpgrade2.address); // dstAddress
+    expect(feeValue).to.equal(0); // feeValue
+    expect(decodedValue[4]).to.equal(0); // txId
+    expect(decodedValue[5]).to.equal(true); // transferResultNotifyFlag
+    expect(decodedValue[6]).to.equal(transferHash); // transferHash
+    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(
+        (TOKEN_AMOUNT.sub(value))
+    );
+    await expect(translator2.transferMessage(300000, packetValue))
+        .to.emit(tokenUpgrade2, 'PayloadReceivedEvent');
+    expect(await tokenUpgrade2.confirmRefund(transferHash)).not.to.be.reverted;
+
+    await expect(tokenUpgrade2.asterizmClReceive(currentChainIds[0], tokenUpgrade1.address, decodedValue[4], decodedValue[6], payload))
+        .to.be.revertedWith("AR: transfer was refunded");
   });
 });

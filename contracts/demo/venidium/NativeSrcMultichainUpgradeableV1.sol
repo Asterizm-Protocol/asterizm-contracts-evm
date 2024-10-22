@@ -46,7 +46,7 @@ contract NativeSrcMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
     /// @param _from address  From address
     /// @param _to uint  To address in uint format
     function crossChainTransfer(uint64 _dstChainId, address _from, uint _to, uint _amount) public payable {
-        require(_amount > 0, "NativeSrcMultichain: amount too small");
+        require(_amount > 0, "NSM: amount too small");
         tokenAddress.safeTransferFrom(_from, address(this), _amount);
         uint amount = execFeeLogic(address(tokenAddress), _amount, true);
         bytes32 transferHash = _initAsterizmTransferEvent(_dstChainId, abi.encode(_to, amount, _getTxId()));
@@ -57,7 +57,7 @@ contract NativeSrcMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal override {
         (uint dstAddressUint, uint amount, ) = abi.decode(_dto.payload, (uint, uint, uint));
-        require(tokenAddress.balanceOf(address(this)) >= amount, "NativeSrcMultichain: insufficient token funds");
+        require(tokenAddress.balanceOf(address(this)) >= amount, "NSM: insufficient token funds");
         tokenAddress.safeTransfer(dstAddressUint.toAddress(), amount);
     }
 

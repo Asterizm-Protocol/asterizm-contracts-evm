@@ -380,6 +380,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
     function _initAsterizmTransferPrivate(ClInitTransferRequestDto memory _dto) private
         onlyExistsOutboundTransfer(_dto.transferHash)
         onlyNotExecutedOutboundTransfer(_dto.transferHash)
+        onlyNotRefundedTransferOnSrcChain(_dto.transferHash)
     {
         require(address(this).balance >= _dto.feeAmount, "AsterizmClient: contract balance is not enough");
         require(_dto.txId <= _getTxId(), "AsterizmClient: wrong txId param");
@@ -435,6 +436,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
         onlyOwnerOrInitializer
         onlyTrustedAddress(_dto.srcChainId, _dto.srcAddress)
         onlyNonExecuted(_dto.transferHash)
+        onlyNotRefundedTransferOnDstChain(_dto.transferHash)
     {
         inboundTransfers[_dto.transferHash].successReceive = true;
         emit PayloadReceivedEvent(_dto.srcChainId, _dto.srcAddress, _dto.txId, _dto.transferHash);
@@ -459,6 +461,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
         onlyTrustedTransfer(_dto.transferHash)
         onlyNonExecuted(_dto.transferHash)
         onlyValidTransferHash(_dto)
+        onlyNotRefundedTransferOnDstChain(_dto.transferHash)
     {
         _asterizmReceive(_dto);
         inboundTransfers[_dto.transferHash].successExecute = true;

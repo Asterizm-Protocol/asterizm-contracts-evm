@@ -44,7 +44,7 @@ contract StableDstMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
     /// @param _to uint  To address in uint format
     function crossChainTransfer(uint64 _dstChainId, address _from, uint _to, uint _amount) public payable {
         uint amount = _debitFrom(_from, _amount); // amount returned should not have dust
-        require(amount > 0, "StableDstMultichain: amount too small");
+        require(amount > 0, "SDM: amount too small");
         bytes32 transferHash = _initAsterizmTransferEvent(_dstChainId, abi.encode(_to, amount, _getTxId()));
         _addRefundTransfer(transferHash, _from, amount, address(this));
     }
