@@ -17,7 +17,6 @@ task("venidium:deployNativeSrc", "Deploy venidium native src contract")
     .addPositionalParam("initializerAddress", "Initializer contract address")
     .addPositionalParam("externalTokenAddress", "External token address")
     .addPositionalParam("feeBaseAddress", "Base fee address")
-    .addPositionalParam("feeProviderAddress", "Provider fee address")
     .addPositionalParam("feeBase", "Fee base param", '1000')
     .addPositionalParam("feeMul", "Fee multiplier param", '2')
     .addPositionalParam("initSupply", "Initial token supply", '0')
@@ -30,7 +29,7 @@ task("venidium:deployNativeSrc", "Deploy venidium native src contract")
         let tx;
         const gasPrice = parseInt(taskArgs.gasPrice);
         console.log("Deploying venidium native src contract...");
-        const token = await upgrades.deployProxy(Token, [initializer.address, BigNumber.from(taskArgs.initSupply), taskArgs.decimals, taskArgs.externalTokenAddress, taskArgs.feeBaseAddress, taskArgs.feeProviderAddress], {
+        const token = await upgrades.deployProxy(Token, [initializer.address, BigNumber.from(taskArgs.initSupply), taskArgs.decimals, taskArgs.externalTokenAddress, taskArgs.feeBaseAddress], {
             initialize: 'initialize',
             kind: 'uups',
         });

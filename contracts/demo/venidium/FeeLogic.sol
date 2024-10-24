@@ -14,7 +14,6 @@ abstract contract FeeLogic is OwnableUpgradeable {
     event UpdateFeeParamsEvent(uint _feeBase, uint _feeMul);
 
     address internal feeBaseAddress;
-    address internal feeProviderAddress;
     uint public feeBase;
     uint public feeMul; // example: feeBase + feeMul = 1002 or 100.2%
 
@@ -22,12 +21,6 @@ abstract contract FeeLogic is OwnableUpgradeable {
     /// @return address  Fee base address
     function getFeeBaseAddress() external view returns(address) {
         return feeBaseAddress;
-    }
-
-    /// Return fee provider address
-    /// @return address  Fee provider address
-    function getFeeProviderAddress() external view returns(address) {
-        return feeProviderAddress;
     }
 
     /// Set system fee (only for owner)
@@ -60,20 +53,16 @@ abstract contract FeeLogic is OwnableUpgradeable {
     /// _token address  Amount token address (0 - native)
     /// _fee uint  Transfer fee for all providers
     function transferFees(address _tokenAddress, uint _fee) private {
-        uint singleFee = _fee / 2;
-        if (singleFee == 0) {
+        if (_fee == 0) {
             return;
         }
 
         if (_tokenAddress == address(0)) {
-            (bool successFirst, ) = feeBaseAddress.call{value: singleFee}("");
+            (bool successFirst, ) = feeBaseAddress.call{value: _fee}("");
             require(successFirst, "FeeLogic: first transfer error");
-            (bool successSecond, ) = feeProviderAddress.call{value: singleFee}("");
-            require(successSecond, "FeeLogic: second transfer error");
         } else {
             IERC20 token = IERC20(_tokenAddress);
-            token.safeTransfer(feeBaseAddress, singleFee);
-            token.safeTransfer(feeProviderAddress, singleFee);
+            token.safeTransfer(feeBaseAddress, _fee);
         }
     }
 

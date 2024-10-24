@@ -21,15 +21,13 @@ contract NativeSrcMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
     /// @param _decimals uint8  Decimals
     /// @param _tokenAddress IERC20  Expectation token address
     /// @param _feeBaseAddress address  Base fee address
-    /// @param _feeProviderAddress address  Base fee address
-    function initialize(IInitializerSender _initializerLib, uint _initialSupply, uint8 _decimals, IERC20 _tokenAddress, address _feeBaseAddress, address _feeProviderAddress) initializer public {
+    function initialize(IInitializerSender _initializerLib, uint _initialSupply, uint8 _decimals, IERC20 _tokenAddress, address _feeBaseAddress) initializer public {
         __AsterizmClientUpgradeable_init(_initializerLib, true, false);
         __ERC20_init("UnknownTokenNS", "UTNS");
         _mint(_msgSender(), _initialSupply);
         tokenAddress = _tokenAddress;
         customDecimals = _decimals;
         feeBaseAddress = _feeBaseAddress;
-        feeProviderAddress = _feeProviderAddress;
         tokenWithdrawalIsDisable = true;
         refundLogicIsAvailable = true;
     }

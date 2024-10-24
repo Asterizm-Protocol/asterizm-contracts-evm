@@ -16,7 +16,6 @@ async function deployBase(hre, initializerAddress) {
 task("venidium:deployNativeDst", "Deploy venidium native dst contract")
     .addPositionalParam("initializerAddress", "Initializer contract address")
     .addPositionalParam("feeBaseAddress", "Base fee address")
-    .addPositionalParam("feeProviderAddress", "Provider fee address")
     .addPositionalParam("feeBase", "Fee base param", '1000')
     .addPositionalParam("feeMul", "Fee multiplier param", '2')
     .addPositionalParam("initSupply", "Initial token supply", '0')
@@ -29,7 +28,7 @@ task("venidium:deployNativeDst", "Deploy venidium native dst contract")
         let tx;
         const gasPrice = parseInt(taskArgs.gasPrice);
         console.log("Deploying venidium native dst contract...");
-        const token = await upgrades.deployProxy(Token, [initializer.address, BigNumber.from(taskArgs.initSupply), taskArgs.decimals, taskArgs.feeBaseAddress, taskArgs.feeProviderAddress], {
+        const token = await upgrades.deployProxy(Token, [initializer.address, BigNumber.from(taskArgs.initSupply), taskArgs.decimals, taskArgs.feeBaseAddress], {
             initialize: 'initialize',
             kind: 'uups',
         });

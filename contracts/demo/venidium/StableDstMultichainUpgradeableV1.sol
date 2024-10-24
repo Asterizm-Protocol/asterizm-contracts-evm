@@ -19,14 +19,12 @@ contract StableDstMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
     /// @param _initialSupply uint  Initial supply
     /// @param _decimals uint8  Decimals
     /// @param _feeBaseAddress address  Base fee address
-    /// @param _feeProviderAddress address  Base fee address
-    function initialize(IInitializerSender _initializerLib, uint _initialSupply, uint8 _decimals, address _feeBaseAddress, address _feeProviderAddress) initializer public {
+    function initialize(IInitializerSender _initializerLib, uint _initialSupply, uint8 _decimals, address _feeBaseAddress) initializer public {
         __AsterizmClientUpgradeable_init(_initializerLib, true, false);
         __ERC20_init("UnknownTokenSD", "UTSD");
         _mint(_msgSender(), _initialSupply);
         customDecimals = _decimals;
         feeBaseAddress = _feeBaseAddress;
-        feeProviderAddress = _feeProviderAddress;
         tokenWithdrawalIsDisable = true;
         refundLogicIsAvailable = true;
     }

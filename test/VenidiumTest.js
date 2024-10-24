@@ -56,24 +56,24 @@ describe("Venidium logic", function () {
         await token1.deployed();
         const token2 = await Token.deploy(initializer1.address, TOKEN_AMOUNT.toString());
         await token2.deployed();
-        const tokenNativeSrc = await upgrades.deployProxy(TokenNativeSrc, [initializer1.address, '0', decimals, token1.address, feeBaseUser.address, feeProviderUser.address], {
+        const tokenNativeSrc = await upgrades.deployProxy(TokenNativeSrc, [initializer1.address, '0', decimals, token1.address, feeBaseUser.address], {
             initialize: 'initialize',
             kind: 'uups',
         });
         await tokenNativeSrc.deployed();
-        const tokenNativeDst = await upgrades.deployProxy(TokenNativeDst, [initializer2.address, '0', decimals, feeBaseUser.address, feeProviderUser.address], {
+        const tokenNativeDst = await upgrades.deployProxy(TokenNativeDst, [initializer2.address, '0', decimals, feeBaseUser.address], {
             initialize: 'initialize',
             kind: 'uups',
         });
         await tokenNativeDst.deployed();
         await tokenNativeSrc.addTrustedAddresses(currentChainIds, [tokenNativeSrc.address, tokenNativeDst.address]);
         await tokenNativeDst.addTrustedAddresses(currentChainIds, [tokenNativeSrc.address, tokenNativeDst.address]);
-        const tokenStableSrc = await upgrades.deployProxy(TokenStableSrc, [initializer1.address, '0', decimals, token2.address, feeBaseUser.address, feeProviderUser.address], {
+        const tokenStableSrc = await upgrades.deployProxy(TokenStableSrc, [initializer1.address, '0', decimals, token2.address, feeBaseUser.address], {
             initialize: 'initialize',
             kind: 'uups',
         });
         await tokenStableSrc.deployed();
-        const tokenStableDst = await upgrades.deployProxy(TokenStableDst, [initializer2.address, '0', decimals, feeBaseUser.address, feeProviderUser.address], {
+        const tokenStableDst = await upgrades.deployProxy(TokenStableDst, [initializer2.address, '0', decimals, feeBaseUser.address], {
             initialize: 'initialize',
             kind: 'uups',
         });
@@ -244,7 +244,6 @@ describe("Venidium logic", function () {
         const value = 10;
         const valueWithDecimals = BigNumber.from(value).mul(pow);
         const valueFee = valueWithDecimals.mul(feeMul).div(feeBase);
-        const agentFee = valueFee.div(2);
         const resultValueWithDecimals = valueWithDecimals.sub(valueFee);
         const startUserNativeBalance = await ethers.provider.getBalance(user.address);
         expect(await tokenNativeSrc.setFeeParams(feeBase, feeMul)).not.to.be.reverted;
@@ -268,8 +267,7 @@ describe("Venidium logic", function () {
         expect(transferHash).to.not.null;
         expect(payload).to.not.null;
         expect(await token1.balanceOf(tokenNativeSrc.address)).to.equal(resultValueWithDecimals);
-        expect(await token1.balanceOf(feeBaseUser.address)).to.equal(agentFee);
-        expect(await token1.balanceOf(feeProviderUser.address)).to.equal(agentFee);
+        expect(await token1.balanceOf(feeBaseUser.address)).to.equal(valueFee);
         let feeValue, packetValue;
         await expect(tokenNativeSrc.initAsterizmTransfer(dstChainId, txId, transferHash))
             .to.emit(translator1, 'SendMessageEvent')
@@ -295,7 +293,6 @@ describe("Venidium logic", function () {
         const startUserTokenBalance = await token1.balanceOf(user.address);
         const startContractCoinBalance = await ethers.provider.getBalance(tokenNativeDst.address);
         const startFeeBaseUserCoinBalance = await ethers.provider.getBalance(feeBaseUser.address);
-        const startFeeProviderUserCoinBalance = await ethers.provider.getBalance(feeProviderUser.address);
         const startContractTokenBalance = await token1.balanceOf(tokenNativeSrc.address);
         await expect(tokenNativeDst.crossChainTransfer(currentChainIds[0], user.address, user.address, valueWithDecimals, {value: valueWithDecimals}))
             .to.emit(tokenNativeDst, 'InitiateTransferEvent')
@@ -312,8 +309,7 @@ describe("Venidium logic", function () {
         expect(transferHash).to.not.null;
         expect(payload).to.not.null;
         expect(await ethers.provider.getBalance(tokenNativeDst.address)).to.equal(startContractCoinBalance.add(resultValueWithDecimals));
-        expect(await ethers.provider.getBalance(feeBaseUser.address)).to.equal(startFeeBaseUserCoinBalance.add(agentFee));
-        expect(await ethers.provider.getBalance(feeProviderUser.address)).to.equal(startFeeProviderUserCoinBalance.add(agentFee));
+        expect(await ethers.provider.getBalance(feeBaseUser.address)).to.equal(startFeeBaseUserCoinBalance.add(valueFee));
         await expect(tokenNativeDst.initAsterizmTransfer(dstChainId, txId, transferHash))
             .to.emit(translator2, 'SendMessageEvent')
             .withArgs(
@@ -474,7 +470,6 @@ describe("Venidium logic", function () {
         const value = 10;
         let valueWithDecimals = BigNumber.from(value).mul(pow);
         let valueFee = valueWithDecimals.mul(feeMul).div(feeBase);
-        let agentFee = valueFee.div(2);
         let resultValueWithDecimals = valueWithDecimals.sub(valueFee);
         const startOwnerTokenBalance = await token2.balanceOf(owner.address);
         expect(await tokenStableSrc.setFeeParams(feeBase, feeMul)).not.to.be.reverted;
@@ -495,8 +490,7 @@ describe("Venidium logic", function () {
         expect(payload).to.not.null;
         expect(await token2.balanceOf(owner.address)).to.equal(startOwnerTokenBalance.sub(valueWithDecimals));
         expect(await token2.balanceOf(tokenStableSrc.address)).to.equal(resultValueWithDecimals);
-        expect(await token2.balanceOf(feeBaseUser.address)).to.equal(agentFee);
-        expect(await token2.balanceOf(feeProviderUser.address)).to.equal(agentFee);
+        expect(await token2.balanceOf(feeBaseUser.address)).to.equal(valueFee);
         let feeValue, packetValue;
         await expect(tokenStableSrc.initAsterizmTransfer(dstChainId, txId, transferHash))
             .to.emit(translator1, 'SendMessageEvent')
@@ -521,7 +515,6 @@ describe("Venidium logic", function () {
 
         valueWithDecimals = await tokenStableDst.balanceOf(owner.address);
         valueFee = valueWithDecimals.mul(feeMul).div(feeBase);
-        agentFee = valueFee.div(2);
         resultValueWithDecimals = valueWithDecimals.sub(valueFee);
         expect(await tokenStableDst.setFeeParams(feeBase, feeMul)).not.to.be.reverted;
         const startOwnerStableTokenBalance = await token2.balanceOf(owner.address);
@@ -543,7 +536,6 @@ describe("Venidium logic", function () {
         expect(await tokenStableDst.balanceOf(owner.address)).to.equal(0);
         expect(await tokenStableDst.totalSupply()).to.equal(0);
         expect(await tokenStableDst.balanceOf(feeBaseUser.address)).to.equal(0);
-        expect(await tokenStableDst.balanceOf(feeProviderUser.address)).to.equal(0);
         await expect(tokenStableDst.initAsterizmTransfer(dstChainId, txId, transferHash))
             .to.emit(translator2, 'SendMessageEvent')
             .withArgs(
