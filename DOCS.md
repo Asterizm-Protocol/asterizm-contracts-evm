@@ -25,15 +25,14 @@ In the strict sequential mode, the Initializer Contract employs the [Nonce Contr
 In parallel mode, the Client Server in the recipient chain is responsible for maintaining the order of execution.
 
 ## Key Variables
-- `translator`: The address of the Translator Contract
+- `translatorLib`: The address of the Translator Contract
 - `blockAddresses`: Blocking address list map that can not call `initTransfer`, `receivePayload` and `receiveEncryptedPayload` methods
-- `sendedTransfers`: Sent transfers list map that was transferred through initializer (successIncome - transfer success income, successOutgoing - transfer success outgoing)
+- `ingoingTransfers` and `outgoingTransfers`: ingoing and outgoing transfers mappings that was transferred through initializer
 
 ## Key Methods
 - `initTransfer`: A method to send messages to the Translator Contract
 - `receivePayload`: A method to receive and process public data from the Translator Contract
-- `validIncomeTarnsferHash`: A method to validate transfers that were income in initializer
-- `validOutgoingTarnsferHash`: A method to validate transfers that were successfully outgoing from initializer
+- `validIncomeTransferHash`: A method to validate transfers that were income in initializer
 
 # [Client Contract](./contracts/base/AsterizmClientUpgradeable.sol)
 ## Purpose:
@@ -43,11 +42,10 @@ The Client Contract is responsible for receiving and processing events from othe
 In the encrypted data mode, the contract first receives encrypted bytecode. After the encrypted bytecode has been processed by the client server, the decrypted data is received by the contract and processed according to its logic. In the case of working with unencrypted data, the first step is omitted and the contract immediately processes the received bytecode according to its logic.
 
 ## Key Variables:
-- `initializer`: The address of the Initializer Contract
+- `initializerLib`: The address of the Initializer Contract
 - `txId`: Internal transaction ID
-- `trustedSrcAddresses`: List ot trusted source addresses. You need to add your own contract addresses in all chains to ensure transfers are not tampered with!
-- `admins`: Additional addresses list who can execute some internal functions
-- `transfers`: Transfers hash list for internal checking logic
+- `trustedAddresses`: List ot trusted source addresses. You need to add your own contract addresses in all chains to ensure transfers are not tampered with!
+- `inboundTransfers` and `outboundTransfers`: Transfers hash lists for internal checking logic
 
 ## Base Contract Methods:
 - `asterizmIzReceive`: This method is receiving transfers from initializer.
