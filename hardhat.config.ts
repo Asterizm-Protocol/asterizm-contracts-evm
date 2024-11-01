@@ -254,6 +254,16 @@ const config = {
       accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
       chainId: 51
     },
+    lemonMainnet: {
+      url: process.env.NETWORK_HOST_LEMON,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 1006
+    },
+    lemonTestnet: {
+      url: process.env.NETWORK_HOST_LEMON_TESTNET,
+      accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
+      chainId: 1005
+    },
   },
   etherscan: {
     apiKey: {
