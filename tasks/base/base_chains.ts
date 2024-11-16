@@ -6,7 +6,7 @@ export const Chains = {
         {
             id: 1,
             title: "ETH", // Ethereum
-            networkName: "mainnet",
+            networkName: "ethereumMainnet",
             chainType: ChainTypes.EVM,
             contractAddresses: {
                 translator: {
@@ -48,7 +48,7 @@ export const Chains = {
         {
             id: 137,
             title: "POL", // Polygon
-            networkName: "polygon",
+            networkName: "polygonMainnet",
             chainType: ChainTypes.EVM,
             contractAddresses: {
                 translator: {
@@ -90,7 +90,7 @@ export const Chains = {
         {
             id: 250,
             title: "FTM", // Fantom
-            networkName: "opera",
+            networkName: "fantomMainnet",
             chainType: ChainTypes.EVM,
             contractAddresses: {
                 translator: {
@@ -130,7 +130,7 @@ export const Chains = {
         {
             id: 56,
             title: "BSC", // Bsc
-            networkName: "bsc",
+            networkName: "bscMainnet",
             chainType: ChainTypes.EVM,
             contractAddresses: {
                 translator: {
@@ -254,7 +254,7 @@ export const Chains = {
         {
             id: 43114,
             title: "AVA", // Avalanche
-            networkName: "avalanche",
+            networkName: "avalancheMainnet",
             chainType: ChainTypes.EVM,
             contractAddresses: {
                 translator: {
@@ -915,6 +915,43 @@ export const Chains = {
                 asterizmRouter: '0x0000000000000000000000000000000000000000',
             },
         },
+        {
+            id: 1006,
+            title: "LMN", // Lemon
+            networkName: "lemonMainnet",
+            chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0xac8D042B7C6cC92fCBdFd259324f602d541ded07',
+                    uint: '985091180901367840761599141252388610288339774727',
+                },
+                initializer: {
+                    address: '0xA55BDd1701D370cE9E2fb66EC0f934F3Dd981571',
+                    uint: '944032104643112257033211217745989932066289489265',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+            },
+            stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+                baseRouter: '0x0000000000000000000000000000000000000000',
+                asterizmRouter: '0x0000000000000000000000000000000000000000',
+            },
+        },
     ],
 
     // TESTNET CHAINS
@@ -1047,7 +1084,7 @@ export const Chains = {
         {
             id: 4002,
             title: "FTM", // Fantom Testnet
-            networkName: "operaTestnet",
+            networkName: "fantomTestnet",
             chainType: ChainTypes.EVM,
             contractAddresses: {
                 translator: {

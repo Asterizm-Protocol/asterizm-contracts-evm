@@ -79,7 +79,7 @@ const config = {
       ],
       chainId: 31337
     },
-    mainnet: {
+    ethereumMainnet: {
       url: process.env.NETWORK_HOST_ETHEREUM,
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 1
@@ -104,7 +104,7 @@ const config = {
         vaultAccountIds: process.env.FIREBLOCKS_VAULT_ACCOUNT_IDS,
       }
     },
-    polygon: {
+    polygonMainnet: {
       url: process.env.NETWORK_HOST_POLYGON,
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 137
@@ -114,7 +114,7 @@ const config = {
       accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
       chainId: 80001
     },
-    bsc: {
+    bscMainnet: {
       url: process.env.NETWORK_HOST_BSC,
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 56
@@ -129,7 +129,7 @@ const config = {
       accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
       chainId: 5611
     },
-    avalanche: {
+    avalancheMainnet: {
       url: process.env.NETWORK_HOST_AVALANCHE,
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 43114
@@ -144,12 +144,12 @@ const config = {
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 42161
     },
-    opera: {
+    fantomMainnet: {
       url: process.env.NETWORK_HOST_FANTOM,
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 250
     },
-    operaTestnet: {
+    fantomTestnet: {
       url: process.env.NETWORK_HOST_FANTOM_TESTNET,
       accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
       chainId: 4002
@@ -257,7 +257,8 @@ const config = {
     lemonMainnet: {
       url: process.env.NETWORK_HOST_LEMON,
       accounts: [process.env.OWNER_PK_ASTERIZM],
-      chainId: 1006
+      chainId: 1006,
+      timeout: 300000 // 5min for approval waiting
     },
     lemonTestnet: {
       url: process.env.NETWORK_HOST_LEMON_TESTNET,
@@ -267,13 +268,13 @@ const config = {
   },
   etherscan: {
     apiKey: {
-      mainnet: process.env.ETHERSCAN_API_KEY,
-      polygon: process.env.POLYGONSCAN_API_KEY,
-      bsc: process.env.BSCSCAN_API_KEY,
-      avalanche: process.env.AVALANCHESCAN_API_KEY,
+      ethereumMainnet: process.env.ETHERSCAN_API_KEY,
+      polygonMainnet: process.env.POLYGONSCAN_API_KEY,
+      bscMainnet: process.env.BSCSCAN_API_KEY,
+      avalancheMainnet: process.env.AVALANCHESCAN_API_KEY,
       optimisticEthereum: process.env.OPTIMISMSCAN_API_KEY,
       arbitrumOne: process.env.ARBIRTUMSCAN_API_KEY,
-      opera: process.env.FANTOMSCAN_API_KEY,
+      fantomMainnet: process.env.FANTOMSCAN_API_KEY,
       moonbeam: process.env.MOONSCAN_API_KEY,
       ethereumSepolia: process.env.ETHERSCAN_API_KEY,
       celo: process.env.CELOSCAN_API_KEY,
@@ -287,7 +288,47 @@ const config = {
     },
     customChains: [
       {
-        network: "avalanche",
+        network: "ethereumMainnet",
+        chainId: 1,
+        urls: {
+          apiURL: "https://etherscan.io/api",
+          browserURL: "https://etherscan.io/"
+        }
+      },
+      {
+        network: "bscMainnet",
+        chainId: 56,
+        urls: {
+          apiURL: "https://bscscan.com/api",
+          browserURL: "https://bscscan.com/"
+        }
+      },
+      {
+        network: "polygonMainnet",
+        chainId: 137,
+        urls: {
+          apiURL: "https://polygonscan.com/api",
+          browserURL: "https://polygonscan.com/"
+        }
+      },
+      {
+        network: "fantomMainnet",
+        chainId: 250,
+        urls: {
+          apiURL: "https://ftmscan.com/api",
+          browserURL: "https://ftmscan.com/"
+        }
+      },
+      {
+        network: "fantomTestnet",
+        chainId: 4002,
+        urls: {
+          apiURL: "https://testnet.ftmscan.com/api",
+          browserURL: "https://testnet.ftmscan.com/"
+        }
+      },
+      {
+        network: "avalancheMainnet",
         chainId: 43114,
         urls: {
           apiURL: "https://api.avascan.info/v2/network/mainnet/evm/43114/etherscan",
