@@ -150,6 +150,19 @@ contract AsterizmTranslatorChainlink is CCIPReceiver, ITranslator, AsterizmEnv, 
         _;
     }
 
+    /// Only allow relay modifier
+    /// @param _dto Client.Any2EVMMessage  Chainlink message dto
+    modifier onlyAllowRelay(Client.Any2EVMMessage memory _dto) {
+        (uint64 srcChainId, , , , , ,) = abi.decode(_dto.data, (uint64, uint, uint64, uint, uint, bool, bytes32));
+        require(
+            chains[srcChainId].exists &&
+            chains[srcChainId].chainSelector == _dto.sourceChainSelector &&
+            chains[srcChainId].relayAddress == address(uint160(bytes20(_dto.sender))),
+            "TranslatorChainlink: only alloy relay"
+        );
+        _;
+    }
+
     /** Internal logic */
 
     /// Withdraw coins
@@ -405,7 +418,7 @@ contract AsterizmTranslatorChainlink is CCIPReceiver, ITranslator, AsterizmEnv, 
 
     /// CCIP receiver
     /// @param _dto Client.Any2EVMMessage  Chainlink message dto
-    function _ccipReceive(Client.Any2EVMMessage memory _dto) internal override {
+    function _ccipReceive(Client.Any2EVMMessage memory _dto) internal override onlyAllowRelay(_dto) {
         _baseTransferMessage(_buildTrTransferMessageRequestDto(gasleft(), _dto.data));
     }
 
