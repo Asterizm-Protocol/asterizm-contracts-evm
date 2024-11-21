@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.28;
 
 import {IInitializerSender} from "../interfaces/IInitializerSender.sol";
 import {IClientReceiverContract} from "../interfaces/IClientReceiverContract.sol";

@@ -48,7 +48,7 @@ import './tasks/venidium/deploy_stablesrcmultichain_task';
 
 const config = {
   solidity: {
-    version: "0.8.17",
+    version: "0.8.28",
     settings: {
       optimizer: {
         enabled: true,

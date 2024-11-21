@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.28;
 
 import {IMultiChainToken} from "../interfaces/IMultiChainToken.sol";
 import {AddressLib} from "../libs/AddressLib.sol";
