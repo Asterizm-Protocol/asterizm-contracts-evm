@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "./IAsterizmEnv.sol";
-import "./IConfig.sol";
+import {IAsterizmEnv} from "./IAsterizmEnv.sol";
+import {IConfig} from "./IConfig.sol";
 
 /// Initializer receive interface
 interface IInitializerReceiver is IAsterizmEnv, IConfig {

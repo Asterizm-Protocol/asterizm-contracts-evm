@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "./IAsterizmEnv.sol";
+import {IAsterizmEnv} from "./IAsterizmEnv.sol";
 
 /// Translator interface
 interface ITranslator is IAsterizmEnv {

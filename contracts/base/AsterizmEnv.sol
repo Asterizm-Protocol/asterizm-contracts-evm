@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../interfaces/IAsterizmEnv.sol";
+import {IAsterizmEnv} from "../interfaces/IAsterizmEnv.sol";
 
 abstract contract AsterizmEnv is IAsterizmEnv {
 

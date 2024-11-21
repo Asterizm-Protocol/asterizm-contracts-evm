@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "../interfaces/IMultiChainToken.sol";
-import "../base/AsterizmClientUpgradeable.sol";
+import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import {IMultiChainToken} from "../interfaces/IMultiChainToken.sol";
+import {AsterizmClientUpgradeable, IInitializerSender, UintLib} from "../base/AsterizmClientUpgradeable.sol";
 
 contract MultiChainTokenUpgradeableV1 is IMultiChainToken, ERC20Upgradeable, AsterizmClientUpgradeable {
 

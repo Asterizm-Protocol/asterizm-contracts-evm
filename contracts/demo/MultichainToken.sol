@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "../interfaces/IMultiChainToken.sol";
-import "../base/AsterizmClient.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {IMultiChainToken} from "../interfaces/IMultiChainToken.sol";
+import {AsterizmClient, IInitializerSender, UintLib} from "../base/AsterizmClient.sol";
 
 contract MultichainToken is IMultiChainToken, ERC20, AsterizmClient {
 

@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "../interfaces/IInitializerSender.sol";
-import "../interfaces/IClientReceiverContract.sol";
-import "./AsterizmEnv.sol";
-import "./AsterizmWithdrawalUpgradeable.sol";
-import "../libs/AddressLib.sol";
-import "../libs/UintLib.sol";
-import "../libs/AsterizmHashLib.sol";
-import "./AsterizmRefundUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {IInitializerSender} from "../interfaces/IInitializerSender.sol";
+import {IClientReceiverContract} from "../interfaces/IClientReceiverContract.sol";
+import {AsterizmEnv} from "./AsterizmEnv.sol";
+import {AsterizmWithdrawalUpgradeable, IERC20} from "./AsterizmWithdrawalUpgradeable.sol";
+import {AddressLib} from "../libs/AddressLib.sol";
+import {UintLib} from "../libs/UintLib.sol";
+import {AsterizmHashLib} from "../libs/AsterizmHashLib.sol";
+import {AsterizmRefundUpgradeable} from "./AsterizmRefundUpgradeable.sol";
 
 abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, IClientReceiverContract, AsterizmEnv, AsterizmWithdrawalUpgradeable, AsterizmRefundUpgradeable {
 

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../interfaces/IMultiChainToken.sol";
-import "../libs/AddressLib.sol";
+import {IMultiChainToken} from "../interfaces/IMultiChainToken.sol";
+import {AddressLib} from "../libs/AddressLib.sol";
 
 /// Claimer demo
 contract Claimer {

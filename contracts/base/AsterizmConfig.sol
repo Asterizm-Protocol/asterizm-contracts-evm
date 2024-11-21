@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "../interfaces/IConfig.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {IConfig} from "../interfaces/IConfig.sol";
 
 /// Asterizm config contract
 abstract contract AsterizmConfig is OwnableUpgradeable, IConfig {
