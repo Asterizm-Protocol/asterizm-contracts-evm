@@ -5,7 +5,7 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {IInitializerSender} from "../interfaces/IInitializerSender.sol";
 import {IClientReceiverContract} from "../interfaces/IClientReceiverContract.sol";
 import {AsterizmEnv} from "./AsterizmEnv.sol";
-import {AsterizmWithdrawalUpgradeable, IERC20} from "./AsterizmWithdrawalUpgradeable.sol";
+import {AsterizmWithdrawalUpgradeable, IERC20, SafeERC20} from "./AsterizmWithdrawalUpgradeable.sol";
 import {AddressLib} from "../libs/AddressLib.sol";
 import {UintLib} from "../libs/UintLib.sol";
 import {AsterizmHashLib} from "../libs/AsterizmHashLib.sol";
@@ -16,6 +16,7 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, IClientReceiverC
     using AddressLib for address;
     using UintLib for uint;
     using AsterizmHashLib for bytes;
+    using SafeERC20 for IERC20;
 
     /// Set initializer event
     /// @param _initializerAddress address  Initializer address
@@ -98,6 +99,7 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, IClientReceiverC
     uint64 private localChainId;
     IERC20 private feeToken;
     uint8 constant private CHAIN_TYPE_SOL = 4;
+    uint[50] private __gap;
 
     /// Initializing function for upgradeable contracts (constructor)
     /// @param _initializerLib IInitializerSender  Initializer library address
@@ -403,7 +405,7 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, IClientReceiverC
             uint feeAmountInToken = initializerLib.getFeeAmountInTokens(externalRelay, initDto);
             if (feeAmountInToken > 0) {
                 require(feeToken.balanceOf(address(this)) >= feeAmountInToken, "AsterizmClient: fee token balance is not enough");
-                feeToken.approve(address(initializerLib), feeAmountInToken);
+                feeToken.forceApprove(address(initializerLib), feeAmountInToken);
             }
         }
 
@@ -472,8 +474,8 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, IClientReceiverC
         onlyValidTransferHash(_dto)
         onlyNotRefundedTransferOnDstChain(_dto.transferHash)
     {
-        _asterizmReceive(_dto);
         inboundTransfers[_dto.transferHash].successExecute = true;
+        _asterizmReceive(_dto);
     }
 
     /// Receive payload

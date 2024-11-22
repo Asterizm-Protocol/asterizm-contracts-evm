@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
 import {OwnerIsCreator} from "@chainlink/contracts-ccip/src/v0.8/shared/access/OwnerIsCreator.sol";
@@ -21,7 +20,6 @@ contract AsterizmTranslatorChainlink is CCIPReceiver, ITranslator, AsterizmEnv, 
     using SafeERC20 for IERC20;
     using AddressLib for address;
     using UintLib for uint;
-    using SafeMath for uint;
 
     /// Set initializer event
     /// @param _initializerAddress address
@@ -164,16 +162,6 @@ contract AsterizmTranslatorChainlink is CCIPReceiver, ITranslator, AsterizmEnv, 
     }
 
     /** Internal logic */
-
-    /// Withdraw coins
-    /// @param _target address  Target address
-    /// @param _amount uint  Amount
-    function withdraw(address _target, uint _amount) external onlyOwner {
-        require(address(this).balance >= _amount, "TranslatorChainlink: coins balance not enough");
-        (bool success, ) = _target.call{value: _amount}("");
-        require(success, "TranslatorChainlink: transfer error");
-        emit WithdrawEvent(_target, _amount);
-    }
 
     /// Add relayer
     /// @param _relayer address  Relayer address
@@ -373,8 +361,8 @@ contract AsterizmTranslatorChainlink is CCIPReceiver, ITranslator, AsterizmEnv, 
         uint feeTokenAllowance = feeToken.allowance(address(initializerLib), address(this));
         require(feeTokenAllowance >= chainlinkFee, "TranslatorChainlink: fee token allowance is not enough");
         if (chainlinkFee > 0) {
-            feeToken.transferFrom(address(initializerLib), address(this), chainlinkFee);
-            feeToken.approve(address(baseRouter), chainlinkFee);
+            feeToken.safeTransferFrom(address(initializerLib), address(this), chainlinkFee);
+            feeToken.forceApprove(address(baseRouter), chainlinkFee);
         }
 
         bytes32 messageId = baseRouter.ccipSend(chains[_dto.dstChainId].chainSelector, chainlinkMessage);
@@ -392,6 +380,11 @@ contract AsterizmTranslatorChainlink is CCIPReceiver, ITranslator, AsterizmEnv, 
     /// @param _transferHash bytes32  Transfer hash
     /// @param _senderAddress uint  Sender address
     function resendMessage(bytes32 _transferHash, uint _senderAddress) external payable onlyInitializer {
+        if (msg.value > 0) {
+            (bool success, ) = msg.sender.call{value: msg.value}("");
+            require(success, "TranslatorChainlink: transfer error");
+        }
+
         return;
     }
 

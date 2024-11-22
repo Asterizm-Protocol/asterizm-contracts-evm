@@ -20,6 +20,7 @@ abstract contract AsterizmSenderUpgradeable is OwnableUpgradeable {
     }
 
     mapping(address => Sender) internal senders;
+    uint[50] private __gap;
 
     /// Only sender modifier
     modifier onlySender {

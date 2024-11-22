@@ -69,11 +69,16 @@ abstract contract AsterizmRefundUpgradeable is AsterizmSenderUpgradeable {
     mapping(bytes32 => RefundConfirmation) public refundConfirmations;
     bool internal refundLogicIsAvailable;
     uint public refundFee;
+    uint[50] private __gap;
 
     /// Only not refunded transfer modifier
     /// @param _transferHash bytes32  Transfer hash
     modifier onlyNotRefundedTransferOnSrcChain(bytes32 _transferHash) {
-        require(!refundRequests[_transferHash].exists, "AR: transfer was refunded");
+        require(
+            !refundRequests[_transferHash].exists ||
+            (refundRequests[_transferHash].exists && refundRequests[_transferHash].rejectProcessed),
+            "AR: transfer was refunded"
+        );
         _;
     }
 
@@ -110,6 +115,7 @@ abstract contract AsterizmRefundUpgradeable is AsterizmSenderUpgradeable {
         require(refundTransfers[_transferHash].exists, "AR: refund transfer not exists");
         require(!refundRequests[_transferHash].exists, "AR: refund request exists already");
         require(!refundRequests[_transferHash].successProcessed && !refundRequests[_transferHash].rejectProcessed , "AR: refund request processed already");
+        require(msg.sender == refundTransfers[_transferHash].userAddress, "AR: wrong sender address");
         refundRequests[_transferHash].exists = true;
         if (msg.value > 0) {
             (bool success, ) = owner().call{value: msg.value}("");

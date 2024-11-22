@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "./interfaces/INonce.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {INonce} from "./interfaces/INonce.sol";
 
-/// Asterizm nonce contract
+/// Asterizm nonce contract. Deprecated
 contract AsterizmNonce is INonce, Ownable {
 
     /// Set manipulator event

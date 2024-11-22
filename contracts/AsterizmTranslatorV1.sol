@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {SafeMathUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -17,7 +16,6 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     using SafeERC20 for IERC20;
     using AddressLib for address;
     using UintLib for uint;
-    using SafeMathUpgradeable for uint;
 
     /// Set initializer event
     /// @param _initializerAddress address
@@ -144,16 +142,6 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /*******************/
     /** Internal logic */
     /*******************/
-
-    /// Withdraw coins
-    /// @param _target address  Target address
-    /// @param _amount uint  Amount
-    function withdraw(address _target, uint _amount) external onlyOwner {
-        require(address(this).balance >= _amount, "Translator: coins balance not enough");
-        (bool success, ) = _target.call{value: _amount}("");
-        require(success, "Translator: transfer error");
-        emit WithdrawEvent(_target, _amount);
-    }
 
     /// Add relayer
     /// @param _relayer address  Relayer address

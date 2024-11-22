@@ -4,7 +4,7 @@ pragma solidity ^0.8.28;
 import {IInitializerSender} from "../interfaces/IInitializerSender.sol";
 import {IClientReceiverContract} from "../interfaces/IClientReceiverContract.sol";
 import {AsterizmEnv} from "./AsterizmEnv.sol";
-import {AsterizmWithdrawal, IERC20} from "./AsterizmWithdrawal.sol";
+import {AsterizmWithdrawal, IERC20, SafeERC20} from "./AsterizmWithdrawal.sol";
 import {AddressLib} from "../libs/AddressLib.sol";
 import {UintLib} from "../libs/UintLib.sol";
 import {AsterizmHashLib} from "../libs/AsterizmHashLib.sol";
@@ -15,6 +15,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
     using AddressLib for address;
     using UintLib for uint;
     using AsterizmHashLib for bytes;
+    using SafeERC20 for IERC20;
 
     /// Set initializer event
     /// @param _initializerAddress address  Initializer address
@@ -394,7 +395,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
             uint feeAmountInToken = initializerLib.getFeeAmountInTokens(externalRelay, initDto);
             if (feeAmountInToken > 0) {
                 require(feeToken.balanceOf(address(this)) >= feeAmountInToken, "AsterizmClient: fee token balance is not enough");
-                feeToken.approve(address(initializerLib), feeAmountInToken);
+                feeToken.forceApprove(address(initializerLib), feeAmountInToken);
             }
         }
 
@@ -463,8 +464,8 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
         onlyValidTransferHash(_dto)
         onlyNotRefundedTransferOnDstChain(_dto.transferHash)
     {
-        _asterizmReceive(_dto);
         inboundTransfers[_dto.transferHash].successExecute = true;
+        _asterizmReceive(_dto);
     }
 
     /// Receive payload

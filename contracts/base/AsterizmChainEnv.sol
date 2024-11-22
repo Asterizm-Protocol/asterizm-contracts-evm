@@ -10,6 +10,8 @@ abstract contract AsterizmChainEnv is Initializable {
     uint8 constant private CHAIN_TYPE_TON = 3;
     uint8 constant private CHAIN_TYPE_SOL = 4;
 
+    uint[50] private __gap;
+
     struct ChainType {
         bool exists;
     }

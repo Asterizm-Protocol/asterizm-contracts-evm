@@ -23,6 +23,7 @@ abstract contract AsterizmWithdrawalUpgradeable is OwnableUpgradeable, Reentranc
 
     bool public coinWithdrawalIsDisable;
     bool public tokenWithdrawalIsDisable;
+    uint[50] private __gap;
 
     receive() external payable {}
     fallback() external payable {}

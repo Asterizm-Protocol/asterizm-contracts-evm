@@ -73,7 +73,11 @@ abstract contract AsterizmRefund is AsterizmSender {
     /// Only not refunded transfer modifier
     /// @param _transferHash bytes32  Transfer hash
     modifier onlyNotRefundedTransferOnSrcChain(bytes32 _transferHash) {
-        require(!refundRequests[_transferHash].exists, "AR: transfer was refunded");
+        require(
+            !refundRequests[_transferHash].exists ||
+            (refundRequests[_transferHash].exists && refundRequests[_transferHash].rejectProcessed),
+            "AR: transfer was refunded"
+        );
         _;
     }
 

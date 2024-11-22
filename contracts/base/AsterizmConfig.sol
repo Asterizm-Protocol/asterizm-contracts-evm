@@ -33,6 +33,7 @@ abstract contract AsterizmConfig is OwnableUpgradeable, IConfig {
     }
 
     mapping(address => Relay) private trustedRelays;
+    uint[50] private __gap;
 
     /// Only trusted relay modifier
     modifier onlyTrustedRelay() {

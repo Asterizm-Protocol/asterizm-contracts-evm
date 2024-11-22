@@ -220,8 +220,8 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
             IERC20 feeToken = IERC20(_dto.feeToken);
             uint feeTokenAmount = feeToken.allowance(msg.sender, address(this));
             if (feeTokenAmount > 0) {
-                feeToken.transferFrom(msg.sender, address(this), feeTokenAmount);
-                feeToken.approve(relayAddress, feeTokenAmount);
+                feeToken.safeTransferFrom(msg.sender, address(this), feeTokenAmount);
+                feeToken.forceApprove(relayAddress, feeTokenAmount);
             }
         }
 

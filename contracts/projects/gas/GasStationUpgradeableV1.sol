@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import "asterizmprotocol/contracts/evm/AsterizmClientUpgradeable.sol";
+import {AsterizmClientUpgradeable, IInitializerSender, SafeERC20, IERC20, UintLib, AddressLib} from "../../base/AsterizmClientUpgradeable.sol";
 
 contract GasStationUpgradeableV1 is AsterizmClientUpgradeable {
 
