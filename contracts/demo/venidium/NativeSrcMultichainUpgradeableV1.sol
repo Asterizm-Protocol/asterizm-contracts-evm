@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../../interfaces/IMultiChainToken.sol";
-import "../../base/AsterizmClientUpgradeable.sol";
-import "./FeeLogic.sol";
+import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import {IMultiChainToken} from "../../interfaces/IMultiChainToken.sol";
+import {AsterizmClientUpgradeable, IInitializerSender, SafeERC20, IERC20, UintLib} from "../../base/AsterizmClientUpgradeable.sol";
+import {FeeLogic} from "./FeeLogic.sol";
+import {VenidiumErrors} from "./VenidiumErrors.sol";
 
 contract NativeSrcMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable, FeeLogic, AsterizmClientUpgradeable {
 
@@ -44,7 +44,7 @@ contract NativeSrcMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
     /// @param _from address  From address
     /// @param _to uint  To address in uint format
     function crossChainTransfer(uint64 _dstChainId, address _from, uint _to, uint _amount) public payable {
-        require(_amount > 0, "NSM: amount too small");
+        require(_amount > 0, CustomError(VenidiumErrors.VENIDIUM__AMOUNT_TOO_SMALL__ERROR));
         tokenAddress.safeTransferFrom(_from, address(this), _amount);
         uint amount = execFeeLogic(address(tokenAddress), _amount, true);
         bytes32 transferHash = _initAsterizmTransferEvent(_dstChainId, abi.encode(_to, amount, _getTxId()));
@@ -55,7 +55,7 @@ contract NativeSrcMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal override {
         (uint dstAddressUint, uint amount, ) = abi.decode(_dto.payload, (uint, uint, uint));
-        require(tokenAddress.balanceOf(address(this)) >= amount, "NSM: insufficient token funds");
+        require(tokenAddress.balanceOf(address(this)) >= amount, CustomError(VenidiumErrors.VENIDIUM__BALANCE_NOT_ENOUGH__ERROR));
         tokenAddress.safeTransfer(dstAddressUint.toAddress(), amount);
     }
 

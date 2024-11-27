@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../../interfaces/IMultiChainToken.sol";
-import "../../base/AsterizmClientUpgradeable.sol";
-import "./FeeLogic.sol";
+import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import {IMultiChainToken} from "../../interfaces/IMultiChainToken.sol";
+import {AsterizmClientUpgradeable, IInitializerSender, SafeERC20, IERC20, UintLib} from "../../base/AsterizmClientUpgradeable.sol";
+import {FeeLogic} from "./FeeLogic.sol";
+import {VenidiumErrors} from "./VenidiumErrors.sol";
 
 contract NativeDstMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable, FeeLogic, AsterizmClientUpgradeable {
 
@@ -41,8 +41,8 @@ contract NativeDstMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
     /// @param _from address  From address
     /// @param _to uint  To address in uint format
     function crossChainTransfer(uint64 _dstChainId, address _from, uint _to, uint _amount) public payable {
-        require(_amount > 0, "NDM: amount too small");
-        require(msg.value >= _amount, "NDM: amount too big");
+        require(_amount > 0, CustomError(VenidiumErrors.VENIDIUM__AMOUNT_TOO_SMALL__ERROR));
+        require(msg.value >= _amount, CustomError(VenidiumErrors.VENIDIUM__AMOUNT_TOO_BIG__ERROR));
         uint amount = execFeeLogic(address(0), _amount, true);
         bytes32 transferHash = _initAsterizmTransferEvent(_dstChainId, abi.encode(_to, amount, _getTxId()));
         _addRefundTransfer(transferHash, _from, amount, address(0));
@@ -52,9 +52,9 @@ contract NativeDstMultichainUpgradeableV1 is IMultiChainToken, ERC20Upgradeable,
     /// @param _dto ClAsterizmReceiveRequestDto  Method DTO
     function _asterizmReceive(ClAsterizmReceiveRequestDto memory _dto) internal override {
         (uint dstAddressUint, uint amount, ) = abi.decode(_dto.payload, (uint, uint, uint));
-        require(address(this).balance >= amount, "NDM: insufficient native coins funds");
+        require(address(this).balance >= amount, CustomError(VenidiumErrors.VENIDIUM__BALANCE_NOT_ENOUGH__ERROR));
         (bool success, ) = dstAddressUint.toAddress().call{value: amount}("");
-        require(success, "NDM: transfer error");
+        require(success, CustomError(VenidiumErrors.VENIDIUM__TRANSFER_ERROR__ERROR));
     }
 
     /// Build packed payload (abi.encodePacked() result)
