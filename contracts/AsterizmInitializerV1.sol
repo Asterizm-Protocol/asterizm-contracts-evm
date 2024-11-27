@@ -15,12 +15,15 @@ import {AddressLib} from "./libs/AddressLib.sol";
 import {UintLib} from "./libs/UintLib.sol";
 import {AsterizmEnv} from "./base/AsterizmEnv.sol";
 import {AsterizmConfig} from "./base/AsterizmConfig.sol";
+import {AsterizmErrors} from "./base/AsterizmErrors.sol";
 
 contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, IInitializerSender, IInitializerReceiver, AsterizmEnv, AsterizmConfig {
 
     using SafeERC20 for IERC20;
     using AddressLib for address;
     using UintLib for uint;
+
+    error CustomError(uint16 _errorCode);
 
     /// Set translator event
     /// @param _translatorAddress address
@@ -104,20 +107,20 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
 
     /// Only translator modifier
     modifier onlyTranslator() {
-        require(msg.sender == address(translatorLib), "AsterizmInitializer: only translator");
+        require(msg.sender == address(translatorLib), CustomError(AsterizmErrors.INITIALIZER__ONLY_TRANSLATOR__ERROR));
         _;
     }
 
     /// Only translator modifier
     modifier onlyTranslatorOrExternalRelay() {
-        require(msg.sender == address(translatorLib) || getRelayData(msg.sender).externalRelayExists, "AsterizmInitializer: only translator or external relay");
+        require(msg.sender == address(translatorLib) || getRelayData(msg.sender).externalRelayExists, CustomError(AsterizmErrors.INITIALIZER__ONLY_TRANSLATOR_OR_EXTERNAL_RELAY__ERROR));
         _;
     }
 
     /// Only exists transfer modifier
     /// @param _transferHash bytes32  Transfer hash
     modifier onlyExistsIngoingTransfer(bytes32 _transferHash) {
-        require(ingoingTransfers[_transferHash], "AsterizmInitializer: transfer not exists");
+        require(ingoingTransfers[_transferHash], CustomError(AsterizmErrors.INITIALIZER__TRANSFER_NOT_EXISTS__ERROR));
         _;
     }
 
@@ -150,9 +153,9 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
     /// @param _target address  Target address
     /// @param _amount uint  Amount
     function withdrawCoins(address _target, uint _amount) external onlyOwner {
-        require(address(this).balance >= _amount, "AsterizmWithdrawal: coins balance not enough");
+        require(address(this).balance >= _amount, CustomError(AsterizmErrors.INITIALIZER__BALANCE_NOT_ENOUGH__ERROR));
         (bool success, ) = _target.call{value: _amount}("");
-        require(success, "AsterizmWithdrawal: transfer error");
+        require(success, CustomError(AsterizmErrors.INITIALIZER__TRANSFER_ERROR__ERROR));
         emit WithdrawCoinsEvent(_target, _amount);
     }
 
@@ -161,7 +164,7 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
     /// @param _target address  Target address
     /// @param _amount uint  Amount
     function withdrawTokens(IERC20 _token, address _target, uint _amount) external onlyOwner {
-        require(_token.balanceOf(address(this)) >= _amount, "AsterizmWithdrawal: coins balance not enough");
+        require(_token.balanceOf(address(this)) >= _amount, CustomError(AsterizmErrors.INITIALIZER__BALANCE_NOT_ENOUGH__ERROR));
         _token.safeTransfer(_target, _amount);
         emit WithdrawTokensEvent(address(_token), _target, _amount);
     }
@@ -206,8 +209,8 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
     /// Only clients can call this method
     /// @param _dto IzInitTransferV2RequestDto  Method DTO
     function initTransfer(IzInitTransferRequestDto calldata _dto) external payable {
-        require(!blockAddresses[localChainId][msg.sender.toUint()], "AsterizmInitializer: sender address is blocked");
-        require(!blockAddresses[_dto.dstChainId][_dto.dstAddress], "AsterizmInitializer: target address is blocked");
+        require(!blockAddresses[localChainId][msg.sender.toUint()], CustomError(AsterizmErrors.INITIALIZER__SENDER_ADDRESS_BLOCKED__ERROR));
+        require(!blockAddresses[_dto.dstChainId][_dto.dstAddress], CustomError(AsterizmErrors.INITIALIZER__TARGET_ADDRESS_BLOCKED__ERROR));
 
         ingoingTransfers[_dto.transferHash] = true;
         TrSendMessageRequestDto memory dto = _buildTrSendMessageRequestDto(
@@ -228,7 +231,7 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
         if (relayAddress != address(translatorLib)) { // External relays logic
             ConfigDataResponseDto memory configDto = getRelayData(_dto.relay);
             if (configDto.externalRelayExists) {
-                require(configDto.systemFee + configDto.externalRelayFee <= msg.value, "AsterizmInitializer: fee not enough");
+                require(configDto.systemFee + configDto.externalRelayFee <= msg.value, CustomError(AsterizmErrors.INITIALIZER__FEE_NOT_ENOUGH__ERROR));
                 ITranslator(_dto.relay).sendMessage{value: msg.value - configDto.systemFee}(dto);
                 translatorLib.logExternalMessage{value: configDto.systemFee}(_dto.relay, dto);
 
@@ -269,8 +272,8 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
     /// Receive payload from translator
     /// @param _dto IzReceivePayloadRequestDto  Method DTO
     function receivePayload(IzReceivePayloadRequestDto calldata _dto) external onlyTranslatorOrExternalRelay {
-        require(!blockAddresses[localChainId][_dto.dstAddress], "AsterizmInitializer: target address is blocked");
-        require(_dto.dstAddress != address(this).toUint() && _dto.dstAddress != msg.sender.toUint(), "AsterizmInitializer: wrong destination address");
+        require(!blockAddresses[localChainId][_dto.dstAddress], CustomError(AsterizmErrors.INITIALIZER__TARGET_ADDRESS_BLOCKED__ERROR));
+        require(_dto.dstAddress != address(this).toUint() && _dto.dstAddress != msg.sender.toUint(), CustomError(AsterizmErrors.INITIALIZER__WRONG_DESTINATION_ADDRESS__ERROR));
 
         IzAsterizmReceiveRequestDto memory dto = _buildIzAsterizmReceiveRequestDto(
             _dto.srcChainId, _dto.srcAddress, _dto.dstChainId,

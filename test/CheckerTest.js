@@ -199,7 +199,8 @@ describe("Checker test", function () {
         expect(transferHash).to.not.null;
         expect(payload).to.not.null;
         await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash))
-            .to.be.revertedWith("AsterizmInitializer: target address is blocked");
+            .to.be.revertedWithCustomError(initializer1, 'CustomError')
+            .withArgs(3007);
 
         await expect(initializer1.addBlockAddress(currentChainIds[0], checker1.address))
             .to.emit(initializer1, 'AddBlockAddressEvent');
@@ -218,7 +219,8 @@ describe("Checker test", function () {
         expect(transferHash).to.not.null;
         expect(payload).to.not.null;
         await expect(checker1.initAsterizmTransfer(dstChainId, txId, transferHash))
-            .to.be.revertedWith("AsterizmInitializer: sender address is blocked");
+            .to.be.revertedWithCustomError(initializer1, 'CustomError')
+            .withArgs(3006);
 
         await expect(initializer1.removeBlockAddress(currentChainIds[0], checker1.address))
             .to.emit(initializer1, 'RemoveBlockAddressEvent');

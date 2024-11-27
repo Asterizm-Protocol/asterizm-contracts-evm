@@ -8,7 +8,7 @@ import {AsterizmWithdrawal, IERC20, SafeERC20} from "./AsterizmWithdrawal.sol";
 import {AddressLib} from "../libs/AddressLib.sol";
 import {UintLib} from "../libs/UintLib.sol";
 import {AsterizmHashLib} from "../libs/AsterizmHashLib.sol";
-import {AsterizmRefund} from "./AsterizmRefund.sol";
+import {AsterizmRefund, AsterizmErrors} from "./AsterizmRefund.sol";
 
 abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, AsterizmWithdrawal, AsterizmRefund {
 
@@ -114,20 +114,20 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
 
     /// Only initializer modifier
     modifier onlyInitializer {
-        require(msg.sender == address(initializerLib), "AsterizmClient: only initializer");
+        require(msg.sender == address(initializerLib), CustomError(AsterizmErrors.CLIENT__ONLY_INITIALIZER__ERROR));
         _;
     }
 
     /// Only owner or initializer modifier
     modifier onlyOwnerOrInitializer {
-        require(msg.sender == owner() || msg.sender == address(initializerLib), "AsterizmClient: only owner or initializer");
+        require(msg.sender == owner() || msg.sender == address(initializerLib), CustomError(AsterizmErrors.CLIENT__ONLY_OWNER_OR_INITIALIZER__ERROR));
         _;
     }
 
     /// Only trusted address modifier
     /// You must add trusted addresses in production networks!
     modifier onlyTrustedAddress(uint64 _chainId, uint _address) {
-        require(trustedAddresses[_chainId].trustedAddress == _address, "AsterizmClient: wrong source address");
+        require(trustedAddresses[_chainId].trustedAddress == _address, CustomError(AsterizmErrors.CLIENT__WRONG_TRUSTED_ADDRESS__ERROR));
         _;
     }
 
@@ -136,42 +136,42 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
     /// Use this modifier for validate transfer by hash
     /// @param _transferHash bytes32  Transfer hash
     modifier onlyTrustedTransfer(bytes32 _transferHash) {
-        require(initializerLib.validIncomeTransferHash(_transferHash), "AsterizmClient: transfer hash is invalid");
+        require(initializerLib.validIncomeTransferHash(_transferHash), CustomError(AsterizmErrors.CLIENT__INVALID_HASH__ERROR));
         _;
     }
 
     /// Only received transfer modifier
     /// @param _transferHash bytes32  Transfer hash
     modifier onlyReceivedTransfer(bytes32 _transferHash) {
-        require(inboundTransfers[_transferHash].successReceive, "AsterizmClient: transfer not received");
+        require(inboundTransfers[_transferHash].successReceive, CustomError(AsterizmErrors.CLIENT__TRANSFER_NOT_RECEIVED__ERROR));
         _;
     }
 
     /// Only non-executed transfer modifier
     /// @param _transferHash bytes32  Transfer hash
     modifier onlyNonExecuted(bytes32 _transferHash) {
-        require(!inboundTransfers[_transferHash].successExecute, "AsterizmClient: transfer executed already");
+        require(!inboundTransfers[_transferHash].successExecute, CustomError(AsterizmErrors.CLIENT__TRANSFER_EXECUTED_ALREADY__ERROR));
         _;
     }
 
     /// Only exists outbound transfer modifier
     /// @param _transferHash bytes32  Transfer hash
     modifier onlyExistsOutboundTransfer(bytes32 _transferHash) {
-        require(outboundTransfers[_transferHash].successReceive, "AsterizmClient: outbound transfer not exists");
+        require(outboundTransfers[_transferHash].successReceive, CustomError(AsterizmErrors.CLIENT__OUTBOUND_TRANSFER_NOT_EXISTS__ERROR));
         _;
     }
 
     /// Only not executed outbound transfer modifier
     /// @param _transferHash bytes32  Transfer hash
     modifier onlyNotExecutedOutboundTransfer(bytes32 _transferHash) {
-        require(!outboundTransfers[_transferHash].successExecute, "AsterizmClient: outbound transfer executed already");
+        require(!outboundTransfers[_transferHash].successExecute, CustomError(AsterizmErrors.CLIENT__OUTBOUND_TRANSFER_EXECUTED_ALREADY__ERROR));
         _;
     }
 
     /// Only executed outbound transfer modifier
     /// @param _transferHash bytes32  Transfer hash
     modifier onlyExecutedOutboundTransfer(bytes32 _transferHash) {
-        require(outboundTransfers[_transferHash].successExecute, "AsterizmClient: outbound transfer not executed");
+        require(outboundTransfers[_transferHash].successExecute, CustomError(AsterizmErrors.CLIENT__OUTBOUND_TRANSFER_NOT_EXECUTED__ERROR));
         _;
     }
 
@@ -181,7 +181,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
         if (!disableHashValidation) {
             require(
                 _validTransferHash(_dto.srcChainId, _dto.srcAddress, _dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.payload, _dto.transferHash),
-                "AsterizmClient: transfer hash is invalid"
+                CustomError(AsterizmErrors.CLIENT__INVALID_HASH__ERROR)
             );
         }
         _;
@@ -227,7 +227,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
     /// Set external relay address (one-time initiation)
     /// _externalRelay address  External relay address
     function setExternalRelay(address _externalRelay) public onlyOwner {
-        require(externalRelay == address(0), "AsterizmClient: relay changing not available");
+        require(externalRelay == address(0), CustomError(AsterizmErrors.CLIENT__RELAY_CHANGING_NOT_AVAILABLE__ERROR));
         externalRelay = _externalRelay;
         emit SetExternalRelayEvent(_externalRelay);
     }
@@ -274,7 +274,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
     /// Remove trusted address
     /// @param _chainId uint64  Chain ID
     function removeTrustedAddress(uint64 _chainId) external onlyOwner {
-        require(trustedAddresses[_chainId].exists, "AsterizmClient: trusted address not found");
+        require(trustedAddresses[_chainId].exists, CustomError(AsterizmErrors.CLIENT__TRUSTED_ADDRESS_NOT_FOUND__ERROR));
         uint removingAddress = trustedAddresses[_chainId].trustedAddress;
         delete trustedAddresses[_chainId];
 
@@ -355,7 +355,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
     /// @param _dstChainId uint64  Destination chain ID
     /// @param _payload bytes  Payload
     function _initAsterizmTransferEvent(uint64 _dstChainId, bytes memory _payload) internal returns(bytes32) {
-        require(trustedAddresses[_dstChainId].exists, "AsterizmClient: trusted address not found");
+        require(trustedAddresses[_dstChainId].exists, CustomError(AsterizmErrors.CLIENT__TRUSTED_ADDRESS_NOT_FOUND__ERROR));
         uint id = txId++;
         bytes32 transferHash = _buildTransferHash(_getLocalChainId(), address(this).toUint(), _dstChainId, trustedAddresses[_dstChainId].trustedAddress, id, _payload);
         outboundTransfers[transferHash].successReceive = true;
@@ -370,7 +370,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
     /// @param _transferHash bytes32  Transfer hash
     /// @param _txId uint  Transaction ID
     function initAsterizmTransfer(uint64 _dstChainId, uint _txId, bytes32 _transferHash) external payable onlySender nonReentrant {
-        require(trustedAddresses[_dstChainId].exists, "AsterizmClient: trusted address not found");
+        require(trustedAddresses[_dstChainId].exists, CustomError(AsterizmErrors.CLIENT__TRUSTED_ADDRESS_NOT_FOUND__ERROR));
         ClInitTransferRequestDto memory dto = _buildClInitTransferRequestDto(_dstChainId, trustedAddresses[_dstChainId].trustedAddress, _txId, _transferHash, msg.value);
         _initAsterizmTransferPrivate(dto);
     }
@@ -383,8 +383,8 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
         onlyNotExecutedOutboundTransfer(_dto.transferHash)
         onlyNotRefundedTransferOnSrcChain(_dto.transferHash)
     {
-        require(address(this).balance >= _dto.feeAmount, "AsterizmClient: contract balance is not enough");
-        require(_dto.txId <= _getTxId(), "AsterizmClient: wrong txId param");
+        require(address(this).balance >= _dto.feeAmount, CustomError(AsterizmErrors.CLIENT__BALANCE_NOT_ENOUGH__ERROR));
+        require(_dto.txId <= _getTxId(), CustomError(AsterizmErrors.CLIENT__WRONG_TXID__ERROR));
 
         IzInitTransferRequestDto memory initDto = _buildIzInitTransferRequestDto(
             _dto.dstChainId, _dto.dstAddress, _dto.txId, _dto.transferHash,
@@ -394,7 +394,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
         if (address(feeToken) != address(0)) { // Token fee logic
             uint feeAmountInToken = initializerLib.getFeeAmountInTokens(externalRelay, initDto);
             if (feeAmountInToken > 0) {
-                require(feeToken.balanceOf(address(this)) >= feeAmountInToken, "AsterizmClient: fee token balance is not enough");
+                require(feeToken.balanceOf(address(this)) >= feeAmountInToken, CustomError(AsterizmErrors.CLIENT__TOKEN_BALANCE_NOT_ENOUGH__ERROR));
                 feeToken.forceApprove(address(initializerLib), feeAmountInToken);
             }
         }

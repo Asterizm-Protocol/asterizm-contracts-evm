@@ -311,7 +311,8 @@ describe("Base layer test", function () {
     expect(transferHash).to.not.null;
     expect(payload).to.not.null;
     await expect(demo1.initAsterizmTransfer(dstChainId, txId, transferHash))
-        .to.be.revertedWith("AsterizmInitializer: target address is blocked");
+        .to.be.revertedWithCustomError(initializer1, 'CustomError')
+        .withArgs(3007);
 
     await expect(initializer1.addBlockAddress(currentChainIds[0], demo1.address))
         .to.emit(initializer1, 'AddBlockAddressEvent');
@@ -330,7 +331,8 @@ describe("Base layer test", function () {
     expect(transferHash).to.not.null;
     expect(payload).to.not.null;
     await expect(demo1.initAsterizmTransfer(dstChainId, txId, transferHash))
-        .to.be.revertedWith("AsterizmInitializer: sender address is blocked");
+        .to.be.revertedWithCustomError(initializer1, 'CustomError')
+        .withArgs(3006);
 
     await expect(initializer1.removeBlockAddress(currentChainIds[0], demo1.address))
         .to.emit(initializer1, 'RemoveBlockAddressEvent');
@@ -481,9 +483,11 @@ describe("Base layer test", function () {
 
     const wrongTransferHash = '0x0000000000000000000000000000000000000000000000000000000000000001';
     await expect(demo1.resendAsterizmTransfer(wrongTransferHash, {value: resendFeeAmount}))
-        .to.be.revertedWith("AsterizmClient: outbound transfer not exists");
+        .to.be.revertedWithCustomError(demo1, 'CustomError')
+        .withArgs(4007);
     await expect(initializer1.resendTransfer(wrongTransferHash, '0x0000000000000000000000000000000000000000', {value: resendFeeAmount}))
-        .to.be.revertedWith("AsterizmInitializer: transfer not exists");
+        .to.be.revertedWithCustomError(initializer1, 'CustomError')
+        .withArgs(3003);
 
     let resendResultHash, resendResultSender, resendResultAmount;
     await expect(demo1.resendAsterizmTransfer(transferHash, {value: resendFeeAmount}))
@@ -571,7 +575,9 @@ describe("Base layer test", function () {
       externalFees, systemFees, chainSelectors
     } = await loadFixture(deployContractsFixture);
     await expect(demo1.setExternalRelay(externalTranslator1.address)).to.not.reverted;
-    await expect(demo1.setExternalRelay(externalTranslator1.address)).to.rejectedWith('AsterizmClient: relay changing not available');
+    await expect(demo1.setExternalRelay(externalTranslator1.address))
+        .to.be.revertedWithCustomError(demo1, 'CustomError')
+        .withArgs(4010);
     const newMessage = "New message with external relays logic";
     const provider = ethers.provider;
     const feeAmount = ethers.utils.parseEther("1");
@@ -625,7 +631,9 @@ describe("Base layer test", function () {
       externalFees, systemFees, chainSelectors
     } = await loadFixture(deployContractsFixture);
     await expect(demo1.setExternalRelay(externalTranslator1.address)).to.not.reverted;
-    await expect(demo1.setExternalRelay(externalTranslator1.address)).to.rejectedWith('AsterizmClient: relay changing not available');
+    await expect(demo1.setExternalRelay(externalTranslator1.address))
+        .to.be.revertedWithCustomError(demo1, 'CustomError')
+        .withArgs(4010);
     const newMessage = "New message with external relays logic and updated fees";
     const provider = ethers.provider;
     const feeAmount = ethers.utils.parseEther("1");

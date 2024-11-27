@@ -10,12 +10,15 @@ import {AddressLib} from "./libs/AddressLib.sol";
 import {UintLib} from "./libs/UintLib.sol";
 import {AsterizmEnv} from "./base/AsterizmEnv.sol";
 import {AsterizmChainEnv} from "./base/AsterizmChainEnv.sol";
+import {AsterizmErrors} from "./base/AsterizmErrors.sol";
 
 contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslator, AsterizmEnv, AsterizmChainEnv {
 
     using SafeERC20 for IERC20;
     using AddressLib for address;
     using UintLib for uint;
+
+    error CustomError(uint16 _errorCode);
 
     /// Set initializer event
     /// @param _initializerAddress address
@@ -128,13 +131,13 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
 
     /// Only initializer modifier
     modifier onlyInitializer() {
-        require(msg.sender == address(initializerLib), "Translator: only initializer");
+        require(msg.sender == address(initializerLib), CustomError(AsterizmErrors.TRANSLATOR__ONLY_INITIALIZER__ERROR));
         _;
     }
 
     /// Only relayer modifier
     modifier onlyRelayer() {
-        require(relayers[msg.sender].exists, "Translator: only relayer");
+        require(relayers[msg.sender].exists, CustomError(AsterizmErrors.TRANSLATOR__ONLY_RELAYER__ERROR));
         _;
     }
 
@@ -168,7 +171,7 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// @param _chainId uint64  Chain ID
     /// @param _chainType uint8  Chain type
     function addChain(uint64 _chainId, uint8 _chainType) public onlyOwner {
-        require(_isChainTypeAwailable(_chainType), "Translator: chain type is unavailable");
+        require(_isChainTypeAwailable(_chainType), CustomError(AsterizmErrors.TRANSLATOR__CHAIN_TYPE__ERROR));
         chains[_chainId].exists = true;
         chains[_chainId].chainType = _chainType;
         emit AddChainEvent(_chainId, _chainType);
@@ -186,7 +189,7 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// Remove chain
     /// @param _chainId uint64  Chain ID
     function removeChainById(uint64 _chainId) public onlyOwner {
-        require(localChainId != _chainId, "Translator: removing local chain");
+        require(localChainId != _chainId, CustomError(AsterizmErrors.TRANSLATOR__REMOVING_LOCAL_CHAIN__ERROR));
         delete chains[_chainId];
         emit RemoveChainEvent(_chainId);
     }
@@ -194,7 +197,7 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// Set local chain
     /// @param _chainId uint64  Chain ID
     function _setLocalChainId(uint64 _chainId) private onlyOwner {
-        require(chains[_chainId].exists, "Translator: chain is not exists");
+        require(chains[_chainId].exists, CustomError(AsterizmErrors.TRANSLATOR__CHAIN_NOT_EXISTS__ERROR));
         localChainId = _chainId;
         emit SetLocalChainEvent(_chainId);
     }
@@ -203,9 +206,9 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// @param _target address  Target address
     /// @param _amount uint  Amount
     function withdrawCoins(address _target, uint _amount) external onlyOwner {
-        require(address(this).balance >= _amount, "AsterizmWithdrawal: coins balance not enough");
+        require(address(this).balance >= _amount, CustomError(AsterizmErrors.TRANSLATOR__BALANCE_NOT_ENOUGH__ERROR));
         (bool success, ) = _target.call{value: _amount}("");
-        require(success, "AsterizmWithdrawal: transfer error");
+        require(success, CustomError(AsterizmErrors.TRANSLATOR__TRANSFER_ERROR__ERROR));
         emit WithdrawCoinsEvent(_target, _amount);
     }
 
@@ -214,7 +217,7 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// @param _target address  Target address
     /// @param _amount uint  Amount
     function withdrawTokens(IERC20 _token, address _target, uint _amount) external onlyOwner {
-        require(_token.balanceOf(address(this)) >= _amount, "AsterizmWithdrawal: coins balance not enough");
+        require(_token.balanceOf(address(this)) >= _amount, CustomError(AsterizmErrors.TRANSLATOR__BALANCE_NOT_ENOUGH__ERROR));
         _token.safeTransfer(_target, _amount);
         emit WithdrawTokensEvent(address(_token), _target, _amount);
     }
@@ -246,7 +249,7 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// @param _chainId  Chain id
     /// @return uint8  Chain type
     function getChainType(uint64 _chainId) external view returns(uint8) {
-        require(chains[_chainId].exists, "Translator: chain not found");
+        require(chains[_chainId].exists, CustomError(AsterizmErrors.TRANSLATOR__CHAIN_NOT_EXISTS__ERROR));
         return chains[_chainId].chainType;
     }
 
@@ -260,10 +263,10 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// Send transfer payload
     /// @param _dto TrSendMessageRequestDto  Method DTO
     function sendMessage(TrSendMessageRequestDto calldata _dto) external payable onlyInitializer {
-        require(chains[_dto.dstChainId].exists, "Translator: wrong chain id");
+        require(chains[_dto.dstChainId].exists, CustomError(AsterizmErrors.TRANSLATOR__WRONG_CHAIN_ID__ERROR));
         if (msg.value > 0) {
             (bool success, ) = owner().call{value: msg.value}("");
-            require(success, "Translator: transfer error");
+            require(success, CustomError(AsterizmErrors.TRANSLATOR__TRANSFER_ERROR__ERROR));
         }
 
         bytes memory payload = abi.encode(
@@ -284,10 +287,10 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// @param _externalRelayAddress address  External relay address
     /// @param _dto TrSendMessageRequestDto  Method DTO
     function logExternalMessage(address _externalRelayAddress, TrSendMessageRequestDto calldata _dto) external payable onlyInitializer {
-        require(chains[_dto.dstChainId].exists, "Translator: wrong chain id");
+        require(chains[_dto.dstChainId].exists, CustomError(AsterizmErrors.TRANSLATOR__CHAIN_NOT_EXISTS__ERROR));
         if (msg.value > 0) {
             (bool success, ) = owner().call{value: msg.value}("");
-            require(success, "Translator: transfer error");
+            require(success, CustomError(AsterizmErrors.TRANSLATOR__TRANSFER_ERROR__ERROR));
         }
 
         emit LogExternalMessageEvent(
@@ -306,7 +309,7 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     function resendMessage(bytes32 _transferHash, uint _senderAddress) external payable onlyInitializer {
         if (msg.value > 0) {
             (bool success, ) = owner().call{value: msg.value}("");
-            require(success, "Translator: transfer error");
+            require(success, CustomError(AsterizmErrors.TRANSLATOR__TRANSFER_ERROR__ERROR));
         }
 
         emit ResendFailedTransferEvent(_transferHash, _senderAddress, msg.value);
@@ -345,8 +348,8 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
         );
 
         {
-            require(dstChainId == localChainId, "Translator: wrong chain id");
-            require(dstAddress.toAddress().isContract(), "Translator: destination address is non-contract");
+            require(dstChainId == localChainId, CustomError(AsterizmErrors.TRANSLATOR__CHAIN_NOT_EXISTS__ERROR));
+            require(dstAddress.toAddress().isContract(), CustomError(AsterizmErrors.TRANSLATOR__ADDRESS_IS_NOT_CONTRACT__ERROR));
 
             initializerLib.receivePayload(_buildIzReceivePayloadRequestDto(
                 _buildBaseTransferDirectionDto(srcChainId, srcAddress, localChainId, dstAddress),

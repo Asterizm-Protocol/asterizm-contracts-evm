@@ -391,7 +391,8 @@ describe("Gas sender test", function () {
     expect(await token1.balanceOf(owner.address)).to.equal(ownerTokenBalanceBefore);
     expect(await token1.allowance(owner.address, gas_sender1.address)).to.equal(0);
     await expect(gas_sender2.asterizmClReceive(currentChainIds[0], gas_sender1.address, decodedValue[4], decodedValue[6], finalPayload))
-        .to.be.revertedWith("AsterizmClient: transfer executed already");
+        .to.be.revertedWithCustomError(gas_sender2, 'CustomError')
+        .withArgs(4006);
   });
   it("Should send money, receive tokens and withdraw tokens two times", async function () {
     let capturedValue;
@@ -583,7 +584,8 @@ describe("Gas sender test", function () {
     const initial_token_balance = await token1.balanceOf(owner.address);
     let dstChainId, dstAddress, txId, transferHash, payload, gasDstChainId, gasTxId, gasPayload;
     await expect(gas_sender3.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
-        .to.be.revertedWith("AsterizmClient: trusted address not found");
+        .to.be.revertedWithCustomError(gas_sender2, 'CustomError')
+        .withArgs(4011);
     await gas_sender3.addTrustedAddress(currentChainIds[1], gas_sender2.address);
     await expect(gas_sender3.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
         .to.emit(gas_sender3, 'InitiateTransferEvent')
@@ -645,7 +647,7 @@ describe("Gas sender test", function () {
     expect(psDstChainId).to.equal(currentChainIds[1]);
     expect(psDstAddress).to.equal(gas_sender2.address);
     expect(psTransferHash).not.null;
-    expect(ethers.utils.defaultAbiCoder.decode(['string'], psReason.toString())[0]).to.equal('AsterizmClient: wrong source address');
+    expect(psReason.toString()).to.equal('0x18c120220000000000000000000000000000000000000000000000000000000000000fa3'); // CustomError(4003)
   });
   it("Should revert transfers with outbound transfer errors", async function () {
     let valueInUsd = 100;
@@ -669,7 +671,8 @@ describe("Gas sender test", function () {
     const initial_token_balance = await token1.balanceOf(owner.address);
     let dstChainId, dstAddress, txId, transferHash, payload, gasDstChainId, gasTxId, gasPayload;
     await expect(gas_sender3.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
-        .to.be.revertedWith("AsterizmClient: trusted address not found");
+        .to.be.revertedWithCustomError(gas_sender3, 'CustomError')
+        .withArgs(4011);
     await gas_sender3.addTrustedAddress(currentChainIds[1], gas_sender2.address);
     await expect(gas_sender3.sendGas([currentChainIds[1]], [value.toString()], [address], token1.address))
         .to.emit(gas_sender3, 'InitiateTransferEvent')
@@ -699,8 +702,9 @@ describe("Gas sender test", function () {
     expect(await token1.balanceOf(owner.address)).to.equal(ownerTokenBalanceBefore);
     expect(await token1.allowance(owner.address, gas_sender3.address)).to.equal(0);
     let feeValue, PacketValue;
-    await expect(gas_sender3.initAsterizmTransfer(dstChainId, txId, failedTransferHash)).to.be
-        .revertedWith("AsterizmClient: outbound transfer not exists");
+    await expect(gas_sender3.initAsterizmTransfer(dstChainId, txId, failedTransferHash))
+        .to.be.revertedWithCustomError(gas_sender3, 'CustomError')
+        .withArgs(4007);
     await expect(gas_sender3.initAsterizmTransfer(dstChainId, txId, transferHash))
         .to.emit(translator1, 'SendMessageEvent')
         .withArgs(
@@ -717,8 +721,9 @@ describe("Gas sender test", function () {
     expect(decodedValue[4]).to.equal(txId); // txId
     expect(decodedValue[5]).to.equal(false); // transferResultNotifyFlag
     expect(decodedValue[6]).to.equal(transferHash); // transferHash
-    await expect(gas_sender3.initAsterizmTransfer(dstChainId, txId, transferHash)).to.be
-        .revertedWith("AsterizmClient: outbound transfer executed already");
+    await expect(gas_sender3.initAsterizmTransfer(dstChainId, txId, transferHash))
+        .to.be.revertedWithCustomError(gas_sender3, 'CustomError')
+        .withArgs(4008);
   });
   it("Should withdraw coins", async function () {
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, Gas, gas_sender1, gas_sender2, gas_sender3, owner, user1, currentChainIds } = await loadFixture(deployContractsFixture);
@@ -730,9 +735,9 @@ describe("Gas sender test", function () {
       value: balance
     });
     expect(await(ethers.provider.getBalance(gas_sender1.address))).to.equal(balance);
-    await expect(gas_sender1.withdrawCoins(user1.address, wrongValue)).to.be.revertedWith(
-        "AsterizmWithdrawal: coins balance not enough"
-    );
+    await expect(gas_sender1.withdrawCoins(user1.address, wrongValue))
+        .to.be.revertedWithCustomError(gas_sender1, 'CustomErrorWithdraw')
+        .withArgs(6003);
     await gas_sender1.withdrawCoins(user1.address, balance);
     expect(await(ethers.provider.getBalance(gas_sender1.address))).to.equal(0);
     expect(await(ethers.provider.getBalance(user1.address))).to.equal(userBalance.add(balance));

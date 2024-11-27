@@ -579,7 +579,8 @@ describe("Venidium logic", function () {
         expect(payload).to.not.null;
         expect(await token1.balanceOf(tokenNativeSrc.address)).to.equal(valueWithDecimals);
         await expect(tokenNativeSrc.withdrawTokens(token1.address, owner.address, valueWithDecimals))
-            .to.be.revertedWith("AsterizmWithdrawal: tokens withdrawal is disabled");
+            .to.be.revertedWithCustomError(tokenNativeSrc, 'CustomErrorWithdraw')
+            .withArgs(6002);
     });
     it("Should not withdrawal tokens with stable logic", async function () {
         let dstChainId, dstAddress, txId, transferHash, payload;
@@ -603,6 +604,7 @@ describe("Venidium logic", function () {
         expect(payload).to.not.null;
         expect(await token2.balanceOf(tokenStableSrc.address)).to.equal(valueWithDecimals);
         await expect(tokenStableSrc.withdrawTokens(token2.address, owner.address, valueWithDecimals))
-            .to.be.revertedWith("AsterizmWithdrawal: tokens withdrawal is disabled");
+            .to.be.revertedWithCustomError(tokenNativeSrc, 'CustomErrorWithdraw')
+            .withArgs(6002);
     });
 });

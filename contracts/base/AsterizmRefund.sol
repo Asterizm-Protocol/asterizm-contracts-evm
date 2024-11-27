@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {AsterizmSender} from "./AsterizmSender.sol";
+import {AsterizmSender, AsterizmErrors} from "./AsterizmSender.sol";
 
 /// Asterizm refund upgradeable contract
 abstract contract AsterizmRefund is AsterizmSender {
@@ -76,7 +76,7 @@ abstract contract AsterizmRefund is AsterizmSender {
         require(
             !refundRequests[_transferHash].exists ||
             (refundRequests[_transferHash].exists && refundRequests[_transferHash].rejectProcessed),
-            "AR: transfer was refunded"
+            CustomError(AsterizmErrors.REFUND__TRANSFER_WAS_REFUNDED__ERROR)
         );
         _;
     }
@@ -84,7 +84,7 @@ abstract contract AsterizmRefund is AsterizmSender {
     /// Only not refunded transfer modifier
     /// @param _transferHash bytes32  Transfer hash
     modifier onlyNotRefundedTransferOnDstChain(bytes32 _transferHash) {
-        require(!refundConfirmations[_transferHash].exists, "AR: transfer was refunded");
+        require(!refundConfirmations[_transferHash].exists, CustomError(AsterizmErrors.REFUND__TRANSFER_WAS_REFUNDED__ERROR));
         _;
     }
 
@@ -101,7 +101,7 @@ abstract contract AsterizmRefund is AsterizmSender {
     /// @param _amount uint  Transfer amount
     /// @param _tokenAddress address  Token address (address(0) - native coin)
     function _addRefundTransfer(bytes32 _transferHash, address _userAddress, uint _amount, address _tokenAddress) internal {
-        require(!refundTransfers[_transferHash].exists, "AR: refund transfer exists already");
+        require(!refundTransfers[_transferHash].exists, CustomError(AsterizmErrors.REFUND__REFUND_TRANSFER_EXISTS_ALREADY__ERROR));
         refundTransfers[_transferHash] = RefundTransfer(true, _userAddress, _amount, _tokenAddress);
         emit AddTransferEvent(_transferHash, _userAddress, _amount, _tokenAddress);
     }
@@ -109,16 +109,16 @@ abstract contract AsterizmRefund is AsterizmSender {
     /// Add refund request
     /// @param _transferHash bytes32  Transfer hash
     function addRefundRequest(bytes32 _transferHash) external payable {
-        require(refundLogicIsAvailable, "AR: refund logic is disabled");
-        require(msg.value >= refundFee, "AR: small value");
-        require(refundTransfers[_transferHash].exists, "AR: refund transfer not exists");
-        require(!refundRequests[_transferHash].exists, "AR: refund request exists already");
-        require(!refundRequests[_transferHash].successProcessed && !refundRequests[_transferHash].rejectProcessed, "AR: refund request processed already");
-        require(msg.sender == refundTransfers[_transferHash].userAddress, "AR: wrong sender address");
+        require(refundLogicIsAvailable, CustomError(AsterizmErrors.REFUND__REFUND_LOGIC_DISABLED__ERROR));
+        require(msg.value >= refundFee, CustomError(AsterizmErrors.REFUND__SMALL_VALUE__ERROR));
+        require(refundTransfers[_transferHash].exists, CustomError(AsterizmErrors.REFUND__REFUND_TRANSFER_NOT_EXISTS__ERROR));
+        require(!refundRequests[_transferHash].exists, CustomError(AsterizmErrors.REFUND__REFUND_REQUEST_EXISTS_ALREADY__ERROR));
+        require(!refundRequests[_transferHash].successProcessed && !refundRequests[_transferHash].rejectProcessed, CustomError(AsterizmErrors.REFUND__REFUND_TRANSFER_PROCESSED_ALREADY__ERROR));
+        require(msg.sender == refundTransfers[_transferHash].userAddress, CustomError(AsterizmErrors.REFUND__WRONG_SENDER_ADDRESS__ERROR));
         refundRequests[_transferHash].exists = true;
         if (msg.value > 0) {
             (bool success, ) = owner().call{value: msg.value}("");
-            require(success, "AR: coins transfer error");
+            require(success, CustomError(AsterizmErrors.REFUND__TRANSFER_ERROR__ERROR));
         }
 
         emit AddRefundRequestEvent(
@@ -133,10 +133,10 @@ abstract contract AsterizmRefund is AsterizmSender {
     /// @param _transferHash bytes32  Transfer hash
     /// @param _status bool  Request status (true - success, false - not success)
     function processRefundRequest(bytes32 _transferHash, bool _status) external onlySenderOrOwner {
-        require(refundLogicIsAvailable, "AR: refund logic is disabled");
-        require(refundTransfers[_transferHash].exists, "AR: refund transfer not exists");
-        require(refundRequests[_transferHash].exists, "AR: refund request not exists");
-        require(!refundRequests[_transferHash].successProcessed && !refundRequests[_transferHash].rejectProcessed , "AR: refund request processed already");
+        require(refundLogicIsAvailable, CustomError(AsterizmErrors.REFUND__REFUND_LOGIC_DISABLED__ERROR));
+        require(refundTransfers[_transferHash].exists, CustomError(AsterizmErrors.REFUND__REFUND_TRANSFER_NOT_EXISTS__ERROR));
+        require(refundRequests[_transferHash].exists, CustomError(AsterizmErrors.REFUND__REFUND_REQUEST_NOT_EXISTS__ERROR));
+        require(!refundRequests[_transferHash].successProcessed && !refundRequests[_transferHash].rejectProcessed , CustomError(AsterizmErrors.REFUND__REFUND_TRANSFER_PROCESSED_ALREADY__ERROR));
         if (_status) {
             refundRequests[_transferHash].successProcessed = true;
             refundTransfers[_transferHash].tokenAddress == address(0) ?
@@ -152,7 +152,7 @@ abstract contract AsterizmRefund is AsterizmSender {
     /// Confirm refund in destination chain
     /// @param _transferHash bytes32  Transfer hash
     function confirmRefund(bytes32 _transferHash) external onlySenderOrOwner {
-        require(refundLogicIsAvailable, "AR: refund logic is disabled");
+        require(refundLogicIsAvailable, CustomError(AsterizmErrors.REFUND__REFUND_LOGIC_DISABLED__ERROR));
         refundConfirmations[_transferHash].exists = true;
 
         emit ConfirmRefundEvent(_transferHash);
@@ -162,10 +162,10 @@ abstract contract AsterizmRefund is AsterizmSender {
     /// @param _targetAddress address  Target address
     /// @param _amount uint  Coins amount
     function _refundCoins(address _targetAddress, uint _amount) internal virtual onlySenderOrOwner {
-        require(refundLogicIsAvailable, "AR: refund logic is disabled");
-        require(address(this).balance >= _amount, "AR: coins balance not enough");
+        require(refundLogicIsAvailable, CustomError(AsterizmErrors.REFUND__REFUND_LOGIC_DISABLED__ERROR));
+        require(address(this).balance >= _amount, CustomError(AsterizmErrors.REFUND__BALANCE_NOT_ENOUGH__ERROR));
         (bool success, ) = _targetAddress.call{value: _amount}("");
-        require(success, "AR: coins transfer error");
+        require(success, CustomError(AsterizmErrors.REFUND__TRANSFER_ERROR__ERROR));
     }
 
     /// Refund tokens
@@ -173,9 +173,9 @@ abstract contract AsterizmRefund is AsterizmSender {
     /// @param _amount uint  Coins amount
     /// @param _tokenAddress address  Token address
     function _refundTokens(address _targetAddress, uint _amount, address _tokenAddress) internal virtual onlySenderOrOwner {
-        require(refundLogicIsAvailable, "AR: refund logic is disabled");
+        require(refundLogicIsAvailable, CustomError(AsterizmErrors.REFUND__REFUND_LOGIC_DISABLED__ERROR));
         IERC20 token = IERC20(_tokenAddress);
-        require(token.balanceOf(address(this)) >= _amount, "AR: tokens balance not enough");
+        require(token.balanceOf(address(this)) >= _amount, CustomError(AsterizmErrors.REFUND__BALANCE_NOT_ENOUGH__ERROR));
         token.safeTransfer(_targetAddress, _amount);
     }
 }
