@@ -65,6 +65,6 @@ library AsterizmErrors {
     uint16 constant WITHDRAWAL__BALANCE_NOT_ENOUGH__ERROR = 6003;
     uint16 constant WITHDRAWAL__TRANSFER_ERROR__ERROR = 6004;
 
-    // For Omnichain token contract
-    uint16 constant WITHDRAWAL__AMOUNT_TOO_SMALL__ERROR = 7001;
+    // For Multichain token contract
+    uint16 constant MULTICHAIN__AMOUNT_TOO_SMALL__ERROR = 7001;
 }

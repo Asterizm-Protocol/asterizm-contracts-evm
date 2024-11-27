@@ -46,7 +46,7 @@ contract MultiChainTokenUpgradeableV1 is IMultiChainToken, ERC20Upgradeable, Ast
     /// @param _to uint  To address in uint format
     function crossChainTransfer(uint64 _dstChainId, address _from, uint _to, uint _amount) public payable {
         uint amount = _debitFrom(_from, _amount); // amount returned should not have dust
-        require(amount > 0, CustomError(AsterizmErrors.WITHDRAWAL__AMOUNT_TOO_SMALL__ERROR));
+        require(amount > 0, CustomError(AsterizmErrors.MULTICHAIN__AMOUNT_TOO_SMALL__ERROR));
         bytes32 transferHash = _initAsterizmTransferEvent(_dstChainId, abi.encode(_to, amount, _getTxId()));
         _addRefundTransfer(transferHash, _from, amount, address(this));
     }
