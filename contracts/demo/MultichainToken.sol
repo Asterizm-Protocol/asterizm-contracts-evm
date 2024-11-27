@@ -3,7 +3,7 @@ pragma solidity ^0.8.28;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IMultiChainToken} from "../interfaces/IMultiChainToken.sol";
-import {AsterizmClient, IInitializerSender, UintLib} from "../base/AsterizmClient.sol";
+import {AsterizmClient, IInitializerSender, UintLib, AsterizmErrors} from "../base/AsterizmClient.sol";
 
 contract MultichainToken is IMultiChainToken, ERC20, AsterizmClient {
 
@@ -45,7 +45,7 @@ contract MultichainToken is IMultiChainToken, ERC20, AsterizmClient {
     /// @param _to uint  To address in uint format
     function crossChainTransfer(uint64 _dstChainId, address _from, uint _to, uint _amount) public payable {
         uint amount = _debitFrom(_from, _amount); // amount returned should not have dust
-        require(amount > 0, "MultichainToken: amount too small");
+        require(amount > 0, CustomError(AsterizmErrors.WITHDRAWAL__AMOUNT_TOO_SMALL__ERROR));
         bytes32 transferHash = _initAsterizmTransferEvent(_dstChainId, abi.encode(_to, amount, _getTxId()));
         _addRefundTransfer(transferHash, _from, amount, address(this));
     }
