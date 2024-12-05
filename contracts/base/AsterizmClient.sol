@@ -108,7 +108,7 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
         _setLocalChainId(initializerLib.getLocalChainId());
         _setNotifyTransferSendingResult(_notifyTransferSendingResult);
         _setDisableHashValidation(_disableHashValidation);
-        addSender(owner());
+        _addSender(owner());
         addTrustedAddress(localChainId, address(this).toUint());
     }
 

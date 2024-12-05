@@ -37,18 +37,30 @@ abstract contract AsterizmSenderUpgradeable is OwnableUpgradeable {
         _;
     }
 
-    /// Add sender
+    /// Add sender (internal)
     /// @param _sender address  Sender address
-    function addSender(address _sender) public onlyOwner {
+    function _addSender(address _sender) internal {
         senders[_sender].exists = true;
         emit AddSenderEvent(_sender);
     }
 
-    /// Remove sender
+    /// Add sender
     /// @param _sender address  Sender address
-    function removeSender(address _sender) public onlyOwner {
-        require(senders[_sender].exists, CustomError(AsterizmErrors.SENDER__SENDER_NOT_EXISTS__ERROR));
-        delete senders[_sender];
+    function addSender(address _sender) public onlyOwner {
+        _addSender(_sender);
+    }
+
+    /// Remove sender (internal)
+    /// @param _sender address  Sender address
+    function _removeSender(address _sender) internal {
+        require(senders[_sender].exists, "ERRS03");
+        senders[_sender].exists = false;
         emit RemoveSenderEvent(_sender);
+    }
+
+    /// Remove sender (external)
+    /// @param _sender address  Sender address
+    function removeSender(address _sender) external onlyOwner {
+        _removeSender(_sender);
     }
 }
