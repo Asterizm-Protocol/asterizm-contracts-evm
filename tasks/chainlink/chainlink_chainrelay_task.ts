@@ -1,7 +1,7 @@
 import "@nomicfoundation/hardhat-toolbox";
 import { task } from 'hardhat/config';
-import { BigNumber } from "ethers";
 import { Chains } from '../base/base_chains';
+const bigInt = require("big-integer");
 
 async function deployBase(hre, isTestnet, gasPrice) {
     const [owner] = await ethers.getSigners();
@@ -41,7 +41,7 @@ task("chainlink:fillChainRelays", "Fill Cainlink cain relays")
     .setAction(async (taskArgs, hre) => {
         let {translatorChainlink, owner, currentChain, chainIds, chainRelays} = await deployBase(hre, taskArgs.isTestnet, parseInt(taskArgs.gasPrice));
 
-        let gasLimit = BigNumber.from(0);
+        let gasLimit = bigInt(0);
         let tx;
 
         tx = await translatorChainlink.addChainRelays(chainIds, chainRelays);
@@ -49,7 +49,7 @@ task("chainlink:fillChainRelays", "Fill Cainlink cain relays")
 
         console.log("Chain relays set successfully\n");
 
-        console.log("Total gas limit: %s", gasLimit);
-        console.log("Chainlink translator address: %s", translatorChainlink.address);
+        console.log("Total gas limit: %s", gasLimit.toString());
+        console.log("Chainlink translator address: %s", await translatorChainlink.getAddress());
         console.log("Transaction hash: %s\n", tx.hash);
     });

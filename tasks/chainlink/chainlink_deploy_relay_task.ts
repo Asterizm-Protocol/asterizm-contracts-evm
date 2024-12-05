@@ -1,7 +1,7 @@
 import "@nomicfoundation/hardhat-toolbox";
 import { task } from 'hardhat/config';
-import { BigNumber } from "ethers";
 import { Chains } from '../base/base_chains';
+const bigInt = require("big-integer");
 
 async function deployBase(hre, isTestnet, gasPrice) {
     const [owner] = await ethers.getSigners();
@@ -30,7 +30,7 @@ async function deployBase(hre, isTestnet, gasPrice) {
         throw new Error('Chain not supported!');
     }
 
-    let gasLimit = BigNumber.from(0);
+    let gasLimit = bigInt(0);
     let tx;
     console.log("Deploying Chainlink translator...");
     // const translatorChainlink = await TranslatorChainlink.attach('0x...');
@@ -39,9 +39,9 @@ async function deployBase(hre, isTestnet, gasPrice) {
         currentChain.chainlink.baseRouter, currentChain.chainlink.feeToken,
         gasPrice > 0 ? {gasPrice: gasPrice} : {}
     );
-    tx = await translatorChainlink.deployed();
+    tx = await translatorChainlink.waitForDeployment();
     gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
-    console.log("Chainlink translator was deployed with address: %s", translatorChainlink.address);
+    console.log("Chainlink translator was deployed with address: %s", await translatorChainlink.getAddress());
     tx = await translatorChainlink.addChains(chainIds, chainTypes, chainSelectors);
     gasLimit = gasLimit.add(tx.gasLimit);
     console.log("Chains set successfully");
@@ -62,11 +62,11 @@ task("chainlink:deploy", "Deploy Chainlink translator")
 
         let tx;
         console.log("Setting initializer for translator contract...");
-        tx = await translatorChainlink.setInitializer(initializer.address, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+        tx = await translatorChainlink.setInitializer(await initializer.getAddress(), gasPrice > 0 ? {gasPrice: gasPrice} : {});
         gasLimit = gasLimit.add(tx.gasLimit);
         console.log("Initializer has been set. Tx: %s", tx.hash);
 
-        tx = await initializer.manageTrustedRelay(translatorChainlink.address, 0, taskArgs.systemFee); // mb we should set relayFee
+        tx = await initializer.manageTrustedRelay(await translatorChainlink.getAddress(), 0, taskArgs.systemFee); // mb we should set relayFee
         gasLimit = gasLimit.add(tx.gasLimit);
         console.log("Trusted relay set successfully");
 
@@ -74,8 +74,8 @@ task("chainlink:deploy", "Deploy Chainlink translator")
         gasLimit = gasLimit.add(tx.gasLimit);
 
         console.log("Deployment was done\n");
-        console.log("Total gas limit: %s", gasLimit);
+        console.log("Total gas limit: %s", gasLimit.toString());
         console.log("Owner address: %s", owner.address);
-        console.log("Initializer address: %s", initializer.address);
-        console.log("Chainlink translator address: %s\n", translatorChainlink.address);
+        console.log("Initializer address: %s", await initializer.getAddress());
+        console.log("Chainlink translator address: %s\n", await translatorChainlink.getAddress());
     });

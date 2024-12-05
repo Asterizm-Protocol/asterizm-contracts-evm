@@ -1,13 +1,13 @@
 import "@nomicfoundation/hardhat-toolbox";
 import { task } from 'hardhat/config';
-import { BigNumber } from "ethers";
+const bigInt = require("big-integer");
 
 async function deployBase(hre, initializerAddress) {
     const [owner] = await ethers.getSigners();
     const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
     const Token = await ethers.getContractFactory("NativeSrcMultichainUpgradeableV1");
 
-    let gasLimit = BigNumber.from(0);
+    let gasLimit = bigInt(0);
     const initializer = await Initializer.attach(initializerAddress);
 
     return {initializer, Token, owner, gasLimit};
@@ -29,11 +29,11 @@ task("venidium:deployNativeSrc", "Deploy venidium native src contract")
         let tx;
         const gasPrice = parseInt(taskArgs.gasPrice);
         console.log("Deploying venidium native src contract...");
-        const token = await upgrades.deployProxy(Token, [initializer.address, BigNumber.from(taskArgs.initSupply), taskArgs.decimals, taskArgs.externalTokenAddress, taskArgs.feeBaseAddress], {
+        const token = await upgrades.deployProxy(Token, [await initializer.getAddress(), bigInt(taskArgs.initSupply).toString(), taskArgs.decimals, taskArgs.externalTokenAddress, taskArgs.feeBaseAddress], {
             initialize: 'initialize',
             kind: 'uups',
         });
-        tx = await token.deployed();
+        tx = await token.waitForDeployment();
         gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
 
         tx = await token.setFeeParams(taskArgs.feeBase, taskArgs.feeMul);
@@ -42,6 +42,6 @@ task("venidium:deployNativeSrc", "Deploy venidium native src contract")
         console.log("Deployment was done\n");
         console.log("Total gas limit: %s", gasLimit);
         console.log("Owner address: %s", owner.address);
-        console.log("Initializer address: %s", initializer.address);
-        console.log("Venidium native src token address: %s\n", token.address);
+        console.log("Initializer address: %s", await initializer.getAddress());
+        console.log("Venidium native src token address: %s\n", await token.getAddress());
     })

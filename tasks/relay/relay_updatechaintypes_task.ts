@@ -1,6 +1,6 @@
 import "@nomicfoundation/hardhat-toolbox";
 import { task } from 'hardhat/config';
-import { BigNumber } from "ethers";
+const bigInt = require("big-integer");
 import { Chains } from "../base/base_chains";
 
 async function deployBase(hre, isTestnet) {
@@ -18,7 +18,7 @@ async function deployBase(hre, isTestnet) {
         throw new Error('Chain not supported!');
     }
 
-    let gasLimit = BigNumber.from(0);
+    let gasLimit = bigInt(0);
     const translator = await Translator.attach(currentChain?.contractAddresses.translator.address);
 
     return {translator, gasLimit};
@@ -37,6 +37,6 @@ task("relay:updateChainTypes", "Update chain types list on relay (translator) co
 
         console.log("\nChain types list updated successfully\n");
 
-        console.log("Total gas limit: %s", gasLimit);
+        console.log("Total gas limit: %s", gasLimit.toString());
         console.log("Transaction hash: %s\n", tx.hash);
     });

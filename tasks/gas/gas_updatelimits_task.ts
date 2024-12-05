@@ -1,6 +1,6 @@
 import "@nomicfoundation/hardhat-toolbox";
 import { task } from 'hardhat/config';
-import { BigNumber } from "ethers";
+const bigInt = require("big-integer");
 import { Chains } from '../base/base_chains';
 
 async function deployBase(hre, isTestnet) {
@@ -15,7 +15,7 @@ async function deployBase(hre, isTestnet) {
         }
     }
 
-    let gasLimit = BigNumber.from(0);
+    let gasLimit = bigInt(0);
     const gasStation = await GasContract.attach(currentChain?.trustAddresses.gas.address);
 
     return {gasStation, gasLimit};
@@ -63,6 +63,6 @@ task("gas:updateLimits", "Update GasSender limits")
         }
 
         console.log("Updating was done\n");
-        console.log("Total gas limit: %s", gasLimit);
-        console.log("Gas station address: %s\n", gasStation.address);
+        console.log("Total gas limit: %s", gasLimit.toString());
+        console.log("Gas station address: %s\n", await gasStation.getAddress());
     })

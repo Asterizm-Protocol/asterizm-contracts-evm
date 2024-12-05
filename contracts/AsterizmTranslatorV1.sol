@@ -113,7 +113,7 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// @param _localChainId uint64  Local chain ID
     /// @param _localChainType uint8  Local chain type
     function initialize(uint64 _localChainId, uint8 _localChainType) initializer public {
-        __Ownable_init();
+        __Ownable_init(_msgSender());
         __UUPSUpgradeable_init();
         __AsterizmChainEnv_init();
 

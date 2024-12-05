@@ -9,6 +9,7 @@ import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interface
 import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract ChainlinkTestRouter is Ownable, IRouter, IRouterClient {
 
@@ -22,7 +23,7 @@ contract ChainlinkTestRouter is Ownable, IRouter, IRouterClient {
     uint private baseFee;
     IERC20 private feeToken;
 
-    constructor (IERC20 _feeToken, uint _baseFee) {
+    constructor (IERC20 _feeToken, uint _baseFee) Ownable(_msgSender()) {
         setFeeToken(_feeToken);
         addToken(address(_feeToken));
         setBaseFee(_baseFee);

@@ -1,6 +1,6 @@
 import "@nomicfoundation/hardhat-toolbox";
 import { task } from 'hardhat/config';
-import { BigNumber } from "ethers";
+const bigInt = require("big-integer");
 import { Chains } from "../base/base_chains";
 
 async function deployBase(hre, contractAddress, contractType, isTestnet) {
@@ -29,7 +29,7 @@ async function deployBase(hre, contractAddress, contractType, isTestnet) {
         }
     }
 
-    let gasLimit = BigNumber.from(0);
+    let gasLimit = bigInt(0);
     const targetContract = await TargetContract.attach(currentChain?.trustAddresses[contractType].address);
 
     return {targetContract, gasLimit};
@@ -52,7 +52,7 @@ task("deploy:addTrustedAddress", "Adding trusted address to client contract")
 
         console.log("Added trusted address successfully\n");
 
-        console.log("Total gas limit: %s", gasLimit);
-        console.log("Target contract address: %s", targetContract.address);
+        console.log("Total gas limit: %s", gasLimit.toString());
+        console.log("Target contract address: %s", await targetContract.getAddress());
         console.log("Transaction hash: %s\n", tx.hash);
     })

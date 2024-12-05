@@ -1,6 +1,6 @@
 import "@nomicfoundation/hardhat-toolbox";
 import { task } from 'hardhat/config';
-import { BigNumber } from "ethers";
+const bigInt = require("big-integer");
 import { Chains } from '../base/base_chains';
 
 async function deployBase(hre, initializerAddress, isTestnet, gasPrice) {
@@ -27,7 +27,7 @@ async function deployBase(hre, initializerAddress, isTestnet, gasPrice) {
     }
 
 
-    let gasLimit = BigNumber.from(0);
+    let gasLimit = bigInt(0);
     let tx;
     console.log("Deploying translator...");
     // const translator = await Transalor.attach('0x...');
@@ -35,16 +35,16 @@ async function deployBase(hre, initializerAddress, isTestnet, gasPrice) {
         initialize: 'initialize',
         kind: 'uups',
     });
-    tx = await translator.deployed();
+    tx = await translator.waitForDeployment();
     gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
-    console.log("Translator was deployed with address: %s", translator.address);
+    console.log("Translator was deployed with address: %s", await translator.getAddress());
     tx = await translator.addChains(chainIds, chainTypes);
     gasLimit = gasLimit.add(tx.gasLimit);
     console.log("Chains is set");
     console.log("Setting endpoint for translator contract...");
-    tx = await translator.setInitializer(initializer.address, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+    tx = await translator.setInitializer(await initializer.getAddress(), gasPrice > 0 ? {gasPrice: gasPrice} : {});
     gasLimit = gasLimit.add(tx.gasLimit);
-    console.log("Initializer has been set: %s", initializer.address);
+    console.log("Initializer has been set: %s", await initializer.getAddress());
 
     return {initializer, translator, owner, gasLimit};
 }
@@ -57,8 +57,8 @@ task("relay:deploy", "Deploy external relay contracts (for external relays)")
         let {initializer, translator, owner, gasLimit} = await deployBase(hre, taskArgs.initializerAddress, taskArgs.isTestnet, parseInt(taskArgs.gasPrice));
 
         console.log("Deployment was done\n");
-        console.log("Total gas limit: %s", gasLimit);
+        console.log("Total gas limit: %s", gasLimit.toString());
         console.log("Owner address: %s", owner.address);
-        console.log("Initializer address: %s", initializer.address);
-        console.log("External relay address: %s\n", translator.address);
+        console.log("Initializer address: %s", await initializer.getAddress());
+        console.log("External relay address: %s\n", await translator.getAddress());
     })

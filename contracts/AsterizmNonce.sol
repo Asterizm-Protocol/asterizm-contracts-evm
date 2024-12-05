@@ -26,7 +26,7 @@ contract AsterizmNonce is INonce, Ownable {
     mapping(uint64 => mapping(bytes => uint)) private nonce;
     address private manipulator;
 
-    constructor(address _manipulatorAddress) {
+    constructor(address _manipulatorAddress) Ownable(_msgSender()) {
         _setManipulator(_manipulatorAddress);
     }
 

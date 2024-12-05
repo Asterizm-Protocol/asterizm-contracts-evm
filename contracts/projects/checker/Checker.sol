@@ -2,6 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {AsterizmClient, IInitializerSender} from "../../base/AsterizmClient.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Checker is AsterizmClient {
     
@@ -10,7 +11,7 @@ contract Checker is AsterizmClient {
 
     uint public morseText;
 
-    constructor (IInitializerSender _initializerLib) AsterizmClient(_initializerLib, false, false) {
+    constructor (IInitializerSender _initializerLib) AsterizmClient(_initializerLib, false, false) Ownable(_msgSender()) {
         morseText = 10100000010101010010; // -.-. .... . -.-. -.- . .-.
     }
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {INonce} from "./interfaces/INonce.sol";
@@ -89,7 +89,7 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
     /// Initializing function for upgradeable contracts (constructor)
     /// @param _translatorLibrary ITranslator  Translator library address
     function initialize(ITranslator _translatorLibrary) initializer public {
-        __Ownable_init();
+        __Ownable_init(_msgSender());
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
 

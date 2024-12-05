@@ -1,9 +1,9 @@
 const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 const { expect } = require("chai");
-const {BigNumber} = require("ethers");
+const bigInt = require("big-integer");
 
-let pow = BigNumber.from(10).pow(18);
-const TOKEN_AMOUNT = BigNumber.from(1000000).mul(pow);
+const pow = bigInt(10).pow(18);
+const TOKEN_AMOUNT = bigInt('1000000').multiply(pow.toString());
 
 describe("Crosschain token", function () {
   async function deployContractsFixture() {
@@ -20,7 +20,7 @@ describe("Crosschain token", function () {
       initialize: 'initialize',
       kind: 'uups',
     });
-    await translator1.deployed();
+    await translator1.waitForDeployment();
     await translator1.addChains(currentChainIds, [chainTypes.EVM, chainTypes.EVM]);
     await translator1.addRelayer(owner.address);
 
@@ -28,58 +28,58 @@ describe("Crosschain token", function () {
       initialize: 'initialize',
       kind: 'uups',
     });
-    await translator2.deployed();
+    await translator2.waitForDeployment();
     await translator2.addChains(currentChainIds, [chainTypes.EVM, chainTypes.EVM]);
     await translator2.addRelayer(owner.address);
 
     // Initializer1 deployment
-    const initializer1 = await upgrades.deployProxy(Initializer, [translator1.address], {
+    const initializer1 = await upgrades.deployProxy(Initializer, [await translator1.getAddress()], {
       initialize: 'initialize',
       kind: 'uups',
     });
-    await initializer1.deployed();
+    await initializer1.waitForDeployment();
 
     // Initializer2 deployment
-    const initializer2 = await upgrades.deployProxy(Initializer, [translator2.address], {
+    const initializer2 = await upgrades.deployProxy(Initializer, [await translator2.getAddress()], {
       initialize: 'initialize',
       kind: 'uups',
     });
-    await initializer2.deployed();
+    await initializer2.waitForDeployment();
 
-    await translator1.setInitializer(initializer1.address);
-    await translator2.setInitializer(initializer2.address);
+    await translator1.setInitializer(await initializer1.getAddress());
+    await translator2.setInitializer(await initializer2.getAddress());
 
-    const token1 = await Token.deploy(initializer1.address, TOKEN_AMOUNT.toString());
-    await token1.deployed();
-    const token2 = await Token.deploy(initializer2.address, TOKEN_AMOUNT.toString());
-    await token2.deployed();
-    await token1.addTrustedAddresses(currentChainIds, [token1.address, token2.address]);
-    await token2.addTrustedAddresses(currentChainIds, [token1.address, token2.address]);
-    const tokenUpgrade1 = await upgrades.deployProxy(TokenUpgrade, [initializer1.address, TOKEN_AMOUNT.toString()], {
+    const token1 = await Token.deploy(await initializer1.getAddress(), TOKEN_AMOUNT.toString());
+    await token1.waitForDeployment();
+    const token2 = await Token.deploy(await initializer2.getAddress(), TOKEN_AMOUNT.toString());
+    await token2.waitForDeployment();
+    await token1.addTrustedAddresses(currentChainIds, [await token1.getAddress(), await token2.getAddress()]);
+    await token2.addTrustedAddresses(currentChainIds, [await token1.getAddress(), await token2.getAddress()]);
+    const tokenUpgrade1 = await upgrades.deployProxy(TokenUpgrade, [await initializer1.getAddress(), TOKEN_AMOUNT.toString()], {
       initialize: 'initialize',
       kind: 'uups',
     });
-    await tokenUpgrade1.deployed();
-    const tokenUpgrade2 = await upgrades.deployProxy(TokenUpgrade, [initializer2.address, TOKEN_AMOUNT.toString()], {
+    await tokenUpgrade1.waitForDeployment();
+    const tokenUpgrade2 = await upgrades.deployProxy(TokenUpgrade, [await initializer2.getAddress(), TOKEN_AMOUNT.toString()], {
       initialize: 'initialize',
       kind: 'uups',
     });
-    await tokenUpgrade2.deployed();
-    await tokenUpgrade1.addTrustedAddresses(currentChainIds, [tokenUpgrade1.address, tokenUpgrade2.address]);
-    await tokenUpgrade2.addTrustedAddresses(currentChainIds, [tokenUpgrade1.address, tokenUpgrade2.address]);
+    await tokenUpgrade2.waitForDeployment();
+    await tokenUpgrade1.addTrustedAddresses(currentChainIds, [await tokenUpgrade1.getAddress(), await tokenUpgrade2.getAddress()]);
+    await tokenUpgrade2.addTrustedAddresses(currentChainIds, [await tokenUpgrade1.getAddress(), await tokenUpgrade2.getAddress()]);
 
-    const gas_sender1 = await upgrades.deployProxy(Gas, [initializer1.address], {
+    const gas_sender1 = await upgrades.deployProxy(Gas, [await initializer1.getAddress()], {
       initialize: 'initialize',
       kind: 'uups',
     });
-    await gas_sender1.deployed();
-    const gas_sender2 = await upgrades.deployProxy(Gas, [initializer2.address], {
+    await gas_sender1.waitForDeployment();
+    const gas_sender2 = await upgrades.deployProxy(Gas, [await initializer2.getAddress()], {
       initialize: 'initialize',
       kind: 'uups',
     });
-    await gas_sender2.deployed();
-    await gas_sender1.addTrustedAddresses(currentChainIds, [gas_sender1.address, gas_sender2.address]);
-    await gas_sender2.addTrustedAddresses(currentChainIds, [gas_sender1.address, gas_sender2.address]);
+    await gas_sender2.waitForDeployment();
+    await gas_sender1.addTrustedAddresses(currentChainIds, [await gas_sender1.getAddress(), await gas_sender2.getAddress()]);
+    await gas_sender2.addTrustedAddresses(currentChainIds, [await gas_sender1.getAddress(), await gas_sender2.getAddress()]);
 
     // Fixtures can return anything you consider useful for your tests
     return { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, user, currentChainIds};
@@ -115,7 +115,7 @@ describe("Crosschain token", function () {
             (value) => {payload = value; return true;},
         );
     expect(dstChainId).to.equal(currentChainIds[1]);
-    expect(dstAddress).to.equal(token2.address);
+    expect(dstAddress).to.equal(await token2.getAddress());
     expect(txId).to.equal(0);
     expect(transferHash).to.not.null;
     expect(payload).to.not.null;
@@ -136,17 +136,17 @@ describe("Crosschain token", function () {
             (value) => {payload = value; return true;},
         );
     expect(dstChainId).to.equal(currentChainIds[1]);
-    expect(dstAddress).to.equal(token2.address);
+    expect(dstAddress).to.equal(await token2.getAddress());
     expect(txId).to.equal(0);
     expect(transferHash).to.not.null;
     expect(payload).to.not.null;
     await expect(token1.initAsterizmTransfer(dstChainId, txId, transferHash))
       .to.emit(translator1, 'SendMessageEvent');
     expect(await token1.balanceOf(owner.address)).to.equal(
-      (TOKEN_AMOUNT.sub(value))
+      (TOKEN_AMOUNT.subtract(value).toString())
     );
     expect(await token1.totalSupply()).to.equal(
-      (TOKEN_AMOUNT.sub(value))
+      (TOKEN_AMOUNT.subtract(value).toString())
     );
   });
   it("Should burn and then mint token", async function () {
@@ -163,7 +163,7 @@ describe("Crosschain token", function () {
             (value) => {payload = value; return true;},
         );
     expect(dstChainId).to.equal(currentChainIds[1]);
-    expect(dstAddress).to.equal(token2.address);
+    expect(dstAddress).to.equal(await token2.getAddress());
     expect(txId).to.equal(0);
     expect(transferHash).to.not.null;
     expect(payload).to.not.null;
@@ -173,29 +173,29 @@ describe("Crosschain token", function () {
             (value) => {feeValue = value; return true;},
             (value) => {packetValue = value; return true;},
         );
-    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint64', 'uint', 'uint64', 'uint', 'uint', 'bool', 'bytes32'], packetValue);
+    let decodedValue = ethers.AbiCoder.defaultAbiCoder().decode(['uint64', 'uint', 'uint64', 'uint', 'uint', 'bool', 'bytes32'], packetValue);
     expect(decodedValue[0]).to.equal(currentChainIds[0]); // srcChainId
-    expect(decodedValue[1]).to.equal(token1.address); // srcAddress
+    expect(decodedValue[1]).to.equal(await token1.getAddress()); // srcAddress
     expect(decodedValue[2]).to.equal(currentChainIds[1]); // dstChainId
-    expect(decodedValue[3]).to.equal(token2.address); // dstAddress
+    expect(decodedValue[3]).to.equal(await token2.getAddress()); // dstAddress
     expect(feeValue).to.equal(0); // feeValue
     expect(decodedValue[4]).to.equal(0); // txId
     expect(decodedValue[5]).to.equal(true); // transferResultNotifyFlag
     expect(decodedValue[6]).to.equal(transferHash); // transferHash
     expect(await token1.balanceOf(owner.address)).to.equal(
-        (TOKEN_AMOUNT.sub(value))
+        (TOKEN_AMOUNT.subtract(value).toString())
     );
     await expect(translator2.transferMessage(300000, packetValue))
         .to.emit(token2, 'PayloadReceivedEvent');
-    await expect(token2.asterizmClReceive(currentChainIds[0], token1.address, decodedValue[4], decodedValue[6], payload)).to.not.reverted;
+    await expect(token2.asterizmClReceive(currentChainIds[0], await token1.getAddress(), decodedValue[4], decodedValue[6], payload)).to.not.reverted;
     expect(await token1.balanceOf(owner.address)).to.equal(
-      (TOKEN_AMOUNT.sub(value))
+      (TOKEN_AMOUNT.subtract(value).toString())
     );
     expect(await token2.balanceOf(user.address)).to.equal(
         value
     );
-    expect(await token1.totalSupply()).to.equal(TOKEN_AMOUNT.sub(value));
-    expect(await token2.totalSupply()).to.equal(TOKEN_AMOUNT.add(value));
+    expect(await token1.totalSupply()).to.equal(TOKEN_AMOUNT.subtract(value).toString());
+    expect(await token2.totalSupply()).to.equal(TOKEN_AMOUNT.add(value).toString());
   });
 
   it("Should emit event from Translator (upgradeable tokens)", async function () {
@@ -211,7 +211,7 @@ describe("Crosschain token", function () {
             (value) => {payload = value; return true;},
         );
     expect(dstChainId).to.equal(currentChainIds[1]);
-    expect(dstAddress).to.equal(tokenUpgrade2.address);
+    expect(dstAddress).to.equal(await tokenUpgrade2.getAddress());
     expect(txId).to.equal(0);
     expect(transferHash).to.not.null;
     expect(payload).to.not.null;
@@ -232,17 +232,17 @@ describe("Crosschain token", function () {
             (value) => {payload = value; return true;},
         );
     expect(dstChainId).to.equal(currentChainIds[1]);
-    expect(dstAddress).to.equal(tokenUpgrade2.address);
+    expect(dstAddress).to.equal(await tokenUpgrade2.getAddress());
     expect(txId).to.equal(0);
     expect(transferHash).to.not.null;
     expect(payload).to.not.null;
     await expect(tokenUpgrade1.initAsterizmTransfer(dstChainId, txId, transferHash))
         .to.emit(translator1, 'SendMessageEvent');
     expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(
-        (TOKEN_AMOUNT.sub(value))
+        (TOKEN_AMOUNT.subtract(value).toString())
     );
     expect(await tokenUpgrade1.totalSupply()).to.equal(
-        (TOKEN_AMOUNT.sub(value))
+        (TOKEN_AMOUNT.subtract(value).toString())
     );
   });
   it("Should burn and then mint token", async function () {
@@ -259,7 +259,7 @@ describe("Crosschain token", function () {
             (value) => {payload = value; return true;},
         );
     expect(dstChainId).to.equal(currentChainIds[1]);
-    expect(dstAddress).to.equal(tokenUpgrade2.address);
+    expect(dstAddress).to.equal(await tokenUpgrade2.getAddress());
     expect(txId).to.equal(0);
     expect(transferHash).to.not.null;
     expect(payload).to.not.null;
@@ -269,35 +269,35 @@ describe("Crosschain token", function () {
             (value) => {feeValue = value; return true;},
             (value) => {packetValue = value; return true;},
         );
-    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint64', 'uint', 'uint64', 'uint', 'uint', 'bool', 'bytes32'], packetValue);
+    let decodedValue = ethers.AbiCoder.defaultAbiCoder().decode(['uint64', 'uint', 'uint64', 'uint', 'uint', 'bool', 'bytes32'], packetValue);
     expect(decodedValue[0]).to.equal(currentChainIds[0]); // srcChainId
-    expect(decodedValue[1]).to.equal(tokenUpgrade1.address); // srcAddress
+    expect(decodedValue[1]).to.equal(await tokenUpgrade1.getAddress()); // srcAddress
     expect(decodedValue[2]).to.equal(currentChainIds[1]); // dstChainId
-    expect(decodedValue[3]).to.equal(tokenUpgrade2.address); // dstAddress
+    expect(decodedValue[3]).to.equal(await tokenUpgrade2.getAddress()); // dstAddress
     expect(feeValue).to.equal(0); // feeValue
     expect(decodedValue[4]).to.equal(0); // txId
     expect(decodedValue[5]).to.equal(true); // transferResultNotifyFlag
     expect(decodedValue[6]).to.equal(transferHash); // transferHash
     expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(
-        (TOKEN_AMOUNT.sub(value))
+        (TOKEN_AMOUNT.subtract(value).toString())
     );
     await expect(translator2.transferMessage(300000, packetValue))
         .to.emit(tokenUpgrade2, 'PayloadReceivedEvent');
-    await expect(tokenUpgrade2.asterizmClReceive(currentChainIds[0], tokenUpgrade1.address, decodedValue[4], decodedValue[6], payload)).to.not.reverted;
+    await expect(tokenUpgrade2.asterizmClReceive(currentChainIds[0], await tokenUpgrade1.getAddress(), decodedValue[4], decodedValue[6], payload)).to.not.reverted;
     expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(
-        (TOKEN_AMOUNT.sub(value))
+        (TOKEN_AMOUNT.subtract(value).toString())
     );
     expect(await tokenUpgrade2.balanceOf(user.address)).to.equal(
         value
     );
-    expect(await tokenUpgrade1.totalSupply()).to.equal(TOKEN_AMOUNT.sub(value));
-    expect(await tokenUpgrade2.totalSupply()).to.equal(TOKEN_AMOUNT.add(value));
+    expect(await tokenUpgrade1.totalSupply()).to.equal(TOKEN_AMOUNT.subtract(value).toString());
+    expect(await tokenUpgrade2.totalSupply()).to.equal(TOKEN_AMOUNT.add(value).toString());
   });
   it("Should refund tokens successfully", async function () {
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, user, currentChainIds } = await loadFixture(deployContractsFixture);
     let feeValue, packetValue, dstChainId, dstAddress, txId, transferHash, payload;
     let value = 100;
-    const startOwnerTokenBalance = await tokenUpgrade1.balanceOf(owner.address);
+    const startOwnerTokenBalance = bigInt(await tokenUpgrade1.balanceOf(owner.address));
     await expect(tokenUpgrade1.crossChainTransfer(currentChainIds[1], owner.address, user.address, value))
         .to.emit(tokenUpgrade1, 'InitiateTransferEvent')
         .withArgs(
@@ -308,11 +308,11 @@ describe("Crosschain token", function () {
             (value) => {payload = value; return true;},
         );
     expect(dstChainId).to.equal(currentChainIds[1]);
-    expect(dstAddress).to.equal(tokenUpgrade2.address);
+    expect(dstAddress).to.equal(await tokenUpgrade2.getAddress());
     expect(txId).to.equal(0);
     expect(transferHash).to.not.null;
     expect(payload).to.not.null;
-    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(startOwnerTokenBalance.sub(value));
+    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(startOwnerTokenBalance.subtract(value).toString());
 
     let refundTransferHash, refundUserAddress, refundAmount, refundTokenAddress;
     await expect(tokenUpgrade1.addRefundRequest(transferHash))
@@ -326,9 +326,9 @@ describe("Crosschain token", function () {
     expect(refundTransferHash).to.equal(transferHash);
     expect(refundUserAddress).to.equal(owner.address);
     expect(refundAmount).to.equal(value);
-    expect(refundTokenAddress).to.equal(tokenUpgrade1.address);
+    expect(refundTokenAddress).to.equal(await tokenUpgrade1.getAddress());
 
-    const beforeProcessOwnerTokenBalance = await tokenUpgrade1.balanceOf(owner.address);
+    const beforeProcessOwnerTokenBalance = bigInt(await tokenUpgrade1.balanceOf(owner.address));
     let requestTransferHash, requestStatus;
     await expect(tokenUpgrade1.processRefundRequest(transferHash, true))
         .to.emit(tokenUpgrade1, 'ProcessRefundRequestEvent')
@@ -338,13 +338,13 @@ describe("Crosschain token", function () {
         );
     expect(refundTransferHash).to.equal(transferHash);
     expect(requestStatus).to.equal(true);
-    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(beforeProcessOwnerTokenBalance.add(value));
+    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(beforeProcessOwnerTokenBalance.add(value).toString());
   });
   it("Should not refund tokens with rejected request", async function () {
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, user, currentChainIds } = await loadFixture(deployContractsFixture);
     let feeValue, packetValue, dstChainId, dstAddress, txId, transferHash, payload;
     let value = 100;
-    const startOwnerTokenBalance = await tokenUpgrade1.balanceOf(owner.address);
+    const startOwnerTokenBalance = bigInt(await tokenUpgrade1.balanceOf(owner.address));
     await expect(tokenUpgrade1.crossChainTransfer(currentChainIds[1], owner.address, user.address, value))
         .to.emit(tokenUpgrade1, 'InitiateTransferEvent')
         .withArgs(
@@ -355,11 +355,11 @@ describe("Crosschain token", function () {
             (value) => {payload = value; return true;},
         );
     expect(dstChainId).to.equal(currentChainIds[1]);
-    expect(dstAddress).to.equal(tokenUpgrade2.address);
+    expect(dstAddress).to.equal(await tokenUpgrade2.getAddress());
     expect(txId).to.equal(0);
     expect(transferHash).to.not.null;
     expect(payload).to.not.null;
-    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(startOwnerTokenBalance.sub(value));
+    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(startOwnerTokenBalance.subtract(value).toString());
 
     let refundTransferHash, refundUserAddress, refundAmount, refundTokenAddress;
     await expect(tokenUpgrade1.addRefundRequest(transferHash))
@@ -373,7 +373,7 @@ describe("Crosschain token", function () {
     expect(refundTransferHash).to.equal(transferHash);
     expect(refundUserAddress).to.equal(owner.address);
     expect(refundAmount).to.equal(value);
-    expect(refundTokenAddress).to.equal(tokenUpgrade1.address);
+    expect(refundTokenAddress).to.equal(await tokenUpgrade1.getAddress());
 
     const beforeProcessOwnerTokenBalance = await tokenUpgrade1.balanceOf(owner.address);
     let requestTransferHash, requestStatus;
@@ -393,7 +393,7 @@ describe("Crosschain token", function () {
     let value = 100;
     const refundFee = 1000000;
     expect(await tokenUpgrade1.setRefundFee(refundFee)).not.to.be.reverted;
-    const startOwnerTokenBalance = await tokenUpgrade1.balanceOf(owner.address);
+    const startOwnerTokenBalance = bigInt(await tokenUpgrade1.balanceOf(owner.address));
     await expect(tokenUpgrade1.crossChainTransfer(currentChainIds[1], owner.address, user.address, value))
         .to.emit(tokenUpgrade1, 'InitiateTransferEvent')
         .withArgs(
@@ -404,11 +404,11 @@ describe("Crosschain token", function () {
             (value) => {payload = value; return true;},
         );
     expect(dstChainId).to.equal(currentChainIds[1]);
-    expect(dstAddress).to.equal(tokenUpgrade2.address);
+    expect(dstAddress).to.equal(await tokenUpgrade2.getAddress());
     expect(txId).to.equal(0);
     expect(transferHash).to.not.null;
     expect(payload).to.not.null;
-    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(startOwnerTokenBalance.sub(value));
+    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(startOwnerTokenBalance.subtract(value).toString());
 
     let refundTransferHash, refundUserAddress, refundAmount, refundTokenAddress;
     await expect(tokenUpgrade1.addRefundRequest(transferHash))
@@ -424,9 +424,9 @@ describe("Crosschain token", function () {
     expect(refundTransferHash).to.equal(transferHash);
     expect(refundUserAddress).to.equal(owner.address);
     expect(refundAmount).to.equal(value);
-    expect(refundTokenAddress).to.equal(tokenUpgrade1.address);
+    expect(refundTokenAddress).to.equal(await tokenUpgrade1.getAddress());
 
-    const beforeProcessOwnerTokenBalance = await tokenUpgrade1.balanceOf(owner.address);
+    const beforeProcessOwnerTokenBalance = bigInt(await tokenUpgrade1.balanceOf(owner.address));
     let requestTransferHash, requestStatus;
     await expect(tokenUpgrade1.processRefundRequest(transferHash, true))
         .to.emit(tokenUpgrade1, 'ProcessRefundRequestEvent')
@@ -436,7 +436,7 @@ describe("Crosschain token", function () {
         );
     expect(refundTransferHash).to.equal(transferHash);
     expect(requestStatus).to.equal(true);
-    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(beforeProcessOwnerTokenBalance.add(value));
+    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(beforeProcessOwnerTokenBalance.add(value).toString());
   });
   it("Should reject refunded transfer in src chain", async function () {
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, owner, user, currentChainIds } = await loadFixture(deployContractsFixture);
@@ -444,7 +444,7 @@ describe("Crosschain token", function () {
     let value = 100;
     const refundFee = 1000000;
     expect(await tokenUpgrade1.setRefundFee(refundFee)).not.to.be.reverted;
-    const startOwnerTokenBalance = await tokenUpgrade1.balanceOf(owner.address);
+    const startOwnerTokenBalance = bigInt(await tokenUpgrade1.balanceOf(owner.address));
     await expect(tokenUpgrade1.crossChainTransfer(currentChainIds[1], owner.address, user.address, value))
         .to.emit(tokenUpgrade1, 'InitiateTransferEvent')
         .withArgs(
@@ -455,11 +455,11 @@ describe("Crosschain token", function () {
             (value) => {payload = value; return true;},
         );
     expect(dstChainId).to.equal(currentChainIds[1]);
-    expect(dstAddress).to.equal(tokenUpgrade2.address);
+    expect(dstAddress).to.equal(await tokenUpgrade2.getAddress());
     expect(txId).to.equal(0);
     expect(transferHash).to.not.null;
     expect(payload).to.not.null;
-    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(startOwnerTokenBalance.sub(value));
+    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(startOwnerTokenBalance.subtract(value).toString());
 
     let refundTransferHash, refundUserAddress, refundAmount, refundTokenAddress;
     await expect(tokenUpgrade1.addRefundRequest(transferHash))
@@ -475,7 +475,7 @@ describe("Crosschain token", function () {
     expect(refundTransferHash).to.equal(transferHash);
     expect(refundUserAddress).to.equal(owner.address);
     expect(refundAmount).to.equal(value);
-    expect(refundTokenAddress).to.equal(tokenUpgrade1.address);
+    expect(refundTokenAddress).to.equal(await tokenUpgrade1.getAddress());
 
     await expect(tokenUpgrade1.initAsterizmTransfer(dstChainId, txId, transferHash))
         .to.be.revertedWith("AR: transfer was refunded");
@@ -494,7 +494,7 @@ describe("Crosschain token", function () {
             (value) => {payload = value; return true;},
         );
     expect(dstChainId).to.equal(currentChainIds[1]);
-    expect(dstAddress).to.equal(tokenUpgrade2.address);
+    expect(dstAddress).to.equal(await tokenUpgrade2.getAddress());
     expect(txId).to.equal(0);
     expect(transferHash).to.not.null;
     expect(payload).to.not.null;
@@ -504,23 +504,23 @@ describe("Crosschain token", function () {
             (value) => {feeValue = value; return true;},
             (value) => {packetValue = value; return true;},
         );
-    let decodedValue = ethers.utils.defaultAbiCoder.decode(['uint64', 'uint', 'uint64', 'uint', 'uint', 'bool', 'bytes32'], packetValue);
+    let decodedValue = ethers.AbiCoder.defaultAbiCoder().decode(['uint64', 'uint', 'uint64', 'uint', 'uint', 'bool', 'bytes32'], packetValue);
     expect(decodedValue[0]).to.equal(currentChainIds[0]); // srcChainId
-    expect(decodedValue[1]).to.equal(tokenUpgrade1.address); // srcAddress
+    expect(decodedValue[1]).to.equal(await tokenUpgrade1.getAddress()); // srcAddress
     expect(decodedValue[2]).to.equal(currentChainIds[1]); // dstChainId
-    expect(decodedValue[3]).to.equal(tokenUpgrade2.address); // dstAddress
+    expect(decodedValue[3]).to.equal(await tokenUpgrade2.getAddress()); // dstAddress
     expect(feeValue).to.equal(0); // feeValue
     expect(decodedValue[4]).to.equal(0); // txId
     expect(decodedValue[5]).to.equal(true); // transferResultNotifyFlag
     expect(decodedValue[6]).to.equal(transferHash); // transferHash
     expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(
-        (TOKEN_AMOUNT.sub(value))
+        (TOKEN_AMOUNT.subtract(value).toString())
     );
     await expect(translator2.transferMessage(300000, packetValue))
         .to.emit(tokenUpgrade2, 'PayloadReceivedEvent');
     expect(await tokenUpgrade2.confirmRefund(transferHash)).not.to.be.reverted;
 
-    await expect(tokenUpgrade2.asterizmClReceive(currentChainIds[0], tokenUpgrade1.address, decodedValue[4], decodedValue[6], payload))
+    await expect(tokenUpgrade2.asterizmClReceive(currentChainIds[0], await tokenUpgrade1.getAddress(), decodedValue[4], decodedValue[6], payload))
         .to.be.revertedWith("AR: transfer was refunded");
   });
 });

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {AsterizmClient, IInitializerSender} from "../base/AsterizmClient.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract AsterizmDemo is AsterizmClient {
 
@@ -10,7 +11,7 @@ contract AsterizmDemo is AsterizmClient {
     string public currentChainMessage;
     string public externalChainMessage;
 
-    constructor (IInitializerSender _initializerLib) AsterizmClient(_initializerLib, true, false) {
+    constructor (IInitializerSender _initializerLib) AsterizmClient(_initializerLib, true, false) Ownable(_msgSender()) {
         currentChainMessage = "Hello from source chain";
         externalChainMessage = "Here is nothing yet";
     }

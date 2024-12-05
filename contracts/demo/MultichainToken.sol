@@ -4,6 +4,7 @@ pragma solidity ^0.8.28;
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IMultiChainToken} from "../interfaces/IMultiChainToken.sol";
 import {AsterizmClient, IInitializerSender, UintLib, AsterizmErrors} from "../base/AsterizmClient.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract MultichainToken is IMultiChainToken, ERC20, AsterizmClient {
 
@@ -25,6 +26,7 @@ contract MultichainToken is IMultiChainToken, ERC20, AsterizmClient {
     mapping (uint => CrossChainTransfer) public crosschainTransfers;
 
     constructor(IInitializerSender _initializerLib, uint _initialSupply)
+    Ownable(_msgSender())
     ERC20("UnknownToken2", "UKWN")
     AsterizmClient(_initializerLib, true, false)
     {

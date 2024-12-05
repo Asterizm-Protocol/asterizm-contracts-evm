@@ -1,6 +1,6 @@
 import "@nomicfoundation/hardhat-toolbox";
 import { task } from 'hardhat/config';
-import { BigNumber } from "ethers";
+const bigInt = require("big-integer");
 
 async function deployBase(contractAddress, contractType) {
     let TargetContract;
@@ -12,7 +12,7 @@ async function deployBase(contractAddress, contractType) {
         TargetContract = await ethers.getContractFactory("GasStationUpgradeableV1");
     }
 
-    let gasLimit = BigNumber.from(0);
+    let gasLimit = bigInt(0);
     const targetContract = await TargetContract.attach(contractAddress);
 
     return {targetContract, gasLimit};
@@ -33,7 +33,7 @@ task("deploy:removeTrustedAddress", "Remove trust address by chain id from clien
 
         console.log("\nRemoved trusted address successfully\n");
 
-        console.log("Total gas limit: %s", gasLimit);
-        console.log("Target contract address: %s", targetContract.address);
+        console.log("Total gas limit: %s", gasLimit.toString());
+        console.log("Target contract address: %s", await targetContract.getAddress());
         console.log("Transaction hash: %s\n", tx.hash);
     })

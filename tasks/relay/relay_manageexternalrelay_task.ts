@@ -1,7 +1,6 @@
 import "@nomicfoundation/hardhat-toolbox";
-// import { upgrades } from 'hardhat';
 import { task } from 'hardhat/config';
-import { BigNumber } from "ethers";
+const bigInt = require("big-integer");
 
 async function deployBase(hre, initializerAddress, relayAddress) {
     const [owner] = await ethers.getSigners();
@@ -10,7 +9,7 @@ async function deployBase(hre, initializerAddress, relayAddress) {
 
     const initializer = await Initializer.attach(initializerAddress);
     const relay = await Translator.attach(relayAddress);
-    let gasLimit = BigNumber.from(0);
+    let gasLimit = bigInt(0);
 
     return {initializer, relay, owner, gasLimit};
 }
@@ -25,12 +24,12 @@ task("relay:manageExternalRelay", "Manage external relay on initializer contract
         let {initializer, relay, owner, gasLimit} = await deployBase(hre, taskArgs.initializerAddress, taskArgs.relayAddress);
         const gasPrice = parseInt(taskArgs.gasPrice);
 
-        let tx = await initializer.manageTrustedRelay(relay.address, taskArgs.relayFee, taskArgs.systemFee, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+        let tx = await initializer.manageTrustedRelay(await relay.getAddress(), taskArgs.relayFee, taskArgs.systemFee, gasPrice > 0 ? {gasPrice: gasPrice} : {});
         gasLimit = gasLimit.add(tx.gasLimit);
 
         console.log("Deployment was done\n");
-        console.log("Total gas limit: %s", gasLimit);
+        console.log("Total gas limit: %s", gasLimit.toString());
         console.log("Owner address: %s", owner.address);
-        console.log("Relay address: %s", relay.address);
+        console.log("Relay address: %s", await relay.getAddress());
         console.log("Transaction hash: %s\n", tx.hash);
     })

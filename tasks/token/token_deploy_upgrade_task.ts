@@ -1,12 +1,12 @@
 import "@nomicfoundation/hardhat-toolbox";
 import { task } from 'hardhat/config';
-import { BigNumber } from "ethers";
+const bigInt = require("big-integer");
 
 async function deployBase(hre, initializerAddress) {
     const [owner] = await ethers.getSigners();
     const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
 
-    let gasLimit = BigNumber.from(0);
+    let gasLimit = bigInt(0);
     const initializer = await Initializer.attach(initializerAddress);
 
     return {initializer, owner, gasLimit};
@@ -26,11 +26,11 @@ task("token:deploy-upgrade", "Deploy Multichain token contract (upgradeable)")
         const gasPrice = parseInt(taskArgs.gasPrice);
         console.log("Deploying token contract...");
         const Token = await ethers.getContractFactory("MultiChainTokenUpgradeableV1");
-        const token = await upgrades.deployProxy(Token, [initializer.address, BigNumber.from(taskArgs.initSupply)], {
+        const token = await upgrades.deployProxy(Token, [await initializer.getAddress(), bigInt(taskArgs.initSupply).toString()], {
             initialize: 'initialize',
             kind: 'uups',
         });
-        tx = await token.deployed();
+        tx = await token.waitForDeployment();
         gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
         if (taskArgs.relayAddress != '0') {
             tx = await token.setExternalRelay(taskArgs.relayAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
@@ -50,11 +50,11 @@ task("token:deploy-upgrade", "Deploy Multichain token contract (upgradeable)")
         }
 
         console.log("Deployment was done\n");
-        console.log("Total gas limit: %s", gasLimit);
+        console.log("Total gas limit: %s", gasLimit.toString());
         console.log("Owner address: %s", owner.address);
-        console.log("Initializer address: %s", initializer.address);
+        console.log("Initializer address: %s", await initializer.getAddress());
         if (taskArgs.relayAddress != '0') {
             console.log("External relay address: %s", taskArgs.relayAddress);
         }
-        console.log("Multichain token address: %s\n", token.address);
+        console.log("Multichain token address: %s\n", await token.getAddress());
     })

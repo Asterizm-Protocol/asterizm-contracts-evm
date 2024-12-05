@@ -1,11 +1,11 @@
 import "@nomicfoundation/hardhat-toolbox";
 import { task } from 'hardhat/config';
-import { BigNumber } from "ethers";
+const bigInt = require("big-integer");
 
 async function deployBase(contractAddress) {
     let TargetContract = await ethers.getContractFactory("AsterizmDemo");
 
-    let gasLimit = BigNumber.from(0);
+    let gasLimit = bigInt(0);
     const targetContract = await TargetContract.attach(contractAddress);
 
     return {targetContract, gasLimit};
@@ -26,7 +26,7 @@ task("demo:sendmessage", "Send crosschain message with AdterizmDemo contract")
 
         console.log("\nMessage sent successfully\n");
 
-        console.log("Total gas limit: %s", gasLimit);
-        console.log("AsterizmDemo address: %s", targetContract.address);
+        console.log("Total gas limit: %s", gasLimit.toString());
+        console.log("AsterizmDemo address: %s", await targetContract.getAddress());
         console.log("Transaction hash: %s\n", tx.hash);
     })

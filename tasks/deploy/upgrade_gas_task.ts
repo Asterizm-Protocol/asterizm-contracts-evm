@@ -1,12 +1,12 @@
 import "@nomicfoundation/hardhat-toolbox";
 import { task } from 'hardhat/config';
-import { BigNumber } from "ethers";
+const bigInt = require("big-integer");
 import {Chains} from "../base/base_chains";
 
 async function deployBase(hre, implementationVersion, isTestnet) {
     const [owner] = await ethers.getSigners();
     const GasStation = await ethers.getContractFactory("GasStationUpgradeableV" + implementationVersion);
-    let gasLimit = BigNumber.from(0);
+    let gasLimit = bigInt(0);
 
     const chains = isTestnet == 1 ? Chains.testnet : Chains.mainnet;
 
@@ -38,8 +38,8 @@ task("upgrade:gas", "Update Asterizm GasSender contracts")
         console.log("GasStation implementation upgrade successfully");
 
         console.log("Deployment was done\n");
-        console.log("Total gas limit: %s", gasLimit);
+        console.log("Total gas limit: %s", gasLimit.toString());
         console.log("Owner address: %s", owner.address);
-        console.log("Gas station address: %s", gasStation.address);
+        console.log("Gas station address: %s", await gasStation.getAddress());
         console.log("Transaction hash: %s\n", gasStation.deployTransaction.hash);
     });

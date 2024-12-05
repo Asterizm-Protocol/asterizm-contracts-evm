@@ -106,7 +106,7 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, IClientReceiverC
     /// @param _notifyTransferSendingResult bool  Transfer sending result notification flag
     /// @param _disableHashValidation bool  Disable hash validation flag
     function __AsterizmClientUpgradeable_init(IInitializerSender _initializerLib, bool _notifyTransferSendingResult, bool _disableHashValidation) initializer public {
-        __Ownable_init();
+        __Ownable_init(_msgSender());
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
 

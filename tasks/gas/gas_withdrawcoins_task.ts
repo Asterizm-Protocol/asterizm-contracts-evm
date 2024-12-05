@@ -1,11 +1,11 @@
 import "@nomicfoundation/hardhat-toolbox";
 import { task } from 'hardhat/config';
-import { BigNumber } from "ethers";
+const bigInt = require("big-integer");
 
 async function deployBase(hre, contractAddress) {
     const GasContract = await ethers.getContractFactory("GasStationUpgradeableV1");
 
-    let gasLimit = BigNumber.from(0);
+    let gasLimit = bigInt(0);
     const gasContract = await GasContract.attach(contractAddress);
 
     return {gasContract, gasLimit};
@@ -26,6 +26,6 @@ task("gas:withdrawCoins", "Withdraw coins from gassender contract")
 
         console.log("\nCoins withdrawal successfully\n");
 
-        console.log("Total gas limit: %s", gasLimit);
+        console.log("Total gas limit: %s", gasLimit.toString());
         console.log("Transaction hash: %s\n", tx.hash);
     });

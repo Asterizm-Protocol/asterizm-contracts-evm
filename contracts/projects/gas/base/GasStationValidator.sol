@@ -25,6 +25,8 @@ contract GasStatioValidator is Ownable, IGasStationValidator {
     uint public minUsdAmountPerChain;
     uint public maxUsdAmountPerChain;
 
+    constructor () Ownable(_msgSender()) {}
+
     /// Only gas station modifier
     modifier onlyGasStation {
         require(msg.sender == _gasStation, "GasStatioValidation: only gas station");

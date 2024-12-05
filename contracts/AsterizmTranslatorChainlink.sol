@@ -14,6 +14,7 @@ import {UintLib} from "./libs/UintLib.sol";
 import {AsterizmEnv} from "./base/AsterizmEnv.sol";
 import {AsterizmChainEnv} from "./base/AsterizmChainEnv.sol";
 import {AsterizmWithdrawal} from "./base/AsterizmWithdrawal.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract AsterizmTranslatorChainlink is CCIPReceiver, ITranslator, AsterizmEnv, AsterizmChainEnv, AsterizmWithdrawal {
 
@@ -126,7 +127,10 @@ contract AsterizmTranslatorChainlink is CCIPReceiver, ITranslator, AsterizmEnv, 
     /// @param _localChainSelector uint64  Local chain selector
     /// @param _baseRouter IRouterClient  Base system router (Chainlink)
     /// @param _feeToken IERC20  Fee token
-    constructor(uint64 _localChainId, uint8 _localChainType, uint64 _localChainSelector, IRouterClient _baseRouter, IERC20 _feeToken) CCIPReceiver(address(_baseRouter)) {
+    constructor(uint64 _localChainId, uint8 _localChainType, uint64 _localChainSelector, IRouterClient _baseRouter, IERC20 _feeToken)
+    Ownable(_msgSender())
+    CCIPReceiver(address(_baseRouter))
+    {
         __AsterizmChainEnv_init();
         addRelayer(owner());
         addChain(_localChainId, _localChainType, _localChainSelector);
