@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
 /// Multichain token interface
-interface IMultiChainToken {
+interface IMultiChainToken is IERC20 {
 
     /// Cross-chain transfer
     /// @param _dstChainId uint64  Destination chain ID
