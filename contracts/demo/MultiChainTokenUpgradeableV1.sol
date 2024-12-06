@@ -9,21 +9,6 @@ contract MultiChainTokenUpgradeableV1 is IMultiChainToken, ERC20Upgradeable, Ast
 
     using UintLib for uint;
 
-    event EncodedPayloadRecieved(uint64 srcChainId, address srcAddress, uint nonce, uint _transactionId, bytes payload);
-    event CrossChainTransferReceived(uint id, uint64 destChain, address from, address to, uint amount, uint _transactionId, address target);
-    event CrossChainTransferCompleted(uint id);
-
-    struct CrossChainTransfer {
-        bool exists;
-        uint64 destChain;
-        address from;
-        address to;
-        uint amount;
-        address target;
-    }
-
-    mapping (uint => CrossChainTransfer) public crosschainTransfers;
-
     /// Initializing function for upgradeable contracts (constructor)
     /// @param _initializerLib IInitializerSender  Initializer library address
     function initialize(IInitializerSender _initializerLib, uint _initialSupply) initializer public {

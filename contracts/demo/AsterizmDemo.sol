@@ -8,11 +8,9 @@ contract AsterizmDemo is AsterizmClient {
 
     event SetExternalChainMessageEvent(string message);
 
-    string public currentChainMessage;
     string public externalChainMessage;
 
     constructor (IInitializerSender _initializerLib) AsterizmClient(_initializerLib, true, false) Ownable(_msgSender()) {
-        currentChainMessage = "Hello from source chain";
         externalChainMessage = "Here is nothing yet";
     }
 

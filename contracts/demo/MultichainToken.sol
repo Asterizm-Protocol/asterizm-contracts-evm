@@ -10,21 +10,6 @@ contract MultichainToken is IMultiChainToken, ERC20, AsterizmClient {
 
     using UintLib for uint;
 
-    event EncodedPayloadRecieved(uint64 srcChainId, address srcAddress, uint nonce, uint _transactionId, bytes payload);
-    event CrossChainTransferReceived(uint id, uint64 destChain, address from, address to, uint amount, uint _transactionId, address target);
-    event CrossChainTransferCompleted(uint id);
-
-    struct CrossChainTransfer {
-        bool exists;
-        uint64 destChain;
-        address from;
-        address to;
-        uint amount;
-        address target;
-    }
-
-    mapping (uint => CrossChainTransfer) public crosschainTransfers;
-
     constructor(IInitializerSender _initializerLib, uint _initialSupply)
     Ownable(_msgSender())
     ERC20("UnknownToken2", "UKWN")

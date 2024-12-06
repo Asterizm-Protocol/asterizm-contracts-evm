@@ -7,14 +7,12 @@ contract AsterizmDemoUpgradeableV1 is AsterizmClientUpgradeable {
 
     event SetExternalChainMessageEvent(string message);
 
-    string public currentChainMessage;
     string public externalChainMessage;
 
     /// Initializing function for upgradeable contracts (constructor)
     /// @param _initializerLib IInitializerSender  Initializer library address
     function initialize(IInitializerSender _initializerLib) initializer public {
         __AsterizmClientUpgradeable_init(_initializerLib, true, true);
-        currentChainMessage = "Hello from source chain";
         externalChainMessage = "Here is nothing yet";
     }
 
