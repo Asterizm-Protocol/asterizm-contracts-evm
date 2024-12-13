@@ -86,6 +86,11 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
     mapping(bytes32 => bool) private ingoingTransfers;
     mapping(bytes32 => bool) private outgoingTransfers;
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     /// Initializing function for upgradeable contracts (constructor)
     /// @param _translatorLibrary ITranslator  Translator library address
     function initialize(ITranslator _translatorLibrary) initializer public {

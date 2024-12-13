@@ -101,6 +101,11 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, IClientReceiverC
     uint8 constant private CHAIN_TYPE_SOL = 4;
     uint[50] private __gap;
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     /// Initializing function for upgradeable contracts (constructor)
     /// @param _initializerLib IInitializerSender  Initializer library address
     /// @param _notifyTransferSendingResult bool  Transfer sending result notification flag

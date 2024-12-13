@@ -109,6 +109,11 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     mapping(uint64 => Chain) public chains;
     uint64 public localChainId;
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     /// Initializing function for upgradeable contracts (constructor)
     /// @param _localChainId uint64  Local chain ID
     /// @param _localChainType uint8  Local chain type
