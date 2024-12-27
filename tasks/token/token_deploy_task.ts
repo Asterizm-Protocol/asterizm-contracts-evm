@@ -28,21 +28,21 @@ task("token:deploy", "Deploy Multichain token contract")
         const Token = await ethers.getContractFactory("MultichainToken");
         const token = await Token.deploy(await initializer.getAddress(), bigInt(taskArgs.initSupply).toString(), gasPrice > 0 ? {gasPrice: gasPrice} : {});
         tx = await token.waitForDeployment();
-        gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
+        // gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
         if (taskArgs.relayAddress != '0') {
             tx = await token.setExternalRelay(taskArgs.relayAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
-            gasLimit = gasLimit.add(tx.gasLimit);
+            // gasLimit = gasLimit.add(tx.gasLimit);
             console.log("Set external relay successfully. Address: %s", taskArgs.relayAddress);
         }
         if (taskArgs.feeTokenAddress != '0') {
             tx = await token.setFeeToken(taskArgs.feeTokenAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
-            gasLimit = gasLimit.add(tx.gasLimit);
+            // gasLimit = gasLimit.add(tx.gasLimit);
             console.log("Set fee token successfully. Address: %s", taskArgs.feeTokenAddress);
         }
 
         if (taskArgs.refundFee != '0') {
             tx = await token.setRefundFee(taskArgs.refundFee, gasPrice > 0 ? {gasPrice: gasPrice} : {});
-            gasLimit = gasLimit.add(tx.gasLimit);
+            // gasLimit = gasLimit.add(tx.gasLimit);
             console.log("Set refund fee successfully. Hash: %s", tx.hash);
         }
 
