@@ -952,6 +952,43 @@ export const Chains = {
                 asterizmRouter: '0x0000000000000000000000000000000000000000',
             },
         },
+        {
+            id: 4158,
+            title: "XFI", // CrossFi
+            networkName: "crossfiMainnet",
+            chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0xc7510259D51C2B2484d117F40f5F687930EC3016',
+                    uint: '1137895728547999387732034229896735238630897627158',
+                },
+                initializer: {
+                    address: '0xaA66A0cD4Cab564fA284Ffe4481302a9Df5a5aDb',
+                    uint: '972817114875848104150930745054640245633179081435',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0x2da63B662823d39d8AC022281C8C66EBB03B0253',
+                    uint: '260611682777055404113896273346659605959612760659',
+                },
+            },
+            stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+                baseRouter: '0x0000000000000000000000000000000000000000',
+                asterizmRouter: '0x0000000000000000000000000000000000000000',
+            },
+        },
     ],
 
     // TESTNET CHAINS
@@ -1426,6 +1463,43 @@ export const Chains = {
                 initializer: {
                     address: '0x368249858eCBf9B7af5e5B18731f5d1769071BBB',
                     uint: '311191003144533610836569876219409758032482474939',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+            },
+            stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+                baseRouter: '0x0000000000000000000000000000000000000000',
+                asterizmRouter: '0x0000000000000000000000000000000000000000',
+            },
+        },
+        {
+            id: 4157,
+            title: "XFI", // CrossFi
+            networkName: "crossfiTestnet",
+            chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                initializer: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
                 },
             },
             trustAddresses: {

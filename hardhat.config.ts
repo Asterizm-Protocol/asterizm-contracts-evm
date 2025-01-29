@@ -260,6 +260,16 @@ const config = {
       accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
       chainId: 1005
     },
+    crossfiMainnet: {
+      url: process.env.NETWORK_HOST_CROSSFI,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 4158
+    },
+    crossfiTestnet: {
+      url: process.env.NETWORK_HOST_CROSSFI_TESTNET,
+      accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
+      chainId: 4157
+    },
   },
   etherscan: {
     apiKey: {
