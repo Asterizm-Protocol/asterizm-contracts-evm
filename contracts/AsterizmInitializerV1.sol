@@ -16,8 +16,9 @@ import {UintLib} from "./libs/UintLib.sol";
 import {AsterizmEnv} from "./base/AsterizmEnv.sol";
 import {AsterizmConfig} from "./base/AsterizmConfig.sol";
 import {AsterizmErrors} from "./base/AsterizmErrors.sol";
+import {AsterizmWithdrawalUpgradeable} from "./base/AsterizmWithdrawalUpgradeable.sol";
 
-contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, IInitializerSender, IInitializerReceiver, AsterizmEnv, AsterizmConfig {
+contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, IInitializerSender, IInitializerReceiver, AsterizmEnv, AsterizmWithdrawalUpgradeable, AsterizmConfig {
 
     using SafeERC20 for IERC20;
     using AddressLib for address;
@@ -28,18 +29,6 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
     /// Set translator event
     /// @param _translatorAddress address
     event SetTranslatorEvent(address _translatorAddress);
-
-    /// Set config event
-    /// @param _configAddress address
-    event SetConfigEvent(address _configAddress);
-
-    /// Set outbound nonce event
-    /// @param _nonceAddress address
-    event SetOutBoundNonceEvent(address _nonceAddress);
-
-    /// Set inbound nonce event
-    /// @param _nonceAddress address
-    event SetInBoundNonceEvent(address _nonceAddress);
 
     /// Set local chain id event
     /// @param _localChainId uint64
@@ -69,17 +58,6 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
     /// @param _transferHash bytes32  Transfer hash
     event SentPayloadEvent(bytes32 _transferHash);
 
-    /// Withdrawal coins event
-    /// @param _targetAddress address  Target address
-    /// @param _amount uint  Amount
-    event WithdrawCoinsEvent(address _targetAddress, uint _amount);
-
-    /// Withdrawal tokens event
-    /// @param _tokenAddress address  Token address
-    /// @param _targetAddress address  Target address
-    /// @param _amount uint  Amount
-    event WithdrawTokensEvent(address _tokenAddress, address _targetAddress, uint _amount);
-
     ITranslator private translatorLib;
     uint64 private localChainId;
     mapping(uint64 => mapping(uint => bool)) public blockAddresses;
@@ -102,9 +80,6 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
         localChainId = translatorLib.getLocalChainId();
         emit SetLocalChainIdEvent(localChainId);
     }
-
-    receive() external payable {}
-    fallback() external payable {}
 
     /// Upgrade implementation address for UUPS logic
     /// @param _newImplementation address  New implementation address
@@ -152,26 +127,6 @@ contract AsterizmInitializerV1 is UUPSUpgradeable, ReentrancyGuardUpgradeable, I
     function removeBlockAddress(uint64 _chainId, uint _address) external onlyOwner {
         delete blockAddresses[_chainId][_address];
         emit RemoveBlockAddressEvent(_chainId, _address);
-    }
-
-    /// Withdraw coins
-    /// @param _target address  Target address
-    /// @param _amount uint  Amount
-    function withdrawCoins(address _target, uint _amount) external onlyOwner {
-        require(address(this).balance >= _amount, CustomError(AsterizmErrors.INITIALIZER__BALANCE_NOT_ENOUGH__ERROR));
-        (bool success, ) = _target.call{value: _amount}("");
-        require(success, CustomError(AsterizmErrors.INITIALIZER__TRANSFER_ERROR__ERROR));
-        emit WithdrawCoinsEvent(_target, _amount);
-    }
-
-    /// Withdraw tokens
-    /// @param _token IERC20  Token address
-    /// @param _target address  Target address
-    /// @param _amount uint  Amount
-    function withdrawTokens(IERC20 _token, address _target, uint _amount) external onlyOwner {
-        require(_token.balanceOf(address(this)) >= _amount, CustomError(AsterizmErrors.INITIALIZER__BALANCE_NOT_ENOUGH__ERROR));
-        _token.safeTransfer(_target, _amount);
-        emit WithdrawTokensEvent(address(_token), _target, _amount);
     }
 
     /** External logic */
