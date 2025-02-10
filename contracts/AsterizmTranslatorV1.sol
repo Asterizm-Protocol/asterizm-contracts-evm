@@ -98,7 +98,7 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
 
     struct Chain {
         bool exists;
-        uint8 chainType; // 1 - EVM, 2 - TVM
+        uint8 chainType; // 1 - EVM, 2 - TVM, 3 - TON, 4 - SOL
     }
     struct Relayer {
         bool exists;
