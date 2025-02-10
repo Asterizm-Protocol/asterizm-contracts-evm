@@ -29,7 +29,12 @@ library AsterizmHashLib {
 
         bytes32 hash = sha256(staticChunk);
 
-        for (uint i = 0; i <= length / chunkLength; i++) {
+        uint limitFix = length / uint(chunkLength);
+        if ((limitFix) * chunkLength == length) {
+            limitFix = limitFix - 1;
+        }
+
+        for (uint i = 0; i <= limitFix; i++) {
             uint from = chunkLength * i;
             uint to = from + chunkLength <= length ? from + chunkLength : length;
             bytes memory chunk = new bytes(to - from);
