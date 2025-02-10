@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IInitializerReceiver} from "./interfaces/IInitializerReceiver.sol";
@@ -11,8 +10,9 @@ import {UintLib} from "./libs/UintLib.sol";
 import {AsterizmEnv} from "./base/AsterizmEnv.sol";
 import {AsterizmChainEnv} from "./base/AsterizmChainEnv.sol";
 import {AsterizmErrors} from "./base/AsterizmErrors.sol";
+import {AsterizmWithdrawalUpgradeable} from "./base/AsterizmWithdrawalUpgradeable.sol";
 
-contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslator, AsterizmEnv, AsterizmChainEnv {
+contract AsterizmTranslatorV1 is UUPSUpgradeable, ITranslator, AsterizmWithdrawalUpgradeable, AsterizmEnv, AsterizmChainEnv {
 
     using SafeERC20 for IERC20;
     using AddressLib for address;
@@ -23,10 +23,6 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// Set initializer event
     /// @param _initializerAddress address
     event SetInitializerEvent(address _initializerAddress);
-
-    /// Set config event
-    /// @param _configAddress address
-    event SetConfigEvent(address _configAddress);
 
     /// Add relayer event
     /// @param _relayerAddress address
@@ -64,11 +60,6 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// @param _payload bytes  Transfer payload
     event LogExternalMessageEvent(uint _feeValue, address _externalRelayAddress, bytes _payload);
 
-    /// Withdraw event
-    /// @param _target address
-    /// @param _amount uint
-    event WithdrawEvent(address _target, uint _amount);
-
     /// Transfer send event
     /// @param _srcChainId uint64  Source chain ID
     /// @param _srcAddress uint  Source address
@@ -81,17 +72,6 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
     /// @param _senderAddress uint
     /// @param _feeAmount uint
     event ResendFailedTransferEvent(bytes32 _transferHash, uint _senderAddress, uint _feeAmount);
-
-    /// Withdrawal coins event
-    /// @param _targetAddress address  Target address
-    /// @param _amount uint  Amount
-    event WithdrawCoinsEvent(address _targetAddress, uint _amount);
-
-    /// Withdrawal tokens event
-    /// @param _tokenAddress address  Token address
-    /// @param _targetAddress address  Target address
-    /// @param _amount uint  Amount
-    event WithdrawTokensEvent(address _tokenAddress, address _targetAddress, uint _amount);
 
     /// Update chain types list event
     event UpdateChainTypesEvent();
@@ -126,9 +106,6 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
         addChain(_localChainId, _localChainType);
         _setLocalChainId(_localChainId);
     }
-
-    receive() external payable {}
-    fallback() external payable {}
 
     /// Upgrade implementation address for UUPS logic
     /// @param _newImplementation address  New implementation address
@@ -205,26 +182,6 @@ contract AsterizmTranslatorV1 is UUPSUpgradeable, OwnableUpgradeable, ITranslato
         require(chains[_chainId].exists, CustomError(AsterizmErrors.TRANSLATOR__CHAIN_NOT_EXISTS__ERROR));
         localChainId = _chainId;
         emit SetLocalChainEvent(_chainId);
-    }
-
-    /// Withdraw coins
-    /// @param _target address  Target address
-    /// @param _amount uint  Amount
-    function withdrawCoins(address _target, uint _amount) external onlyOwner {
-        require(address(this).balance >= _amount, CustomError(AsterizmErrors.TRANSLATOR__BALANCE_NOT_ENOUGH__ERROR));
-        (bool success, ) = _target.call{value: _amount}("");
-        require(success, CustomError(AsterizmErrors.TRANSLATOR__TRANSFER_ERROR__ERROR));
-        emit WithdrawCoinsEvent(_target, _amount);
-    }
-
-    /// Withdraw tokens
-    /// @param _token IERC20  Token address
-    /// @param _target address  Target address
-    /// @param _amount uint  Amount
-    function withdrawTokens(IERC20 _token, address _target, uint _amount) external onlyOwner {
-        require(_token.balanceOf(address(this)) >= _amount, CustomError(AsterizmErrors.TRANSLATOR__BALANCE_NOT_ENOUGH__ERROR));
-        _token.safeTransfer(_target, _amount);
-        emit WithdrawTokensEvent(address(_token), _target, _amount);
     }
 
     /// Update chain types list
