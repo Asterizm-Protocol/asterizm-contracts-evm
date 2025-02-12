@@ -1,19 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import {IMultiChainToken} from "../interfaces/IMultiChainToken.sol";
-import {AsterizmClientUpgradeable, IInitializerSender, UintLib, AsterizmErrors} from "../base/AsterizmClientUpgradeable.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {IMultiChainToken} from "../../interfaces/IMultiChainToken.sol";
+import {AsterizmClient, IInitializerSender, UintLib, AsterizmErrors} from "../../base/AsterizmClient.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract MultiChainTokenUpgradeableV1 is IMultiChainToken, ERC20Upgradeable, AsterizmClientUpgradeable {
+contract OmniChainToken is IMultiChainToken, ERC20, AsterizmClient {
 
     using UintLib for uint;
 
-    /// Initializing function for upgradeable contracts (constructor)
-    /// @param _initializerLib IInitializerSender  Initializer library address
-    function initialize(IInitializerSender _initializerLib, uint _initialSupply) initializer public {
-        __AsterizmClientUpgradeable_init(_initializerLib, true, false);
-        __ERC20_init("UnknownToken5", "UKWN");
+    constructor(IInitializerSender _initializerLib, uint _initialSupply)
+    Ownable(_msgSender())
+    ERC20("AsterizmOmniChainToken", "AOCT")
+    AsterizmClient(_initializerLib, true, false)
+    {
         _mint(_msgSender(), _initialSupply);
         refundLogicIsAvailable = true;
     }
@@ -31,7 +32,7 @@ contract MultiChainTokenUpgradeableV1 is IMultiChainToken, ERC20Upgradeable, Ast
     /// @param _to uint  To address in uint format
     function crossChainTransfer(uint64 _dstChainId, address _from, uint _to, uint _amount) public payable {
         uint amount = _debitFrom(_from, _amount); // amount returned should not have dust
-        require(amount > 0, CustomError(AsterizmErrors.MULTICHAIN__AMOUNT_TOO_SMALL__ERROR));
+        require(amount > 0, CustomError(AsterizmErrors.OMNICHAIN__AMOUNT_TOO_SMALL__ERROR));
         bytes32 transferHash = _initAsterizmTransferEvent(_dstChainId, abi.encode(_to, amount, _getTxId()));
         _addRefundTransfer(transferHash, _from, amount, address(this));
     }
@@ -48,7 +49,6 @@ contract MultiChainTokenUpgradeableV1 is IMultiChainToken, ERC20Upgradeable, Ast
     /// @return bytes  Packed payload (abi.encodePacked() result)
     function _buildPackedPayload(bytes memory _payload) internal pure override returns(bytes memory) {
         (uint dstAddressUint, uint amount, uint txId) = abi.decode(_payload, (uint, uint, uint));
-
         return abi.encodePacked(dstAddressUint, amount, txId);
     }
 

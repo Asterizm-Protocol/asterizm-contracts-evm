@@ -16,7 +16,7 @@ async function deployBase(hre, isTestnet, contractType) {
         }
 
         if (contractType == "multichain") {
-            TargetContract = await ethers.getContractFactory("MultichainToken");
+            TargetContract = await ethers.getContractFactory("OmniChainToken");
             if (chains[i].trustAddresses.multichain.address == '0x0000000000000000000000000000000000000000') {
                 continue;
             }

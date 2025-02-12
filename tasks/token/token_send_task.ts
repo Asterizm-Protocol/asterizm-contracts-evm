@@ -5,7 +5,7 @@ import {Chains} from "../base/base_chains";
 
 async function deployBase(hre, isTestnet: number) {
     const [owner] = await ethers.getSigners();
-    const Token = await ethers.getContractFactory("MultichainToken");
+    const Token = await ethers.getContractFactory("OmniChainToken");
     const chains = isTestnet == 1 ? Chains.testnet : Chains.mainnet;
 
     let currentChain = null;
@@ -25,7 +25,7 @@ async function deployBase(hre, isTestnet: number) {
     return {Token, token, owner, currentChain, gasLimit};
 }
 
-task("token:send", "Send Multichain token")
+task("token-base:send", "Send base OmniChain token")
     .addPositionalParam("dstChainId", "Destination chain ID")
     .addPositionalParam("dstAddress", "Destination address (in uint)")
     .addPositionalParam("amount", "Token transfer amount (with decimals)")

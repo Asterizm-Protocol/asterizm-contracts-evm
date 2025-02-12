@@ -10,7 +10,7 @@ describe("Venidium logic", function () {
     async function deployContractsFixture() {
         const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
         const Transalor = await ethers.getContractFactory("AsterizmTranslatorV1");
-        const Token = await ethers.getContractFactory("MultichainToken");
+        const Token = await ethers.getContractFactory("OmniChainToken");
         const TokenNativeSrc = await ethers.getContractFactory("NativeSrcMultichainUpgradeableV1");
         const TokenNativeDst = await ethers.getContractFactory("NativeDstMultichainUpgradeableV1");
         const TokenStableSrc = await ethers.getContractFactory("StableSrcMultichainUpgradeableV1");

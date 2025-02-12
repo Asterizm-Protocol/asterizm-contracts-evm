@@ -10,7 +10,7 @@ describe("Gas sender test", function () {
   async function deployContractsFixture() {
     const Initializer = await ethers.getContractFactory("AsterizmInitializerV1");
     const Transalor = await ethers.getContractFactory("AsterizmTranslatorV1");
-    const Token = await ethers.getContractFactory("MultichainToken");
+    const Token = await ethers.getContractFactory("OmniChainToken");
     const Gas = await ethers.getContractFactory("GasStationUpgradeableV1");
     const [owner, user1] = await ethers.getSigners();
     const currentChainIds = [1, 2, 3];

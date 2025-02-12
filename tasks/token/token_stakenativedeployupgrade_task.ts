@@ -12,7 +12,7 @@ async function deployBase(hre, initializerAddress) {
     return {initializer, owner, gasLimit};
 }
 
-task("token-base:deploy", "Deploy base OmniChain token contract")
+task("token-stake-native:deploy-upgrade", "Deploy base OmniChain token contract (upgradeable)")
     .addPositionalParam("initializerAddress", "Initializer contract address")
     .addPositionalParam("initSupply", "Initial token supply", '0')
     .addPositionalParam("relayAddress", "Config contract address", '0')
@@ -25,24 +25,27 @@ task("token-base:deploy", "Deploy base OmniChain token contract")
         let tx;
         const gasPrice = parseInt(taskArgs.gasPrice);
         console.log("Deploying token contract...");
-        const Token = await ethers.getContractFactory("OmniChainToken");
-        const token = await Token.deploy(await initializer.getAddress(), bigInt(taskArgs.initSupply).toString(), gasPrice > 0 ? {gasPrice: gasPrice} : {});
+        const Token = await ethers.getContractFactory("OmniChainStakeNativeUpgradeableV1");
+        const token = await upgrades.deployProxy(Token, [await initializer.getAddress(), bigInt(taskArgs.initSupply).toString()], {
+            initialize: 'initialize',
+            kind: 'uups',
+        });
         tx = await token.waitForDeployment();
-        // gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
+        gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
         if (taskArgs.relayAddress != '0') {
             tx = await token.setExternalRelay(taskArgs.relayAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
-            // gasLimit = gasLimit.add(tx.gasLimit);
+            gasLimit = gasLimit.add(tx.gasLimit);
             console.log("Set external relay successfully. Address: %s", taskArgs.relayAddress);
         }
         if (taskArgs.feeTokenAddress != '0') {
             tx = await token.setFeeToken(taskArgs.feeTokenAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
-            // gasLimit = gasLimit.add(tx.gasLimit);
+            gasLimit = gasLimit.add(tx.gasLimit);
             console.log("Set fee token successfully. Address: %s", taskArgs.feeTokenAddress);
         }
 
         if (taskArgs.refundFee != '0') {
             tx = await token.setRefundFee(taskArgs.refundFee, gasPrice > 0 ? {gasPrice: gasPrice} : {});
-            // gasLimit = gasLimit.add(tx.gasLimit);
+            gasLimit = gasLimit.add(tx.gasLimit);
             console.log("Set refund fee successfully. Hash: %s", tx.hash);
         }
 
@@ -53,5 +56,5 @@ task("token-base:deploy", "Deploy base OmniChain token contract")
         if (taskArgs.relayAddress != '0') {
             console.log("External relay address: %s", taskArgs.relayAddress);
         }
-        console.log("Base OmniChain token address: %s\n", await token.getAddress());
+        console.log("Stake native OmniChain token address: %s\n", await token.getAddress());
     })

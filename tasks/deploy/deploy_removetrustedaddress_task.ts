@@ -5,7 +5,7 @@ const bigInt = require("big-integer");
 async function deployBase(contractAddress, contractType) {
     let TargetContract;
     if (contractType == "multichain") {
-        TargetContract = await ethers.getContractFactory("MultichainToken");
+        TargetContract = await ethers.getContractFactory("OmniChainToken");
     } else if (contractType == "checker") {
         TargetContract = await ethers.getContractFactory("Checker");
     } else {

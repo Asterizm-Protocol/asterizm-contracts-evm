@@ -8,7 +8,7 @@ async function deployBase(hre, contractAddress, contractType, isTestnet) {
 
     let TargetContract;
     if (contractType == "multichain") {
-        TargetContract = await ethers.getContractFactory("MultichainToken");
+        TargetContract = await ethers.getContractFactory("OmniChainToken");
     } else if (contractType == "checker") {
         TargetContract = await ethers.getContractFactory("Checker");
     } else if (contractType == "demo") {

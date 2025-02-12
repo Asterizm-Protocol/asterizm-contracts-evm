@@ -21,7 +21,7 @@ task("deploy:claim", "Deploy Asterizm claim contracts")
 
         let tx;
         console.log("Deployig multichain token...");
-        const Token = await ethers.getContractFactory("MultichainToken");
+        const Token = await ethers.getContractFactory("OmniChainToken");
         const token = await Token.deploy(await initializer.getAddress(), ethers.utils.parseEther("1000000"));
         tx = await token.waitForDeployment();
         gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);

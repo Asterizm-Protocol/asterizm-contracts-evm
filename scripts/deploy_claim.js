@@ -18,7 +18,7 @@ async function main() {
 
     let tx;
     console.log("Deployig multichain token...");
-    const Token = await ethers.getContractFactory("MultichainToken");
+    const Token = await ethers.getContractFactory("OmniChainToken");
     const token = await Token.deploy(initializer.address, ethers.utils.parseEther("1000000"));
     tx = await token.deployed();
     gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);

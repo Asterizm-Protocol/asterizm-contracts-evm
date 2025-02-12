@@ -12,7 +12,7 @@ async function deployBase(hre, initializerAddress) {
     return {initializer, owner, gasLimit};
 }
 
-task("token-base:deploy", "Deploy base OmniChain token contract")
+task("token-stake-native:deploy", "Deploy stake native OmniChain token contract")
     .addPositionalParam("initializerAddress", "Initializer contract address")
     .addPositionalParam("initSupply", "Initial token supply", '0')
     .addPositionalParam("relayAddress", "Config contract address", '0')
@@ -25,7 +25,7 @@ task("token-base:deploy", "Deploy base OmniChain token contract")
         let tx;
         const gasPrice = parseInt(taskArgs.gasPrice);
         console.log("Deploying token contract...");
-        const Token = await ethers.getContractFactory("OmniChainToken");
+        const Token = await ethers.getContractFactory("OmniChainStakeNative");
         const token = await Token.deploy(await initializer.getAddress(), bigInt(taskArgs.initSupply).toString(), gasPrice > 0 ? {gasPrice: gasPrice} : {});
         tx = await token.waitForDeployment();
         // gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
@@ -53,5 +53,5 @@ task("token-base:deploy", "Deploy base OmniChain token contract")
         if (taskArgs.relayAddress != '0') {
             console.log("External relay address: %s", taskArgs.relayAddress);
         }
-        console.log("Base OmniChain token address: %s\n", await token.getAddress());
+        console.log("Stake native OmniChain token address: %s\n", await token.getAddress());
     })
