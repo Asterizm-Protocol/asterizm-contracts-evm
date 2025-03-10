@@ -34,7 +34,7 @@ task("venidium:deployStableSrc", "Deploy venidium stable src contract")
             kind: 'uups',
         });
         tx = await token.waitForDeployment();
-        gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
+        gasLimit = gasLimit.add((await tx.deploymentTransaction()).gasLimit);
 
         tx = await token.setFeeParams(taskArgs.feeBase, taskArgs.feeMul);
         gasLimit = gasLimit.add(tx.gasLimit);

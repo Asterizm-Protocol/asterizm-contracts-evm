@@ -33,7 +33,7 @@ task("venidium:deployStableDst", "Deploy venidium stable dst contract")
             kind: 'uups',
         });
         tx = await token.waitForDeployment();
-        gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
+        gasLimit = gasLimit.add((await tx.deploymentTransaction()).gasLimit);
 
         tx = await token.setFeeParams(taskArgs.feeBase, taskArgs.feeMul);
         gasLimit = gasLimit.add(tx.gasLimit);

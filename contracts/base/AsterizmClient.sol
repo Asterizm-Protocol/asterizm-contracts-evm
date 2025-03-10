@@ -76,6 +76,14 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
     /// @param _statusCode uint8  Status code
     event TransferSendingResultNotification(bytes32 indexed _transferHash, uint8 _statusCode);
 
+    /// Out asterizm transfer event
+    /// @param _transferHash bytes32  Transfer hash
+    event OutAsterizmTransferEvent(bytes32 indexed _transferHash);
+
+    /// In asterizm transfer event
+    /// @param _transferHash bytes32  Transfer hash
+    event InAsterizmTransferEvent(bytes32 indexed _transferHash);
+
     struct AsterizmTransfer {
         bool successReceive;
         bool successExecute;
@@ -348,6 +356,20 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
         return notifyTransferSendingResult;
     }
 
+    /// Return outbound transfer data by hash
+    /// @param _transferHash bytes32  Transfer hash
+    /// @return AsterizmTransfer
+    function getOutboundTransfer(bytes32 _transferHash) external view returns(AsterizmTransfer memory) {
+        return outboundTransfers[_transferHash];
+    }
+
+    /// Return inbound transfer data by hash
+    /// @param _transferHash bytes32  Transfer hash
+    /// @return AsterizmTransfer
+    function getInboundTransfer(bytes32 _transferHash) external view returns(AsterizmTransfer memory) {
+        return inboundTransfers[_transferHash];
+    }
+
     /** Sending logic */
 
     /// Initiate transfer event
@@ -401,6 +423,8 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
 
         initializerLib.initTransfer{value: _dto.feeAmount} (initDto);
         outboundTransfers[_dto.transferHash].successExecute = true;
+
+        emit OutAsterizmTransferEvent(_dto.transferHash);
     }
 
     /// Resend failed by fee amount transfer
@@ -466,6 +490,8 @@ abstract contract AsterizmClient is IClientReceiverContract, AsterizmEnv, Asteri
     {
         inboundTransfers[_dto.transferHash].successExecute = true;
         _asterizmReceive(_dto);
+
+        emit InAsterizmTransferEvent(_dto.transferHash);
     }
 
     /// Receive payload

@@ -24,14 +24,14 @@ task("deploy:claim", "Deploy Asterizm claim contracts")
         const Token = await ethers.getContractFactory("OmniChainToken");
         const token = await Token.deploy(await initializer.getAddress(), ethers.utils.parseEther("1000000"));
         tx = await token.waitForDeployment();
-        gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
+        gasLimit = gasLimit.add((await tx.deploymentTransaction()).gasLimit);
         console.log("Token was deployed with address: ", await token.getAddress());
 
         console.log("Deployig claimer contract...");
         const Claimer = await ethers.getContractFactory("Claimer");
         const claimer = await Claimer.deploy(await token.getAddress());
         tx = await claimer.waitForDeployment();
-        gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
+        gasLimit = gasLimit.add((await tx.deploymentTransaction()).gasLimit);
         console.log("Claimer was deployed with address: ", await claimer.getAddress());
 
         console.log("Providing claimer contract with funds...");

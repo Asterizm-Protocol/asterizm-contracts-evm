@@ -47,7 +47,7 @@ task("deploy:gas", "Deploy Asterizm gassender contracts")
             kind: 'uups',
         });
         tx = await gasStation.waitForDeployment();
-        gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
+        gasLimit = gasLimit.add((await tx.deploymentTransaction()).gasLimit);
         console.log("Gas station was deployed with address: %s", await gasStation.getAddress());
         if (taskArgs.minUsdAmount != '0') {
             tx = await gasStation.setMinUsdAmount(taskArgs.minUsdAmount, gasPrice > 0 ? {gasPrice: gasPrice} : {});

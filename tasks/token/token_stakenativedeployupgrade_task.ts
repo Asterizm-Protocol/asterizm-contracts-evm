@@ -12,7 +12,7 @@ async function deployBase(hre, initializerAddress) {
     return {initializer, owner, gasLimit};
 }
 
-task("token-stake-native:deploy-upgrade", "Deploy base OmniChain token contract (upgradeable)")
+task("token-stake-native:deploy-upgrade", "Deploy stake native OmniChain token contract (upgradeable)")
     .addPositionalParam("initializerAddress", "Initializer contract address")
     .addPositionalParam("initSupply", "Initial token supply", '0')
     .addPositionalParam("relayAddress", "Config contract address", '0')
@@ -31,7 +31,7 @@ task("token-stake-native:deploy-upgrade", "Deploy base OmniChain token contract 
             kind: 'uups',
         });
         tx = await token.waitForDeployment();
-        gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
+        gasLimit = gasLimit.add((await tx.deploymentTransaction()).gasLimit);
         if (taskArgs.relayAddress != '0') {
             tx = await token.setExternalRelay(taskArgs.relayAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
             gasLimit = gasLimit.add(tx.gasLimit);

@@ -26,7 +26,7 @@ task("demo:deploy", "Deploy AsterizmDemo contract")
         const Demo = await ethers.getContractFactory("AsterizmDemo");
         const demo = await Demo.deploy(await initializer.getAddress(), gasPrice > 0 ? {gasPrice: gasPrice} : {});
         tx = await demo.waitForDeployment();
-        gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
+        gasLimit = gasLimit.add((await tx.deploymentTransaction()).gasLimit);
         if (taskArgs.relayAddress != '0') {
             tx = await demo.setExternalRelay(taskArgs.relayAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
             gasLimit = gasLimit.add(tx.gasLimit);

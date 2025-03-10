@@ -36,7 +36,7 @@ async function deployBase(hre, initializerAddress, isTestnet, gasPrice) {
         kind: 'uups',
     });
     tx = await translator.waitForDeployment();
-    gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
+    gasLimit = gasLimit.add((await tx.deploymentTransaction()).gasLimit);
     console.log("Translator was deployed with address: %s", await translator.getAddress());
     tx = await translator.addChains(chainIds, chainTypes);
     gasLimit = gasLimit.add(tx.gasLimit);

@@ -35,7 +35,7 @@ async function deployBase(hre, isTestnet, gasPrice) {
         kind: 'uups',
     });
     tx = await translator.waitForDeployment();
-    gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
+    gasLimit = gasLimit.add((await tx.deploymentTransaction()).gasLimit);
     console.log("Translator was deployed with address: %s", await translator.getAddress());
     tx = await translator.addChains(chainIds, chainTypes);
     gasLimit = gasLimit.add(tx.gasLimit);
@@ -49,7 +49,7 @@ async function deployBase(hre, isTestnet, gasPrice) {
         kind: 'uups',
     });
     tx = await initializer.waitForDeployment();
-    gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
+    gasLimit = gasLimit.add((await tx.deploymentTransaction()).gasLimit);
     console.log("Initializer was deployed with address: %s", await initializer.getAddress());
 
     console.log("Setting initializer for translator contract...");

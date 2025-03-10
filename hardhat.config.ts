@@ -35,11 +35,14 @@ import './tasks/chainlink/chainlink_deploy_relay_task';
 import './tasks/chainlink/chainlink_chainrelay_task';
 import './tasks/token/token_deploy_task';
 import './tasks/token/token_deployupgrade_task';
+import './tasks/token/token_upgrade_tast';
 import './tasks/token/token_send_task';
 import './tasks/token/token_stakenativedeploy_task';
 import './tasks/token/token_stakenativedeployupgrade_task';
+import './tasks/token/token_stakenativeupgrade_task';
 import './tasks/token/token_staketokendeploy_task';
 import './tasks/token/token_staketokendeployupgrade_task';
+import './tasks/token/token_staketokenupgrade_task';
 import './tasks/venidium/deploy_nativedstmultichain_task';
 import './tasks/venidium/deploy_nativesrcmultichain_task';
 import './tasks/venidium/deploy_stabledstmultichain_task';
@@ -274,6 +277,16 @@ const config = {
       accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
       chainId: 4157
     },
+    haustMainnet: {
+      url: process.env.NETWORK_HOST_HAUST,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 938
+    },
+    haustTestnet: {
+      url: process.env.NETWORK_HOST_HAUST_TESTNET,
+      accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
+      chainId: 1523903251
+    },
   },
   etherscan: {
     apiKey: {
@@ -294,6 +307,7 @@ const config = {
       mantleMainnet: process.env.MANTLESCAN_API_KEY,
       gnosisMainnet: process.env.GNOSISSCAN_API_KEY,
       xdcMainnet: process.env.GNOSISSCAN_API_KEY,
+      lemonMainnet: process.env.LEMONSCAN_API_KEY,
     },
     customChains: [
       {
@@ -406,6 +420,14 @@ const config = {
         urls: {
           apiURL: "https://api.gnosisscan.io/api",
           browserURL: "https://gnosisscan.io/"
+        }
+      },
+      {
+        network: "lemonMainnet",
+        chainId: 1006,
+        urls: {
+          apiURL: "https://explorer.lemonchain.io/api",
+          browserURL: "https://explorer.lemonchain.io"
         }
       },
     ],

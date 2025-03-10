@@ -1524,5 +1524,42 @@ export const Chains = {
                 asterizmRouter: '0x0000000000000000000000000000000000000000',
             },
         },
+        {
+            id: 1523903251,
+            title: "HST", // Haust
+            networkName: "haustTestnet",
+            chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x8b314A606F9C347093B69BBe102855BD9DE4edbd',
+                    uint: '794648932783863238517312334764403844450535927229',
+                },
+                initializer: {
+                    address: '0x44DE63c860E961dd6c6f96ec93e4C4f1d9F54653',
+                    uint: '393170830151693192137490714634169047190030599763',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+            },
+            stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+                baseRouter: '0x0000000000000000000000000000000000000000',
+                asterizmRouter: '0x0000000000000000000000000000000000000000',
+            },
+        },
     ],
 };

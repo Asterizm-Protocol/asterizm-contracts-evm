@@ -28,7 +28,7 @@ task("token-base:deploy", "Deploy base OmniChain token contract")
         const Token = await ethers.getContractFactory("OmniChainToken");
         const token = await Token.deploy(await initializer.getAddress(), bigInt(taskArgs.initSupply).toString(), gasPrice > 0 ? {gasPrice: gasPrice} : {});
         tx = await token.waitForDeployment();
-        // gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
+        gasLimit = gasLimit.add((await tx.deploymentTransaction()).gasLimit);
         if (taskArgs.relayAddress != '0') {
             tx = await token.setExternalRelay(taskArgs.relayAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
             // gasLimit = gasLimit.add(tx.gasLimit);

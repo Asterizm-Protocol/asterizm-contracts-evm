@@ -43,7 +43,7 @@ task("deploy:checker", "Deploy Asterizm checker contract")
         // const checker = await Checker.attach('0x...');
         const checker = await Checker.deploy(await initializer.getAddress(), gasPrice > 0 ? {gasPrice: gasPrice} : {});
         tx = await checker.waitForDeployment();
-        gasLimit = gasLimit.add(tx.deployTransaction.gasLimit);
+        gasLimit = gasLimit.add((await tx.deploymentTransaction()).gasLimit);
         if (taskArgs.relayAddress != '0') {
             tx = await checker.setExternalRelay(taskArgs.relayAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
             gasLimit = gasLimit.add(tx.gasLimit);
