@@ -423,7 +423,7 @@ describe("OmniChain token test", function () {
 
     let refundTransferHash, refundUserAddress, refundAmount, refundTokenAddress;
     await expect(tokenUpgrade1.addRefundRequest(transferHash))
-        .to.be.revertedWithCustomError(initializer1, 'CustomError')
+        .to.be.revertedWithCustomError(tokenUpgrade1, 'CustomError')
         .withArgs(5005);
     await expect(tokenUpgrade1.addRefundRequest(transferHash, {value: refundFee}))
         .to.emit(tokenUpgrade1, 'AddRefundRequestEvent')
@@ -475,7 +475,7 @@ describe("OmniChain token test", function () {
 
     let refundTransferHash, refundUserAddress, refundAmount, refundTokenAddress;
     await expect(tokenUpgrade1.addRefundRequest(transferHash))
-        .to.be.revertedWithCustomError(initializer1, 'CustomError')
+        .to.be.revertedWithCustomError(tokenUpgrade1, 'CustomError')
         .withArgs(5005);
     await expect(tokenUpgrade1.addRefundRequest(transferHash, {value: refundFee}))
         .to.emit(tokenUpgrade1, 'AddRefundRequestEvent')
@@ -491,7 +491,7 @@ describe("OmniChain token test", function () {
     expect(refundTokenAddress).to.equal(await tokenUpgrade1.getAddress());
 
     await expect(tokenUpgrade1.initAsterizmTransfer(dstChainId, txId, transferHash))
-        .to.be.revertedWithCustomError(initializer1, 'CustomError')
+        .to.be.revertedWithCustomError(tokenUpgrade1, 'CustomError')
         .withArgs(5001);
   });
   it("Should reject refunded transfer in dst chain", async function () {
@@ -535,7 +535,7 @@ describe("OmniChain token test", function () {
     expect(await tokenUpgrade2.confirmRefund(transferHash)).not.to.be.reverted;
 
     await expect(tokenUpgrade2.asterizmClReceive(currentChainIds[0], await tokenUpgrade1.getAddress(), decodedValue[4], decodedValue[6], payload))
-        .to.be.revertedWithCustomError(initializer1, 'CustomError')
+        .to.be.revertedWithCustomError(tokenUpgrade2, 'CustomError')
         .withArgs(5001);
   });
   it("Should stake and then send coins in stake native logic", async function () {
@@ -624,5 +624,50 @@ describe("OmniChain token test", function () {
     await expect(tokenStakeTokenUpgrade2.asterizmClReceive(currentChainIds[0], await tokenStakeTokenUpgrade1.getAddress(), decodedValue[4], decodedValue[6], payload)).to.not.reverted;
     expect(await token2.balanceOf(user.address)).to.equal(value.toString());
     expect(await token2.balanceOf(await tokenStakeTokenUpgrade2.getAddress())).to.equal(dstTokenBalance.subtract(value).toString());
+  });
+  it("Should reject refunded transfer in dst chain with transfer executed error", async function () {
+    let feeValue, packetValue, dstChainId, dstAddress, txId, transferHash, payload;
+    let value = 100;
+    const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, TokenStakeNativeUpgrade, tokenStakeNativeUpgrade1, tokenStakeNativeUpgrade2, TokenStakeTokenUpgrade, tokenStakeTokenUpgrade1, tokenStakeTokenUpgrade2, owner, user, currentChainIds } = await loadFixture(deployContractsFixture);
+    await expect(tokenUpgrade1.crossChainTransfer(currentChainIds[1], owner.address, user.address, value))
+        .to.emit(tokenUpgrade1, 'InitiateTransferEvent')
+        .withArgs(
+            (value) => {dstChainId = value; return true;},
+            (value) => {dstAddress = value; return true;},
+            (value) => {txId = value; return true;},
+            (value) => {transferHash = value; return true;},
+            (value) => {payload = value; return true;},
+        );
+    expect(dstChainId).to.equal(currentChainIds[1]);
+    expect(dstAddress).to.equal(await tokenUpgrade2.getAddress());
+    expect(txId).to.equal(0);
+    expect(transferHash).to.not.null;
+    expect(payload).to.not.null;
+    await expect(tokenUpgrade1.initAsterizmTransfer(dstChainId, txId, transferHash))
+        .to.emit(translator1, 'SendMessageEvent')
+        .withArgs(
+            (value) => {feeValue = value; return true;},
+            (value) => {packetValue = value; return true;},
+        );
+    let decodedValue = ethers.AbiCoder.defaultAbiCoder().decode(['uint64', 'uint', 'uint64', 'uint', 'uint', 'bool', 'bytes32'], packetValue);
+    expect(decodedValue[0]).to.equal(currentChainIds[0]); // srcChainId
+    expect(decodedValue[1]).to.equal(await tokenUpgrade1.getAddress()); // srcAddress
+    expect(decodedValue[2]).to.equal(currentChainIds[1]); // dstChainId
+    expect(decodedValue[3]).to.equal(await tokenUpgrade2.getAddress()); // dstAddress
+    expect(feeValue).to.equal(0); // feeValue
+    expect(decodedValue[4]).to.equal(0); // txId
+    expect(decodedValue[5]).to.equal(true); // transferResultNotifyFlag
+    expect(decodedValue[6]).to.equal(transferHash); // transferHash
+    expect(await tokenUpgrade1.balanceOf(owner.address)).to.equal(
+        (TOKEN_AMOUNT.subtract(value).toString())
+    );
+    await expect(translator2.transferMessage(300000, packetValue))
+        .to.emit(tokenUpgrade2, 'PayloadReceivedEvent');
+
+    await expect(tokenUpgrade2.asterizmClReceive(currentChainIds[0], await tokenUpgrade1.getAddress(), decodedValue[4], decodedValue[6], payload)).to.not.reverted;
+
+    await expect(tokenUpgrade2.confirmRefund(transferHash))
+        .to.be.revertedWithCustomError(tokenUpgrade2, 'CustomError')
+        .withArgs(5012);
   });
 });

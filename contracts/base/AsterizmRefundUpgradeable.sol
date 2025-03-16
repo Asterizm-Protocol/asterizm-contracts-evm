@@ -154,6 +154,7 @@ abstract contract AsterizmRefundUpgradeable is AsterizmSenderUpgradeable {
     /// @param _transferHash bytes32  Transfer hash
     function confirmRefund(bytes32 _transferHash) external onlySenderOrOwner {
         require(refundLogicIsAvailable, CustomError(AsterizmErrors.REFUND__REFUND_LOGIC_DISABLED__ERROR));
+        require(!_checkIsInboundTransferExecuted(_transferHash), CustomError(AsterizmErrors.REFUND__TRANSFER_EXECUTED_ALREADY__ERROR));
         refundConfirmations[_transferHash].exists = true;
 
         emit ConfirmRefundEvent(_transferHash);
@@ -179,4 +180,9 @@ abstract contract AsterizmRefundUpgradeable is AsterizmSenderUpgradeable {
         require(token.balanceOf(address(this)) >= _amount, CustomError(AsterizmErrors.REFUND__BALANCE_NOT_ENOUGH__ERROR));
         token.safeTransfer(_targetAddress, _amount);
     }
+
+    /// Check is inbound transfer executed
+    /// @param _transferHash bytes32  Transfer hash
+    /// @return bool  Result
+    function _checkIsInboundTransferExecuted(bytes32 _transferHash) internal view virtual returns(bool) {}
 }

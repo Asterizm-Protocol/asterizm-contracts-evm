@@ -41,11 +41,6 @@ library AsterizmErrors {
     uint16 constant CLIENT__WRONG_TXID__ERROR = 4013;
     uint16 constant CLIENT__TOKEN_BALANCE_NOT_ENOUGH__ERROR = 4013;
 
-    // For Sender contract
-    uint16 constant SENDER__ONLY_SENDER__ERROR = 5001;
-    uint16 constant SENDER__ONLY_SENDER_OR_OWNER__ERROR = 5002;
-    uint16 constant SENDER__SENDER_NOT_EXISTS__ERROR = 5003;
-
     // For Refund contract
     uint16 constant REFUND__TRANSFER_WAS_REFUNDED__ERROR = 5001;
     uint16 constant REFUND__REFUND_TRANSFER_EXISTS_ALREADY__ERROR = 5002;
@@ -58,6 +53,7 @@ library AsterizmErrors {
     uint16 constant REFUND__TRANSFER_ERROR__ERROR = 5009;
     uint16 constant REFUND__REFUND_REQUEST_NOT_EXISTS__ERROR = 5010;
     uint16 constant REFUND__BALANCE_NOT_ENOUGH__ERROR = 5011;
+    uint16 constant REFUND__TRANSFER_EXECUTED_ALREADY__ERROR = 5012;
 
     // For Withdrawal contract
     uint16 constant WITHDRAWAL__COIN_WITHDRAWAL_DISABLE__ERROR = 6001;
@@ -70,4 +66,9 @@ library AsterizmErrors {
     uint16 constant OMNICHAIN__BALANCE_NOT_ENOUGH__ERROR = 7002;
     uint16 constant OMNICHAIN__TRANSFER_ERROR__ERROR = 7003;
     uint16 constant OMNICHAIN__WRONG_AMOUNT__ERROR = 7004;
+
+    // For Sender contract
+    uint16 constant SENDER__ONLY_SENDER__ERROR = 8001;
+    uint16 constant SENDER__ONLY_SENDER_OR_OWNER__ERROR = 8002;
+    uint16 constant SENDER__SENDER_NOT_EXISTS__ERROR = 8003;
 }

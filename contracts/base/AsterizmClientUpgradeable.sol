@@ -385,6 +385,13 @@ abstract contract AsterizmClientUpgradeable is UUPSUpgradeable, IClientReceiverC
         return inboundTransfers[_transferHash];
     }
 
+    /// Check is inbound transfer executed
+    /// @param _transferHash bytes32  Transfer hash
+    /// @return bool  Result
+    function _checkIsInboundTransferExecuted(bytes32 _transferHash) internal view override returns(bool) {
+        return inboundTransfers[_transferHash].successExecute;
+    }
+
     /** Sending logic */
 
     /// Initiate transfer event
