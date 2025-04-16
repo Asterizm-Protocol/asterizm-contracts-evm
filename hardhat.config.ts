@@ -287,6 +287,12 @@ const config = {
       accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
       chainId: 1523903251
     },
+    unitMainnet: {
+      url: process.env.NETWORK_HOST_UNIT,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 88811,
+      maxPriorityFeePerGas: 56000000000
+    },
   },
   etherscan: {
     apiKey: {
