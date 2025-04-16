@@ -991,7 +991,7 @@ export const Chains = {
         },
         {
             id: 88811,
-            title: "UNI", // UnitZero
+            title: "UNT", // UnitZero
             networkName: "unitMainnet",
             chainType: ChainTypes.EVM,
             contractAddresses: {
