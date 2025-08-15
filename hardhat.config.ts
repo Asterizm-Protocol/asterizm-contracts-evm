@@ -26,6 +26,7 @@ import './tasks/deploy/upgrade_initializer_task';
 import './tasks/demo/demo_deploy_task';
 import './tasks/demo/demo_sendmessage_task';
 import './tasks/relay/relay_addchain_task';
+import './tasks/relay/relay_removechain_task';
 import './tasks/relay/relay_deploy_task';
 import './tasks/relay/relay_updatefee_task';
 import './tasks/relay/relay_updatesystemfee_task';
@@ -291,7 +292,12 @@ const config = {
       url: process.env.NETWORK_HOST_UNIT,
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 88811,
-      maxPriorityFeePerGas: 56000000000
+      maxPriorityFeePerGas: 100000000000
+    },
+    redbellyMainnet: {
+      url: process.env.NETWORK_HOST_REDBELLY,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 151
     },
   },
   etherscan: {

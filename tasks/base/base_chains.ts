@@ -1026,6 +1026,43 @@ export const Chains = {
                 asterizmRouter: '0x0000000000000000000000000000000000000000',
             },
         },
+        {
+            id: 151,
+            title: "RDB", // Redbelly
+            networkName: "redbellyMainnet",
+            chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0xac8D042B7C6cC92fCBdFd259324f602d541ded07',
+                    uint: '985091180901367840761599141252388610288339774727',
+                },
+                initializer: {
+                    address: '0xA55BDd1701D370cE9E2fb66EC0f934F3Dd981571',
+                    uint: '944032104643112257033211217745989932066289489265',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0xA23C4235d26e94B016A796525D3cd56654044099',
+                    uint: '926200317310922830817339070044806267472496050329',
+                },
+            },
+            stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+                baseRouter: '0x0000000000000000000000000000000000000000',
+                asterizmRouter: '0x0000000000000000000000000000000000000000',
+            },
+        },
     ],
 
     // TESTNET CHAINS
