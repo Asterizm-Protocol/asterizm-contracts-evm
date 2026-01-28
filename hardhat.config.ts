@@ -23,6 +23,8 @@ import './tasks/gas/gas_updatelimits_task';
 import './tasks/deploy/upgrade_gas_task';
 import './tasks/deploy/upgrade_translator_task';
 import './tasks/deploy/upgrade_initializer_task';
+import './tasks/deploy/deploy_addsender_task';
+import './tasks/deploy/deploy_removesender_task';
 import './tasks/demo/demo_deploy_task';
 import './tasks/demo/demo_sendmessage_task';
 import './tasks/relay/relay_addchain_task';
@@ -48,6 +50,12 @@ import './tasks/venidium/deploy_nativedstmultichain_task';
 import './tasks/venidium/deploy_nativesrcmultichain_task';
 import './tasks/venidium/deploy_stabledstmultichain_task';
 import './tasks/venidium/deploy_stablesrcmultichain_task';
+import './tasks/staking/staking_deploy_task';
+import './tasks/staking/staking_deployupgrade_task';
+import './tasks/staking/staking_upgrade_tast';
+import './tasks/staking/staking_send_task';
+import './tasks/nft/nft_deployupgrade_task';
+import './tasks/nft/nft_upgrade_tast';
 
 const config = {
   solidity: {
@@ -125,7 +133,8 @@ const config = {
     bscTestnet: {
       url: process.env.NETWORK_HOST_BSC_TESTNET,
       accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
-      chainId: 97
+      chainId: 97,
+      gasPrice: 100000000
     },
     opBnbTestnet: {
       url: process.env.NETWORK_HOST_OPBNB_TESTNET,
@@ -320,6 +329,7 @@ const config = {
       gnosisMainnet: process.env.GNOSISSCAN_API_KEY,
       xdcMainnet: process.env.GNOSISSCAN_API_KEY,
       lemonMainnet: process.env.LEMONSCAN_API_KEY,
+      bscTestnet: process.env.BSCSCAN_API_KEY,
     },
     customChains: [
       {
@@ -334,7 +344,15 @@ const config = {
         network: "bscMainnet",
         chainId: 56,
         urls: {
-          apiURL: "https://bscscan.com/api",
+          apiURL: "https://api.bscscan.com/api",
+          browserURL: "https://testnet.bscscan.com/"
+        }
+      },
+      {
+        network: "bscTestnet",
+        chainId: 97,
+        urls: {
+          apiURL: "https://api.bscscan.com/api",
           browserURL: "https://bscscan.com/"
         }
       },

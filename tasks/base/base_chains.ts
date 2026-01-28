@@ -31,6 +31,14 @@ export const Chains = {
                     address: '0x4C9BFC8BA437e3fB7B746859827e162BBfDb51Ea',
                     uint: '437361913901971447688660164742358754819898561002',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [
                 '0xdAC17F958D2ee523a2206206994597C13D831ec7',
@@ -72,6 +80,14 @@ export const Chains = {
                 checker: {
                     address: '0xAC398e29d353f0680a9A6B4e16ffAaa7a00d227e',
                     uint: '983229939235098941171860054683297091967400092286',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
                 },
             },
             stableCoins: [
@@ -115,6 +131,14 @@ export const Chains = {
                     address: '0x59E8070De88cc1E4085293eFD08aAd4fBa2eF6E0',
                     uint: '513274566008164863673458270168230392643082712800',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [
                 // '0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E',
@@ -148,12 +172,20 @@ export const Chains = {
                     uint: '1392554366193406771829250910892083494211229529580',
                 },
                 multichain: {
-                    address: '0x0000000000000000000000000000000000000000',
-                    uint: '0',
+                    address: '0x13CB819Be579379B40eA0873781B0A058BD4D59B', // Stellar test
+                    uint: '113009166454629344063052544563796738533345252763',
                 },
                 checker: {
                     address: '0x398a579193f5cc814DC9FE87A2a470683DC059Ee',
                     uint: '328497605080848121519146905820503632519326882286',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
                 },
             },
             stableCoins: [
@@ -197,6 +229,14 @@ export const Chains = {
                     address: '0xDd03057d1c234eCF4d32A4d1f896657ca5E90d98',
                     uint: '1261754340721791363367587229269420822021374807448',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [
                 '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58',
@@ -237,6 +277,14 @@ export const Chains = {
                 checker: {
                     address: '0x7ab494c6986bf5D001cDc0503089459Be7b3747A',
                     uint: '700523968373073701777778808306040484793228162170',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
                 },
             },
             stableCoins: [
@@ -279,6 +327,14 @@ export const Chains = {
                     address: '0x58352Ef44fDFD0290575C7FB402B58F3c0e8BD26',
                     uint: '503577217628241506697052540985991439591500463398',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [
                 '0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7',
@@ -318,6 +374,14 @@ export const Chains = {
                 checker: {
                     address: '0x8851e1575A3269AD83Bd537CC80FeDb9BE7e533D',
                     uint: '778248735181916001811134858112216580824953148221',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
                 },
             },
             stableCoins: [
@@ -360,6 +424,14 @@ export const Chains = {
                     address: '0xdE4f4940fa08D195776eAB78b7B833DaE1121cEd',
                     uint: '1269164091300873583232669260247228297700411841773',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [
                 '0x5DE1677344D3Cb0D7D465c10b72A8f60699C062d',
@@ -398,6 +470,14 @@ export const Chains = {
                 checker: {
                     address: '0x180Ca0EEf9Ce8c53A67b3d3f3fBb56208B6e4700',
                     uint: '137297406727157155150219371293073471982218921728',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
                 },
             },
             stableCoins: [
@@ -438,6 +518,14 @@ export const Chains = {
                 checker: {
                     address: '0xA252037CB23BB9CF53aBD06ADa08fC8265E2A188',
                     uint: '926685469748525504936754509004107247204681556360',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
                 },
             },
             stableCoins: [],
@@ -497,6 +585,14 @@ export const Chains = {
                     address: '0xEc28269d5B9C936fC812688c0D1Cd4D7bE1142f3',
                     uint: '1348217215535337102418210529111040129153962689267',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [],
             chainlink: {
@@ -533,6 +629,14 @@ export const Chains = {
                 checker: {
                     address: '0x2e7763513E51A4365e5Ef159D505705D974c17EE',
                     uint: '265276015898536769535909174652399582360478947310',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
                 },
             },
             stableCoins: [],
@@ -571,6 +675,14 @@ export const Chains = {
                     address: '0x73c40DAFBE3F0088a8330a3aC82BADD2d874bF91',
                     uint: '660906076965665316198297056036513466477213695889',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [],
             chainlink: {
@@ -605,6 +717,14 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
                     address: '0x0000000000000000000000000000000000000000',
                     uint: '0',
                 },
@@ -645,6 +765,14 @@ export const Chains = {
                     address: '0x1199cb4f02257fdafDF86FaF881FFeA741637e6f',
                     uint: '100482567798584755528521049825039929363013009007',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [],
             chainlink: {
@@ -681,6 +809,14 @@ export const Chains = {
                 checker: {
                     address: '0x3e23e7505506c49B37160F629900Ab5c26da46D2',
                     uint: '354758104146685733677026025917250033014409938642',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
                 },
             },
             stableCoins: [],
@@ -719,6 +855,14 @@ export const Chains = {
                     address: '0x3C11820C18cdBD8044B0EeD85349Ce9588ebCC60',
                     uint: '342929887631334660223436754676854769928041647200',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [],
             chainlink: {
@@ -753,6 +897,14 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
                     address: '0x0000000000000000000000000000000000000000',
                     uint: '0',
                 },
@@ -793,6 +945,14 @@ export const Chains = {
                     address: '0xA23C4235d26e94B016A796525D3cd56654044099',
                     uint: '926200317310922830817339070044806267472496050329',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [],
             chainlink: {
@@ -828,6 +988,14 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
                     address: '0x0000000000000000000000000000000000000000',
                     uint: '0',
                 },
@@ -869,6 +1037,14 @@ export const Chains = {
                     address: '0x0000000000000000000000000000000000000000',
                     uint: '0',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [],
             chainlink: {
@@ -906,6 +1082,14 @@ export const Chains = {
                     address: '0xA23C4235d26e94B016A796525D3cd56654044099',
                     uint: '926200317310922830817339070044806267472496050329',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [],
             chainlink: {
@@ -940,6 +1124,14 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
                     address: '0x0000000000000000000000000000000000000000',
                     uint: '0',
                 },
@@ -980,6 +1172,14 @@ export const Chains = {
                     address: '0x2da63B662823d39d8AC022281C8C66EBB03B0253',
                     uint: '260611682777055404113896273346659605959612760659',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [],
             chainlink: {
@@ -1017,6 +1217,14 @@ export const Chains = {
                     address: '0xA23C4235d26e94B016A796525D3cd56654044099',
                     uint: '926200317310922830817339070044806267472496050329',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [],
             chainlink: {
@@ -1053,6 +1261,59 @@ export const Chains = {
                 checker: {
                     address: '0xA23C4235d26e94B016A796525D3cd56654044099',
                     uint: '926200317310922830817339070044806267472496050329',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+            },
+            stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+                baseRouter: '0x0000000000000000000000000000000000000000',
+                asterizmRouter: '0x0000000000000000000000000000000000000000',
+            },
+        },
+        {
+            id: 90000,
+            title: "CANTON", // Canton
+            networkName: "cantonMainnet",
+            chainType: ChainTypes.CTN,
+            contractAddresses: {
+                translator: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                initializer: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
                 },
             },
             stableCoins: [],
@@ -1099,6 +1360,14 @@ export const Chains = {
                     address: '0x1d01A1746056CDCd1D65260000237468762E23Be',
                     uint: '165597097777936052324499905607670083562245071806',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [
                 '0xc8e37E456c517D682ca8F343e46BF4DEFFd24D13',
@@ -1142,6 +1411,14 @@ export const Chains = {
                     address: '0xe7A74ABb5c7537100fEB4870F958Fac3af7dC5eE',
                     uint: '1322507602573320699786003569561590698947261613550',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [
                 '0x7f4F94A70e5E7236c7a14D04fd749FF5b7023bE8',
@@ -1174,12 +1451,20 @@ export const Chains = {
                     uint: '1317529085406174387464612824796491405687419790591',
                 },
                 multichain: {
-                    address: '0xC7864fDF5a3e7C8cC46165781c83fd1d4404eA00',
-                    uint: '1139084421124058569449505853133547600456506993152',
+                    address: '0x74164d84A1960438D307744D3c0a75Ae8FB64499',
+                    uint: '662740298588006875104904986691829813669369627801',
                 },
                 checker: {
                     address: '0x0000000000000000000000000000000000000000',
                     uint: '0',
+                },
+                staking: {
+                    address: '0x4E820008F839002842725b67C34cc5560384bEc7',
+                    uint: '448200380052271906331378955617309784883782270663',
+                },
+                cantonNft: {
+                    address: '0xB67b8b9EE3e749E86e072aA5B35354a8dccB67c2',
+                    uint: '1041791474624652222887786420211721128689732904898',
                 },
             },
             stableCoins: [
@@ -1220,6 +1505,14 @@ export const Chains = {
                     address: '0x0000000000000000000000000000000000000000',
                     uint: '0',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [],
             chainlink: {
@@ -1256,6 +1549,14 @@ export const Chains = {
                 checker: {
                     address: '0xc8e37E456c517D682ca8F343e46BF4DEFFd24D13',
                     uint: '1146871423096324818780652019202769904412751187219',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
                 },
             },
             stableCoins: [],
@@ -1294,6 +1595,14 @@ export const Chains = {
                     address: '0x0000000000000000000000000000000000000000',
                     uint: '0',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [],
             chainlink: {
@@ -1328,6 +1637,14 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
                     address: '0x0000000000000000000000000000000000000000',
                     uint: '0',
                 },
@@ -1399,6 +1716,14 @@ export const Chains = {
                     address: '0x0000000000000000000000000000000000000000',
                     uint: '0',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [
                 '0:8c6dcaa30727458527e99a479dae92a92a51c24e235e5b531659e201204d79ee',
@@ -1435,6 +1760,14 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
                     address: '0x0000000000000000000000000000000000000000',
                     uint: '0',
                 },
@@ -1478,6 +1811,14 @@ export const Chains = {
                     address: '0xcc11A3F6e5804D9366d4bab1bA0957c778bD4074',
                     uint: '1165027513233566821464575078488279740472125898868',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [],
             chainlink: {
@@ -1512,6 +1853,14 @@ export const Chains = {
                     uint: '82956800369460856566174632957770929749457176919168498373121963061566857716153',
                 },
                 checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
                     address: '0x0000000000000000000000000000000000000000',
                     uint: '0',
                 },
@@ -1552,6 +1901,14 @@ export const Chains = {
                     address: '0x0000000000000000000000000000000000000000',
                     uint: '0',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [],
             chainlink: {
@@ -1589,6 +1946,14 @@ export const Chains = {
                     address: '0x0000000000000000000000000000000000000000',
                     uint: '0',
                 },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
             },
             stableCoins: [],
             chainlink: {
@@ -1623,6 +1988,59 @@ export const Chains = {
                     uint: '0',
                 },
                 checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+            },
+            stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+                baseRouter: '0x0000000000000000000000000000000000000000',
+                asterizmRouter: '0x0000000000000000000000000000000000000000',
+            },
+        },
+        {
+            id: 90001,
+            title: "CANTON", // Canton
+            networkName: "cantonTestnet",
+            chainType: ChainTypes.CTN,
+            contractAddresses: {
+                translator: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                initializer: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
                     address: '0x0000000000000000000000000000000000000000',
                     uint: '0',
                 },

@@ -71,4 +71,9 @@ library AsterizmErrors {
     uint16 constant SENDER__ONLY_SENDER__ERROR = 8001;
     uint16 constant SENDER__ONLY_SENDER_OR_OWNER__ERROR = 8002;
     uint16 constant SENDER__SENDER_NOT_EXISTS__ERROR = 8003;
+
+    // For Staking token contract
+    uint16 constant STAKING__AMOUNT_TOO_SMALL__ERROR = 9001;
+    uint16 constant STAKING__STAKE_EXISTS_ALREADY__ERROR = 9002;
+    uint16 constant STAKING__STAKE_IS_NOT_EXISTS__ERROR = 9003;
 }

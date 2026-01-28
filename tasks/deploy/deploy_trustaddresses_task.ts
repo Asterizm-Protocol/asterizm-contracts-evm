@@ -31,6 +31,14 @@ async function deployBase(hre, isTestnet, contractType) {
 
             trustedAddresses.push(chains[i].trustAddresses.checker.uint);
             chainIds.push(chains[i].id);
+        } else if (contractType == "staking") {
+            TargetContract = await ethers.getContractFactory("StakingToken");
+            if (chains[i].trustAddresses.staking.address == '0x0000000000000000000000000000000000000000') {
+                continue;
+            }
+
+            trustedAddresses.push(chains[i].trustAddresses.staking.uint);
+            chainIds.push(chains[i].id);
         } else {
             TargetContract = await ethers.getContractFactory("GasStationUpgradeableV1");
             if (chains[i].trustAddresses.gas.address == '0x0000000000000000000000000000000000000000') {
@@ -49,7 +57,7 @@ async function deployBase(hre, isTestnet, contractType) {
 }
 
 task("deploy:fillTrustedAddresses", "Adding trusted addresses to client contract from chains list")
-    .addPositionalParam("contractType", "Target contract type (gas - gassender contract, claim - claim contract, checker - checker contract)", "gas")
+    .addPositionalParam("contractType", "Target contract type (gas - gassender contract, claim - claim contract, checker - checker contract, staking - staking contract)", "gas")
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs, hre) => {

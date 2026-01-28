@@ -10,6 +10,13 @@ library AddressLib {
         return uint(uint160(_address));
     }
 
+    /// Convert address to bytes format
+    /// @param _address address
+    /// @return bytes
+    function toBytes(address _address) internal pure returns(bytes memory) {
+        return abi.encodePacked(_address);
+    }
+
     /**
      * @dev Returns true if `account` is a contract.
      *

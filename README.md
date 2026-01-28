@@ -17,3 +17,7 @@ Before the deployment you will also need to update your .env file:
 - add Fireblocks config if it is used.
 
 All private data is stored inside .env file.
+
+### Verify contracts
+- See contract input path in artifacts/contracts/.../*.dbg.json
+- Verify on scanner form

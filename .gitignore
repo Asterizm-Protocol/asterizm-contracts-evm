@@ -8,7 +8,8 @@ typechain-types
 .deps
 .DS_Store
 .openzeppelin
-fireblocks_key.csr
+*.csr
+standard-input.json
 
 #Hardhat files
 cache
