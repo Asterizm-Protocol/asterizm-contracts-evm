@@ -156,6 +156,12 @@ const config = {
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 42161
     },
+    arbitrumTestnet: {
+      url: process.env.NETWORK_HOST_ARBITRUM_TESTNET,
+      accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
+      chainId: 421614,
+      gasPrice: 1000000000
+    },
     fantomMainnet: {
       url: process.env.NETWORK_HOST_FANTOM,
       accounts: [process.env.OWNER_PK_ASTERIZM],

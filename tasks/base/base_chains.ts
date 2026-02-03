@@ -2053,5 +2053,50 @@ export const Chains = {
                 asterizmRouter: '0x0000000000000000000000000000000000000000',
             },
         },
+        {
+            id: 421614,
+            title: "ARB", // Arbitrum Testnet
+            networkName: "arbitrumTestnet",
+            chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x94d315B5682770783B5384b5D61Ebe47Cc0D5259',
+                    uint: '849637982406375683019140599329792808295565447769',
+                },
+                initializer: {
+                    address: '0x4c344E472F85B2d2108d7d97d4ad8169588b9C64',
+                    uint: '435049756314454043126970702514803351607269104740',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                staking: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+            },
+            stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+                baseRouter: '0x0000000000000000000000000000000000000000',
+                asterizmRouter: '0x0000000000000000000000000000000000000000',
+            },
+        },
     ],
 };

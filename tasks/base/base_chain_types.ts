@@ -3,5 +3,5 @@ export const ChainTypes = {
     TVM: 2,
     TON: 3,
     SOL: 4,
-    CTN: 5,
+    CTN: 1,
 };
