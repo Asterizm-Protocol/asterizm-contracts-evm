@@ -19,5 +19,19 @@ Before the deployment you will also need to update your .env file:
 All private data is stored inside .env file.
 
 ### Verify contracts
+JSON Input logic
 - See contract input path in artifacts/contracts/.../*.dbg.json
-- Verify on scanner form
+- Call code (XXXXX.json - filename from )artifacts/contracts/.../*.dbg.json:
+    ```shell
+    node -e "
+    const fs=require('fs');
+    const p=process.argv[1];
+    const j=JSON.parse(fs.readFileSync(p,'utf8'));
+    process.stdout.write(JSON.stringify(j.input));
+    " artifacts/build-info/XXXXX.json > standard-input.json
+    ```
+- Verify on scanner form (Standard JSON Input)
+
+Flatten logic:
+- npx hardhat flatten {path-to-main-*.sol} > new-flattened.sol
+- Verify on scanner form (Solidity Single file)

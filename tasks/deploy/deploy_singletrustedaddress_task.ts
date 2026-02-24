@@ -17,6 +17,8 @@ async function deployBase(hre, contractAddress, contractType, isTestnet) {
         TargetContract = await ethers.getContractFactory("GasStationUpgradeableV1");
     } else if (contractType == "staking") {
         TargetContract = await ethers.getContractFactory("StakingToken");
+    } else if (contractType == "cantonNft") {
+        TargetContract = await ethers.getContractFactory("CantonNftUpgradeableV1");
     }
 
     if (!TargetContract) {
@@ -41,7 +43,7 @@ task("deploy:addTrustedAddress", "Adding trusted address to client contract")
     // .addPositionalParam("contractAddress", "Target contract address")
     .addPositionalParam("trustedChainId", "Trusted chain ID")
     .addPositionalParam("trustedAddress", "Trusted address")
-    .addPositionalParam("contractType", "Target contract type (gas - gassender contract, claim - claim contract, checker - checker contract, demo - demo contract, multichain - multichain token contract, staking - staking contract)", "gas")
+    .addPositionalParam("contractType", "Target contract type (gas - gassender contract, claim - claim contract, checker - checker contract, demo - demo contract, multichain - multichain token contract, staking - staking contract, cantonNft - canton NFT contract)", "gas")
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs, hre) => {

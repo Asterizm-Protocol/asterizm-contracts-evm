@@ -109,7 +109,6 @@ describe("OmniChain token test", function () {
   });
   it("Check address balances", async function () {
     const { Initializer, initializer1, initializer2, Transalor, translator1, translator2, Token, token1, token2, TokenUpgrade, tokenUpgrade1, tokenUpgrade2, TokenStakeNativeUpgrade, tokenStakeNativeUpgrade1, tokenStakeNativeUpgrade2, TokenStakeTokenUpgrade, tokenStakeTokenUpgrade1, tokenStakeTokenUpgrade2, owner, user, currentChainIds } = await loadFixture(deployContractsFixture);
-    let balance = await(token1.balanceOf(owner.address));
     expect(await token1.balanceOf(owner.address)).to.equal(
       TOKEN_AMOUNT.toString()
     );

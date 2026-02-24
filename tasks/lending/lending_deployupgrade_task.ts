@@ -12,7 +12,7 @@ async function deployBase(hre, initializerAddress) {
     return {initializer, owner, gasLimit};
 }
 
-task("staking:deploy-upgrade", "Deploy Staking token contract (upgradeable)")
+task("lending:deploy-upgrade", "Deploy Lending token contract (upgradeable)")
     .addPositionalParam("initializerAddress", "Initializer contract address")
     .addPositionalParam("initSupply", "Initial token supply", '0')
     .addPositionalParam("relayAddress", "Config contract address", '0')
@@ -24,27 +24,27 @@ task("staking:deploy-upgrade", "Deploy Staking token contract (upgradeable)")
 
         let tx;
         const gasPrice = parseInt(taskArgs.gasPrice);
-        console.log("Deploying staking token contract...");
-        const Stake = await ethers.getContractFactory("StakingTokenUpgradeableV1");
-        const stake = await upgrades.deployProxy(Stake, [await initializer.getAddress(), bigInt(taskArgs.initSupply).toString()], {
+        console.log("Deploying lending token contract...");
+        const Lend = await ethers.getContractFactory("LendingTokenUpgradeableV1");
+        const lend = await upgrades.deployProxy(Lend, [await initializer.getAddress(), bigInt(taskArgs.initSupply).toString()], {
             initialize: 'initialize',
             kind: 'uups',
         });
-        tx = await stake.waitForDeployment();
+        tx = await lend.waitForDeployment();
         gasLimit = gasLimit.add((await tx.deploymentTransaction()).gasLimit);
         if (taskArgs.relayAddress != '0') {
-            tx = await stake.setExternalRelay(taskArgs.relayAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+            tx = await lend.setExternalRelay(taskArgs.relayAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
             gasLimit = gasLimit.add(tx.gasLimit);
             console.log("Set external relay successfully. Address: %s", taskArgs.relayAddress);
         }
         if (taskArgs.feeTokenAddress != '0') {
-            tx = await stake.setFeeToken(taskArgs.feeTokenAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+            tx = await lend.setFeeToken(taskArgs.feeTokenAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
             gasLimit = gasLimit.add(tx.gasLimit);
             console.log("Set fee token successfully. Address: %s", taskArgs.feeTokenAddress);
         }
 
         if (taskArgs.refundFee != '0') {
-            tx = await stake.setRefundFee(taskArgs.refundFee, gasPrice > 0 ? {gasPrice: gasPrice} : {});
+            tx = await lend.setRefundFee(taskArgs.refundFee, gasPrice > 0 ? {gasPrice: gasPrice} : {});
             gasLimit = gasLimit.add(tx.gasLimit);
             console.log("Set refund fee successfully. Hash: %s", tx.hash);
         }
@@ -56,5 +56,5 @@ task("staking:deploy-upgrade", "Deploy Staking token contract (upgradeable)")
         if (taskArgs.relayAddress != '0') {
             console.log("External relay address: %s", taskArgs.relayAddress);
         }
-        console.log("Staking token address: %s\n", await stake.getAddress());
+        console.log("Lending token address: %s\n", await lend.getAddress());
     })

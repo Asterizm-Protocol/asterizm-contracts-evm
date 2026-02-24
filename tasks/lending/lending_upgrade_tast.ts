@@ -5,7 +5,7 @@ import {Chains} from "../base/base_chains";
 
 async function deployBase(hre, implementationVersion, isTestnet) {
     const [owner] = await ethers.getSigners();
-    const Stake = await ethers.getContractFactory("StakingTokenUpgradeableV" + implementationVersion);
+    const Lend = await ethers.getContractFactory("LendingTokenUpgradeableV" + implementationVersion);
     let gasLimit = bigInt(0);
 
     const chains = isTestnet == 1 ? Chains.testnet : Chains.mainnet;
@@ -21,26 +21,26 @@ async function deployBase(hre, implementationVersion, isTestnet) {
         throw new Error('Chain not supported!');
     }
 
-    return {owner, Stake, gasLimit, currentChain};
+    return {owner, Lend, gasLimit, currentChain};
 }
 
-task("staking:upgrade", "Update Staking token contracts")
+task("lending:upgrade", "Update Lending token contracts")
     .addPositionalParam("address", "Deployed token contract address")
     .addPositionalParam("implementationVersion", "Implementation version", '1')
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs, hre) => {
-        let {owner, Stake, gasLimit, currentChain} = await deployBase(hre, taskArgs.implementationVersion, taskArgs.isTestnet);
+        let {owner, Lend, gasLimit, currentChain} = await deployBase(hre, taskArgs.implementationVersion, taskArgs.isTestnet);
 
-        console.log("Upgrading base Staking token implementation...");
+        console.log("Upgrading base Lending token implementation...");
 
-        const stake = await upgrades.upgradeProxy(currentChain.trustAddresses.staking.address, Stake);
-        gasLimit = gasLimit.add(token.deployTransaction.gasLimit);
-        console.log("Staking token implementation upgrade successfully");
+        const lend = await upgrades.upgradeProxy(currentChain.trustAddresses.lending.address, Lend);
+        gasLimit = gasLimit.add(lend.deployTransaction.gasLimit);
+        console.log("Lending token implementation upgrade successfully");
 
         console.log("Deployment was done\n");
         console.log("Total gas limit: %s", gasLimit.toString());
         console.log("Owner address: %s", owner.address);
-        console.log("Staking token address: %s", await token.getAddress());
-        console.log("Transaction hash: %s\n", token.deployTransaction.hash);
+        console.log("Lending token address: %s", await lend.getAddress());
+        console.log("Transaction hash: %s\n", lend.deployTransaction.hash);
     });
