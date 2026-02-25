@@ -24,7 +24,7 @@ async function deployBase(hre, implementationVersion, isTestnet) {
     return {owner, Lend, gasLimit, currentChain};
 }
 
-task("lending:upgrade", "Update Lending token contracts")
+task("lending:upgrade-token", "Update Lending token contracts")
     .addPositionalParam("address", "Deployed token contract address")
     .addPositionalParam("implementationVersion", "Implementation version", '1')
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
@@ -34,7 +34,7 @@ task("lending:upgrade", "Update Lending token contracts")
 
         console.log("Upgrading base Lending token implementation...");
 
-        const lend = await upgrades.upgradeProxy(currentChain.trustAddresses.lending.address, Lend);
+        const lend = await upgrades.upgradeProxy(currentChain.trustAddresses.lending.token.address, Lend);
         gasLimit = gasLimit.add(lend.deployTransaction.gasLimit);
         console.log("Lending token implementation upgrade successfully");
 

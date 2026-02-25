@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {AsterizmClient, IInitializerSender, UintLib} from "../../base/AsterizmClient.sol";
+import {AsterizmClient, IInitializerSender, UintLib} from "../../../base/AsterizmClient.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {BytesLib} from "../../libs/BytesLib.sol";
-import {AddressLib} from "../../libs/AddressLib.sol";
+import {BytesLib} from "../../../libs/BytesLib.sol";
+import {AddressLib} from "../../../libs/AddressLib.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract LendingInitializerTest is AsterizmClient {

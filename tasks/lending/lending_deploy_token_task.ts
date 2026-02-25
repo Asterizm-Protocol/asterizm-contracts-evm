@@ -12,7 +12,7 @@ async function deployBase(hre, initializerAddress) {
     return {initializer, owner, gasLimit};
 }
 
-task("lending:deploy-upgrade", "Deploy Lending token contract (upgradeable)")
+task("lending:deploy-token", "Deploy Lending token contract")
     .addPositionalParam("initializerAddress", "Initializer contract address")
     .addPositionalParam("initSupply", "Initial token supply", '0')
     .addPositionalParam("relayAddress", "Config contract address", '0')
@@ -25,27 +25,24 @@ task("lending:deploy-upgrade", "Deploy Lending token contract (upgradeable)")
         let tx;
         const gasPrice = parseInt(taskArgs.gasPrice);
         console.log("Deploying lending token contract...");
-        const Lend = await ethers.getContractFactory("LendingTokenUpgradeableV1");
-        const lend = await upgrades.deployProxy(Lend, [await initializer.getAddress(), bigInt(taskArgs.initSupply).toString()], {
-            initialize: 'initialize',
-            kind: 'uups',
-        });
+        const Lend = await ethers.getContractFactory("LendingToken");
+        const lend = await Lend.deploy(await initializer.getAddress(), bigInt(taskArgs.initSupply).toString(), gasPrice > 0 ? {gasPrice: gasPrice} : {});
         tx = await lend.waitForDeployment();
         gasLimit = gasLimit.add((await tx.deploymentTransaction()).gasLimit);
         if (taskArgs.relayAddress != '0') {
             tx = await lend.setExternalRelay(taskArgs.relayAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
-            gasLimit = gasLimit.add(tx.gasLimit);
+            // gasLimit = gasLimit.add(tx.gasLimit);
             console.log("Set external relay successfully. Address: %s", taskArgs.relayAddress);
         }
         if (taskArgs.feeTokenAddress != '0') {
             tx = await lend.setFeeToken(taskArgs.feeTokenAddress, gasPrice > 0 ? {gasPrice: gasPrice} : {});
-            gasLimit = gasLimit.add(tx.gasLimit);
+            // gasLimit = gasLimit.add(tx.gasLimit);
             console.log("Set fee token successfully. Address: %s", taskArgs.feeTokenAddress);
         }
 
         if (taskArgs.refundFee != '0') {
             tx = await lend.setRefundFee(taskArgs.refundFee, gasPrice > 0 ? {gasPrice: gasPrice} : {});
-            gasLimit = gasLimit.add(tx.gasLimit);
+            // gasLimit = gasLimit.add(tx.gasLimit);
             console.log("Set refund fee successfully. Hash: %s", tx.hash);
         }
 

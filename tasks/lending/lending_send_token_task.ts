@@ -20,12 +20,12 @@ async function deployBase(hre, isTestnet: number) {
     }
 
     let gasLimit = bigInt(0);
-    const lend = await Lend.attach(currentChain?.trustAddresses.lending.address);
+    const lend = await Lend.attach(currentChain?.trustAddresses.lending.token.address);
 
     return {Lend, lend, owner, currentChain, gasLimit};
 }
 
-task("lending:send", "Send Lending token")
+task("lending:send-token", "Send Lending token")
     .addPositionalParam("stakeId", "Staking ID (in uint)")
     .addPositionalParam("dstChainId", "Destination chain ID")
     .addPositionalParam("dstAddress", "Destination address (in bytes)")

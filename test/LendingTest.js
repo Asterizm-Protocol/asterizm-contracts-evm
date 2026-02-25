@@ -86,7 +86,7 @@ describe("Lending test", function () {
             lendingInitializer, Lending, lending, Pool, pool, owner, feeCollector, user, currentChainIds
         } = await loadFixture(deployContractsFixture);
     });
-    it("Should check owner token balance", async function () {
+    it("Should check token balances", async function () {
         const {
             Initializer, initializer1, initializer2, Translator, translator1, translator2, Token, token, LendingInitializer,
             lendingInitializer, Lending, lending, Pool, pool, owner, feeCollector, user, currentChainIds

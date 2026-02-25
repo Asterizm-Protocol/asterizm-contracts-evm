@@ -50,10 +50,12 @@ import './tasks/venidium/deploy_nativedstmultichain_task';
 import './tasks/venidium/deploy_nativesrcmultichain_task';
 import './tasks/venidium/deploy_stabledstmultichain_task';
 import './tasks/venidium/deploy_stablesrcmultichain_task';
-import './tasks/lending/lending_deploy_task';
-import './tasks/lending/lending_deployupgrade_task';
-import './tasks/lending/lending_upgrade_tast';
-import './tasks/lending/lending_send_task';
+import './tasks/lending/lending_deploy_token_task';
+import './tasks/lending/lending_deployupgrade_token_task';
+import './tasks/lending/lending_upgrade_token_tast';
+import './tasks/lending/lending_send_token_task';
+import './tasks/lending/lending_deploy_base_task';
+import './tasks/lending/lending_deployupgrade_base_task';
 import './tasks/nft/nft_deployupgrade_task';
 import './tasks/nft/nft_upgrade_tast';
 
