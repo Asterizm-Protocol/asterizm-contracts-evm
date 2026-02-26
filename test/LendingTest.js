@@ -239,6 +239,10 @@ describe("Lending test", function () {
 
         await expect(lending.crossChainUnstake(stakeId, currentChainIds[0], user.address))
             .to.be.revertedWithCustomError(lending, 'CustomError')
+            .withArgs(10010); // LENDING__WRONG_CLIENT_ADDRESS__ERROR
+
+        await expect(lending.connect(user).crossChainUnstake(stakeId, currentChainIds[0], user.address))
+            .to.be.revertedWithCustomError(lending, 'CustomError')
             .withArgs(10009); // LENDING__CLIENT_ALLOWANCE_IS_NOT_ENOUGH__ERROR
 
         const userTokenBalanceBefore = bigInt(await token.balanceOf(user.address));
@@ -247,7 +251,7 @@ describe("Lending test", function () {
 
         await expect(token.connect(user).approve(await lending.getAddress(), userTokenBalanceBefore.toString())).to.not.reverted;
 
-        const userTokenFee = INTEREST_FOR_BLOCK.multiply(4);
+        const userTokenFee = INTEREST_FOR_BLOCK.multiply(5);
         const userTokenAmount = amount.add(userTokenFee.toString());
 
         await expect(lending.connect(user).crossChainUnstake(stakeId, currentChainIds[0], user.address))
@@ -352,6 +356,10 @@ describe("Lending test", function () {
         await token.transfer(user.address, bigInt('100').multiply(POW.toString()).toString());
 
         await expect(lending.crossChainUnstake(stakeId, currentChainIds[0], user.address))
+            .to.be.revertedWithCustomError(lending, 'CustomError')
+            .withArgs(10010); // LENDING__WRONG_CLIENT_ADDRESS__ERROR
+
+        await expect(lending.connect(user).crossChainUnstake(stakeId, currentChainIds[0], user.address))
             .to.be.revertedWithCustomError(lending, 'CustomError')
             .withArgs(10009); // LENDING__CLIENT_ALLOWANCE_IS_NOT_ENOUGH__ERROR
 

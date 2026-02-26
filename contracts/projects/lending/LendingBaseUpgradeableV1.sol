@@ -42,7 +42,7 @@ contract LendingBaseUpgradeableV1 is ILendingBase, AsterizmClientUpgradeable {
         uint closeBlockNumber;
     }
 
-    uint public constant RATE_DIV = 10000000000;
+    uint public constant RATE_DIV = 1e10;
     uint public constant WAD = 1e18; // format
     uint public constant ANNUAL_RATE_WAD = 1e17; // 10% = 0.1 * 1e18
     uint public constant BLOCKS_PER_YEAR = 2_592_000; // blocks in year
@@ -126,6 +126,7 @@ contract LendingBaseUpgradeableV1 is ILendingBase, AsterizmClientUpgradeable {
     function crossChainUnstake(uint _stakeId, uint64 _dstChainId, bytes memory _to) public payable onlyPoolSet {
         require(stakes[_stakeId].exists, CustomError(LendingErrors.LENDING__STAKE_IS_NOT_EXISTS__ERROR));
         require(!stakes[_stakeId].isClosed, CustomError(LendingErrors.LENDING__POSITION_IS_CLOSED_ALREADY__ERROR));
+        require(stakes[_stakeId].liquidityAddress == _msgSender(), CustomError(LendingErrors.LENDING__WRONG_CLIENT_ADDRESS__ERROR));
 
         uint currentBlockNum = block.number;
         uint liquidAmount = stakes[_stakeId].liquidAmount;

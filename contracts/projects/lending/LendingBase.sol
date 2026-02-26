@@ -127,6 +127,7 @@ contract LendingBase is ILendingBase, AsterizmClient {
     function crossChainUnstake(uint _stakeId, uint64 _dstChainId, bytes memory _to) public payable onlyPoolSet {
         require(stakes[_stakeId].exists, CustomError(LendingErrors.LENDING__STAKE_IS_NOT_EXISTS__ERROR));
         require(!stakes[_stakeId].isClosed, CustomError(LendingErrors.LENDING__POSITION_IS_CLOSED_ALREADY__ERROR));
+        require(stakes[_stakeId].liquidityAddress == _msgSender(), CustomError(LendingErrors.LENDING__WRONG_CLIENT_ADDRESS__ERROR));
 
         uint currentBlockNum = block.number;
         uint liquidAmount = stakes[_stakeId].liquidAmount;
