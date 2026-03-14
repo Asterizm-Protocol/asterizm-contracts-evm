@@ -39,7 +39,7 @@ task("deploy:checker", "Deploy Asterizm checker contract")
         let tx;
         const gasPrice = parseInt(taskArgs.gasPrice);
         console.log("Deploying checker contract...");
-        const Checker = await ethers.getContractFactory("Checker");
+        const Checker = await ethers.getContractFactory("CheckerText");
         // const checker = await Checker.attach('0x...');
         const checker = await Checker.deploy(await initializer.getAddress(), gasPrice > 0 ? {gasPrice: gasPrice} : {});
         tx = await checker.waitForDeployment();

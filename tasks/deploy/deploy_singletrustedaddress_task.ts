@@ -15,10 +15,12 @@ async function deployBase(hre, contractAddress, contractType, isTestnet) {
         TargetContract = await ethers.getContractFactory("AsterizmDemo");
     } else if (contractType == "gas") {
         TargetContract = await ethers.getContractFactory("GasStationUpgradeableV1");
-    } else if (contractType == "staking") {
-        TargetContract = await ethers.getContractFactory("StakingToken");
     } else if (contractType == "cantonNft") {
         TargetContract = await ethers.getContractFactory("CantonNftUpgradeableV1");
+    } else if (contractType == "lending.base") {
+        TargetContract = await ethers.getContractFactory("LendingBase");
+    } else if (contractType == "lending.token") {
+        TargetContract = await ethers.getContractFactory("LendingToken");
     }
 
     if (!TargetContract) {
@@ -33,8 +35,17 @@ async function deployBase(hre, contractAddress, contractType, isTestnet) {
         }
     }
 
+    let trustedAddress;
+    if (contractType == "lending.base") {
+        trustedAddress = currentChain?.trustAddresses.lending.base.address;
+    } else if (contractType == "lending.token") {
+        trustedAddress = currentChain?.trustAddresses.lending.token.address;
+    } else {
+        trustedAddress = currentChain?.trustAddresses[contractType].address;
+    }
+
     let gasLimit = bigInt(0);
-    const targetContract = await TargetContract.attach(currentChain?.trustAddresses[contractType].address);
+    const targetContract = await TargetContract.attach(trustedAddress);
 
     return {targetContract, gasLimit};
 }
@@ -43,7 +54,7 @@ task("deploy:addTrustedAddress", "Adding trusted address to client contract")
     // .addPositionalParam("contractAddress", "Target contract address")
     .addPositionalParam("trustedChainId", "Trusted chain ID")
     .addPositionalParam("trustedAddress", "Trusted address")
-    .addPositionalParam("contractType", "Target contract type (gas - gassender contract, claim - claim contract, checker - checker contract, demo - demo contract, multichain - multichain token contract, staking - staking contract, cantonNft - canton NFT contract)", "gas")
+    .addPositionalParam("contractType", "Target contract type (gas - gassender contract, claim - claim contract, checker - checker contract, demo - demo contract, multichain - multichain token contract, cantonNft - canton NFT contract, lending.base - base lending contract, lending.token - lending token contract)", "gas")
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
     .setAction(async (taskArgs, hre) => {
