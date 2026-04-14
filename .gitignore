@@ -10,6 +10,7 @@ typechain-types
 .openzeppelin
 *.csr
 standard-input.json
+AGENTS.md
 
 #Hardhat files
 cache
