@@ -1604,6 +1604,61 @@ export const Chains = {
                 asterizmRouter: '0x0000000000000000000000000000000000000000',
             },
         },
+        {
+            id: 72957,
+            title: "RLS", // Rayls Mainnet
+            networkName: "raylsMainnet",
+            chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                initializer: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                lending: {
+                    base: {
+                        address: '0x0000000000000000000000000000000000000000',
+                        uint: '0',
+                    },
+                    pool: {
+                        address: '0x0000000000000000000000000000000000000000',
+                        uint: '0',
+                    },
+                    token: {
+                        address: '0x0000000000000000000000000000000000000000',
+                        uint: '0',
+                    },
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+            },
+            stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+                baseRouter: '0x0000000000000000000000000000000000000000',
+                asterizmRouter: '0x0000000000000000000000000000000000000000',
+            },
+        },
     ],
 
     // TESTNET CHAINS
@@ -1760,16 +1815,16 @@ export const Chains = {
                 },
                 lending: {
                     base: {
-                        address: '0xF7424dcC29c680be855071f0262E672133Ae0599',
-                        uint: '1411599346695740014871576582003511589716685096345',
+                        address: '0xFDC9f5427847B051cE9253409D0DE9ba2b668F46',
+                        uint: '1448878479931905141681449184094469559286497709894',
                     },
                     pool: {
-                        address: '0x0b393b33612c6E58a5cb6573f8f5478AC55B40F3',
-                        uint: '64075198063814981849403898726060707893976187123',
+                        address: '0x8737D36cF7200Db51e3041b76b079858D5331e7C',
+                        uint: '771958712818450495396967866411159312741803695740',
                     },
                     token: {
-                        address: '0x4E820008F839002842725b67C34cc5560384bEc7',
-                        uint: '448200380052271906331378955617309784883782270663',
+                        address: '0x041406E5895C796eeAbfDfA8442f24121eFa5664',
+                        uint: '23282578768227975708981353205104822257859581540',
                     },
                 },
                 cantonNft: {
@@ -2479,6 +2534,61 @@ export const Chains = {
                 checker: {
                     address: '0x0000000000000000000000000000000000000000',
                     uint: '0',
+                },
+                lending: {
+                    base: {
+                        address: '0x0000000000000000000000000000000000000000',
+                        uint: '0',
+                    },
+                    pool: {
+                        address: '0x0000000000000000000000000000000000000000',
+                        uint: '0',
+                    },
+                    token: {
+                        address: '0x0000000000000000000000000000000000000000',
+                        uint: '0',
+                    },
+                },
+                cantonNft: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+            },
+            stableCoins: [],
+            chainlink: {
+                chainSelector: '0',
+                feeToken: '0x0000000000000000000000000000000000000000',
+                baseRouter: '0x0000000000000000000000000000000000000000',
+                asterizmRouter: '0x0000000000000000000000000000000000000000',
+            },
+        },
+        {
+            id: 7295799,
+            title: "RLS", // Rayls Testnet
+            networkName: "raylsTestnet",
+            chainType: ChainTypes.EVM,
+            contractAddresses: {
+                translator: {
+                    address: '0x8b314A606F9C347093B69BBe102855BD9DE4edbd',
+                    uint: '794648932783863238517312334764403844450535927229',
+                },
+                initializer: {
+                    address: '0x44DE63c860E961dd6c6f96ec93e4C4f1d9F54653',
+                    uint: '393170830151693192137490714634169047190030599763',
+                },
+            },
+            trustAddresses: {
+                gas: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                multichain: {
+                    address: '0x0000000000000000000000000000000000000000',
+                    uint: '0',
+                },
+                checker: {
+                    address: '0x6EF4688B8FF0Cec6EDD6052FE87a0EB180d7795b',
+                    uint: '633439473787379673368730752584098077686306928987',
                 },
                 lending: {
                     base: {

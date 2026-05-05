@@ -316,6 +316,19 @@ const config = {
       accounts: [process.env.OWNER_PK_ASTERIZM],
       chainId: 151
     },
+    raylsTestnet: {
+      url: process.env.NETWORK_HOST_RAYLS_TESTNET,
+      accounts: [process.env.OWNER_PK_ASTERIZM_TEST],
+      chainId: 7295799,
+      gasPrice: 200_000_000_000,
+      maxFeePerGas: 200_000_000_000,
+      maxPriorityFeePerGas: 200_000_000_000
+    },
+    raylsMainnet: {
+      url: process.env.NETWORK_HOST_RAYLS,
+      accounts: [process.env.OWNER_PK_ASTERIZM],
+      chainId: 72957
+    },
   },
   etherscan: {
     apiKey: {

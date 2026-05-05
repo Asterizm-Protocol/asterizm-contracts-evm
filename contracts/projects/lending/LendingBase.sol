@@ -45,7 +45,7 @@ contract LendingBase is ILendingBase, AsterizmClient {
     uint public constant RATE_DIV = 10000000000;
     uint public constant WAD = 1e18; // format
     uint public constant ANNUAL_RATE_WAD = 1e17; // 10% = 0.1 * 1e18
-    uint public constant BLOCKS_PER_YEAR = 2_592_000; // blocks in year
+    uint public constant BLOCKS_PER_YEAR = 62_208_000; // blocks in year. ETH: 2_592_000, BSC: 62_208_000
     uint public constant RATE_PER_BLOCK_WAD = ANNUAL_RATE_WAD / BLOCKS_PER_YEAR; // rate per block
 
     mapping(uint => Stake) public stakes;
