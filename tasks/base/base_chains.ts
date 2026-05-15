@@ -1611,12 +1611,12 @@ export const Chains = {
             chainType: ChainTypes.EVM,
             contractAddresses: {
                 translator: {
-                    address: '0x0000000000000000000000000000000000000000',
-                    uint: '0',
+                    address: '0xac8D042B7C6cC92fCBdFd259324f602d541ded07',
+                    uint: '985091180901367840761599141252388610288339774727',
                 },
                 initializer: {
-                    address: '0x0000000000000000000000000000000000000000',
-                    uint: '0',
+                    address: '0xA55BDd1701D370cE9E2fb66EC0f934F3Dd981571',
+                    uint: '944032104643112257033211217745989932066289489265',
                 },
             },
             trustAddresses: {
@@ -1810,7 +1810,7 @@ export const Chains = {
                     uint: '662740298588006875104904986691829813669369627801',
                 },
                 checker: {
-                    address: '0x85D60b6cf2997f6Ac389b37233e559C9a0a78e81',
+                    address: '0x838F791e979D85C84226bB882b93d784D12D1938',
                     uint: '764069127300167267623390353671598637606706318977',
                 },
                 lending: {
