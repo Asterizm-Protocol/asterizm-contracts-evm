@@ -35,25 +35,29 @@ async function deployBase(hre, contractAddress, contractType, isTestnet) {
         }
     }
 
-    let trustedAddress;
-    if (contractType == "lending.base") {
-        trustedAddress = currentChain?.trustAddresses.lending.base.address;
-    } else if (contractType == "lending.token") {
-        trustedAddress = currentChain?.trustAddresses.lending.token.address;
+    let targetAddress;
+    if (contractAddress == '0') {
+        if (contractType == "lending.base") {
+            targetAddress = currentChain?.trustAddresses.lending.base.address;
+        } else if (contractType == "lending.token") {
+            targetAddress = currentChain?.trustAddresses.lending.token.address;
+        } else {
+            targetAddress = currentChain?.trustAddresses[contractType].address;
+        }
     } else {
-        trustedAddress = currentChain?.trustAddresses[contractType].address;
+        targetAddress = contractAddress;
     }
 
     let gasLimit = bigInt(0);
-    const targetContract = await TargetContract.attach(trustedAddress);
+    const targetContract = await TargetContract.attach(targetAddress);
 
     return {targetContract, gasLimit};
 }
 
 task("deploy:addTrustedAddress", "Adding trusted address to client contract")
-    // .addPositionalParam("contractAddress", "Target contract address")
     .addPositionalParam("trustedChainId", "Trusted chain ID")
     .addPositionalParam("trustedAddress", "Trusted address")
+    .addPositionalParam("contractAddress", "Target contract address", '0')
     .addPositionalParam("contractType", "Target contract type (gas - gassender contract, claim - claim contract, checker - checker contract, demo - demo contract, multichain - multichain token contract, cantonNft - canton NFT contract, lending.base - base lending contract, lending.token - lending token contract)", "gas")
     .addPositionalParam("isTestnet", "Is testnet flag (1 - testnet, 0 - mainnet)", '0')
     .addPositionalParam("gasPrice", "Gas price (for some networks)", '0')
